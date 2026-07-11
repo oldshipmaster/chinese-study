@@ -161,6 +161,15 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
 
   const selectedCorrectCount = answers.filter((value, index) => value === course.lesson.quiz[index]?.answer).length;
   const pinyinTokens = course.type === "pinyin" ? course.title.split(/\s+/).filter(Boolean) : [];
+  const wrongQuestionIndexes = Object.keys(wrongAttempts).map(Number).filter((index) => index >= 0 && index < course.lesson.quiz.length);
+  const studyPrescription = [
+    !interactionsPassed ? "回到互动实验，把两种玩法各做对一次，并说出判断依据。" : "互动方法已经掌握，可以试着用同一方法解决一个生活问题。",
+    !openSubmitted ? "使用一个句式支架，补写“发现＋依据”，再提交开放表达。" : "把开放表达读一遍，检查观点、依据和两者的联系是否完整。",
+    wrongQuestionIndexes.length > 0
+      ? `重点复习${wrongQuestionIndexes.map((index) => `“${difficultyLabels[course.lesson.quiz[index].difficulty]}”`).join("、")}层级，先解释错项为什么不成立。`
+      : "五个层级暂未留下错项，可以限时重答或向家人讲解其中一题。",
+    lessonPassed ? "挑战拓展任务：寻找新例子或反例，检验本课方法的适用条件。" : "完成未通过的项目后，再进入带走挑战。",
+  ];
 
   const speakWithDevice = (text: string) => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) {
@@ -335,6 +344,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
               return <article key={index}><strong>{question.prompt}</strong>{values.map((value) => <p key={value}>曾选“{value}”：{question.feedback[value]}</p>)}<small>正确思路：{question.explanation}</small></article>;
             })}</section>
             <section className="confidence-check"><h2>现在的我</h2><div>{["我还要复习一次", "我基本掌握了", "我能讲给别人听"].map((value) => <button className={confidence === value ? "selected" : ""} key={value} onClick={() => setConfidence(value)}>{value}</button>)}</div>{confidence && <p>已记录：{confidence}。诚实判断，比追求满分更重要。</p>}</section>
+            <section className="study-prescription"><span className="eyebrow">自学导航</span><h2>我的下一步学习处方</h2><ol>{studyPrescription.map((item) => <li key={item}>{item}</li>)}</ol></section>
             {!lessonPassed && <aside className="completion-hint">要完成课程，还需要：{!interactionsPassed ? "完成两项互动；" : ""}{!openSubmitted ? "提交开放表达；" : ""}{!quizPassed ? "答对五道分层题。" : ""}</aside>}
             {lessonPassed && <p className="success-message">全部完成！点击“完成课程”返回课程地图。</p>}
           </div>

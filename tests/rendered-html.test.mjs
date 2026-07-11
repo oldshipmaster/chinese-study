@@ -144,3 +144,12 @@ test("every lesson intro runs a pausable three-beat HTML storyboard", async () =
   assert.match(css, /nth-child\(2\).*animation-delay/);
   assert.match(css, /prefers-reduced-motion/);
 });
+
+test("final station gives a personalized next-study prescription", async () => {
+  const lesson = await readFile(new URL("../app/components/LessonView.tsx", import.meta.url), "utf8");
+  assert.match(lesson, /studyPrescription/);
+  assert.match(lesson, /我的下一步学习处方/);
+  assert.match(lesson, /wrongAttempts/);
+  assert.match(lesson, /回到互动实验/);
+  assert.match(lesson, /挑战拓展任务/);
+});

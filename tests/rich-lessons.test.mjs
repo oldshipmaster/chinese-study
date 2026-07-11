@@ -149,6 +149,15 @@ test("all 564 runtime courses satisfy the rich lesson quality floor", async () =
     assert.ok(course.lesson.extension.fact.length > 15, course.id);
     assert.ok(course.lesson.quiz.every((question) => question.options.every((option) => question.feedback[option]?.length > 0)), course.id);
     assert.equal(course.lesson.gradeBand, course.grade <= 2 ? "lower" : course.grade <= 4 ? "middle" : "upper", course.id);
+    for (const task of [course.lesson.warmUp, ...course.lesson.interactions]) {
+      assert.equal(new Set(task.options).size, task.options.length, `${course.id}:${task.id}:duplicate-option`);
+      const taskAnswers = Array.isArray(task.answer) ? task.answer : [task.answer];
+      assert.ok(taskAnswers.every((answer) => task.options.includes(answer)), `${course.id}:${task.id}:missing-answer`);
+    }
+    for (const question of course.lesson.quiz) {
+      assert.equal(new Set(question.options).size, question.options.length, `${course.id}:${question.difficulty}:duplicate-option`);
+      assert.equal(question.options.filter((option) => option === question.answer).length, 1, `${course.id}:${question.difficulty}:answer-count`);
+    }
   }
 });
 
