@@ -19,6 +19,28 @@ interface LessonViewProps {
 
 const sameOrder = (left: string[], right: string[]) => left.length === right.length && left.every((value, index) => value === right[index]);
 
+const pinyinMouthCue = (token: string) => {
+  const exact: Record<string, string> = {
+    a: "嘴巴张大，舌头自然放平，声音响亮送出。",
+    o: "双唇拢圆向前，舌头稍向后缩。",
+    e: "嘴角向两边展开，舌位稍高。",
+    i: "嘴角展开，牙齿接近，舌尖抵下齿背。",
+    u: "双唇收成小圆孔，舌头向后缩。",
+    ü: "先摆好 i 的舌位，再把双唇拢圆。",
+  };
+  if (exact[token]) return exact[token];
+  if (["y", "w"].includes(token)) return "声音轻短，帮助 i、u、ü 站到音节开头；整体认读时不要拆开拼。";
+  if (["b", "p", "m", "f"].includes(token)) return token === "f" ? "上齿轻触下唇，让气流从缝隙摩擦出来。" : "先闭合双唇再放开；注意比较气流强弱和鼻腔共鸣。";
+  if (["d", "t", "n", "l"].includes(token)) return "舌尖抵住上齿龈再放开；留意气流从口腔还是鼻腔通过。";
+  if (["g", "k", "h"].includes(token)) return "舌根抬起靠近软腭，发音位置在口腔后部。";
+  if (["j", "q", "x"].includes(token)) return "舌面抬起靠近硬腭，嘴角自然展开，舌尖不要翘起。";
+  if (["z", "c", "s"].includes(token)) return "舌尖平伸靠近上齿背，保持平舌，比较送气强弱。";
+  if (["zh", "ch", "sh", "r"].includes(token)) return "舌尖轻轻翘起靠近硬腭前部，留出窄缝让气流通过。";
+  if (["an", "en", "in", "un", "ün"].includes(token)) return "口形保持自然，结尾时舌尖抵住上齿龈，轻轻收住 n 音。";
+  if (["ang", "eng", "ing", "ong"].includes(token)) return "尾音滑向后鼻音，舌根抬起并感受口腔后部共鸣。";
+  return "两个音连成一体，口形从前一个音自然滑向后一个音，中间不要停。";
+};
+
 export function LessonView({ course, completed, onBack, onComplete, onReset }: LessonViewProps) {
   const [stage, setStage] = useState(0);
   const [playing, setPlaying] = useState(true);
@@ -38,6 +60,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   const [message, setMessage] = useState("带着问题走进情境，看看今天会发现什么。");
   const [speechMessage, setSpeechMessage] = useState("点击字母或音节，听清后再跟读。");
   const [pinyinRate, setPinyinRate] = useState<"normal" | "slow">("normal");
+  const [activePinyinToken, setActivePinyinToken] = useState("");
   const [notified, setNotified] = useState(completed);
   const [draftReady, setDraftReady] = useState(false);
   const quizPassed = course.lesson.quiz.every((question, index) => answers[index] === question.answer);
@@ -146,6 +169,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
     setWrongAttempts({});
     setConfidence("");
     setAnswers([]);
+    setActivePinyinToken("");
     setMessage(resetMessage);
   };
 
@@ -208,6 +232,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   };
 
   const speakPinyin = (token: string) => {
+    setActivePinyinToken(token);
     const audioToken = token.replaceAll("ü", "v");
     const audio = new Audio(`${import.meta.env.BASE_URL}audio/pinyin-${audioToken}.wav`);
     audio.playbackRate = pinyinRate === "slow" ? 0.68 : 1;
@@ -251,6 +276,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
             <p className="learning-guide">学习路线：{course.lesson.learningGuide}</p>
             {pinyinTokens.length > 0 && <div className="pinyin-rate-control" aria-label="发音速度"><span>听音速度</span><button className={pinyinRate === "normal" ? "selected" : ""} onClick={() => setPinyinRate("normal")}>标准速度</button><button className={pinyinRate === "slow" ? "selected" : ""} onClick={() => setPinyinRate("slow")}>慢速辨音</button></div>}
             {pinyinTokens.length > 0 && <div className="pinyin-soundboard" aria-label="拼音点击发音">{pinyinTokens.map((token) => <button key={token} onClick={() => speakPinyin(token)} aria-label={`听 ${token} 的发音`}>{token}<small>点击听音</small></button>)}</div>}
+            {activePinyinToken && <aside className="mouth-cue"><div aria-hidden="true"><span>{activePinyinToken}</span><i /></div><section><strong>发音动作镜</strong><p>{pinyinMouthCue(activePinyinToken)}</p></section></aside>}
             {pinyinTokens.length > 0 && <p className="speech-status">{speechMessage}</p>}
             <ol className={`animation-frames ${playing ? "is-playing" : ""}`}>{course.lesson.animationFrames.map((frame, index) => <li className={`story-beat ${activeStoryBeat === index ? "selected" : ""}`} key={frame}><span>{index + 1}</span><div><p>{frame}</p><button onClick={() => { setPlaying(false); setActiveStoryBeat(index); setMessage(`已定格第 ${index + 1} 幕。请指出这一幕里最重要的线索。`); }}>点击定格观察</button></div></li>)}</ol>
           </div>
