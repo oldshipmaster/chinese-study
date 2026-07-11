@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
 import { build } from "esbuild";
 
 const result = await build({
@@ -26,6 +27,15 @@ for (const book of curriculum.books) {
     assert.equal(course.lesson.lessonId, course.id, `${course.id} 课程内容标识错位`);
     assert.equal(course.lesson.courseKind, course.type, `${course.id} 课型引擎错位`);
     assert.equal(course.minutes, expectedMinutes, `${course.id} 课时长度未按年级适配`);
+    if (course.type === "pinyin") {
+      for (const token of course.title.split(/\s+/).filter(Boolean)) {
+        const audioToken = token.replaceAll("ü", "v");
+        assert.ok(existsSync(`static-site/public/audio/pinyin-${audioToken}.wav`), `${course.id} 缺少 ${token} 发音`);
+        if (["a", "o", "e", "i", "u", "ü"].includes(token)) {
+          for (const tone of [1, 2, 3, 4]) assert.ok(existsSync(`static-site/public/audio/pinyin-tone-${audioToken}${tone}.wav`), `${course.id} 缺少 ${token} 第 ${tone} 声`);
+        }
+      }
+    }
     assert.ok(course.lesson.focus.length >= 10, `${course.id} 核心知识过短`);
     assert.equal(new Set(course.lesson.animationFrames).size, 3, `${course.id} 动画分镜重复`);
     assert.equal(new Set(course.lesson.examples).size, 3, `${course.id} 例子拆解重复`);
