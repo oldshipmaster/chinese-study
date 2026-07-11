@@ -8,6 +8,7 @@ export interface LessonDraft {
   openSubmitted: boolean;
   wrongAttempts: Record<number, string[]>;
   answers: string[];
+  masteredKnowledge: number[];
 }
 
 export type LessonDrafts = Record<string, LessonDraft>;
@@ -20,9 +21,11 @@ export const emptyLessonDraft = (): LessonDraft => ({
   openSubmitted: false,
   wrongAttempts: {},
   answers: [],
+  masteredKnowledge: [],
 });
 
 const isStringArray = (value: unknown): value is string[] => Array.isArray(value) && value.every((item) => typeof item === "string");
+const isNumberArray = (value: unknown): value is number[] => Array.isArray(value) && value.every((item) => Number.isInteger(item) && item >= 0 && item <= 4);
 const isAnswerRecord = (value: unknown): value is Record<string, string[]> => Boolean(value) && typeof value === "object" && !Array.isArray(value)
   && Object.values(value).every(isStringArray);
 
@@ -35,7 +38,8 @@ const isLessonDraft = (value: unknown): value is LessonDraft => {
     && typeof draft.openResponse === "string"
     && typeof draft.openSubmitted === "boolean"
     && isAnswerRecord(draft.wrongAttempts)
-    && isStringArray(draft.answers);
+    && isStringArray(draft.answers)
+    && (draft.masteredKnowledge === undefined || isNumberArray(draft.masteredKnowledge));
 };
 
 export function parseLessonDrafts(raw: string | null): LessonDrafts {
@@ -43,7 +47,10 @@ export function parseLessonDrafts(raw: string | null): LessonDrafts {
   try {
     const parsed: unknown = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
-    const entries = Object.entries(parsed).filter((entry): entry is [string, LessonDraft] => isLessonDraft(entry[1]));
+    const entries = Object.entries(parsed).filter((entry) => isLessonDraft(entry[1])).map(([id, value]) => {
+      const draft = value as LessonDraft;
+      return [id, { ...draft, masteredKnowledge: draft.masteredKnowledge ?? [] }] as [string, LessonDraft];
+    });
     if (entries.length !== Object.keys(parsed).length) return {};
     return Object.fromEntries(entries);
   } catch {
