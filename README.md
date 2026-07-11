@@ -2,6 +2,8 @@
 
 面向中国大陆小学一至六年级孩子的统编版语文动画学习网站。课程采用“东方自然乐园”视觉语言，通过 HTML、CSS 和 React 交互讲解拼音、识字、阅读、古诗、口语交际与习作。
 
+在线学习：<https://oldshipmaster.github.io/chinese-study/>
+
 ## 第一版内容
 
 - 一至六年级上下册共 12 册课程地图；
@@ -25,6 +27,12 @@ npm run dev
 
 ```bash
 npm test
+```
+
+GitHub Pages 静态构建：
+
+```bash
+npm run build:pages
 ```
 
 ## 内容扩充顺序

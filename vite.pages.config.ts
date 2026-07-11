@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import { resolve } from "node:path";
 
 export default defineConfig({
-  root: "pages",
+  root: "static-site",
   base: "/chinese-study/",
   plugins: [react()],
   build: {
