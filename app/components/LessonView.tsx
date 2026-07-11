@@ -240,6 +240,11 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
     lessonPassed ? "挑战拓展任务：寻找新例子或反例，检验本课方法的适用条件。" : "完成未通过的项目后，再进入带走挑战。",
     masteredKnowledge.length < course.lesson.knowledgePoints.length ? `还有 ${course.lesson.knowledgePoints.length - masteredKnowledge.length} 张知识卡未标记掌握，复述后再诚实检查一次。` : "五张知识卡均已自检，可以随机抽一张脱离页面复述。",
   ];
+  const confidenceReviewPlan: Record<string, string> = {
+    "我还要复习一次": "现在先回知识卡和错题页重学；明天不看提示，再做一次五题闯关。",
+    "我基本掌握了": "三天后用 30 秒复述卡回忆本课；如果说不出证据，再打开对应知识卡。",
+    "我能讲给别人听": "一周后把本课讲给家人听，并寻找一个新例子或反例检验方法。",
+  };
 
   const speakWithDevice = (text: string) => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) {
@@ -426,7 +431,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
               const question = course.lesson.quiz[Number(index)];
               return <article key={index}><strong>{question.prompt}</strong>{values.map((value) => <p key={value}>曾选“{value}”：{question.feedback[value]}</p>)}<small>正确思路：{question.explanation}</small></article>;
             })}<div className="mistake-actions"><button onClick={() => setStage(2)}>回知识卡复习</button><button onClick={retryWrongQuestions}>只重做错过的题</button></div></section>
-            <section className="confidence-check"><h2>现在的我</h2><div>{["我还要复习一次", "我基本掌握了", "我能讲给别人听"].map((value) => <button aria-pressed={confidence === value} className={confidence === value ? "selected" : ""} key={value} onClick={() => setConfidence(value)}>{value}</button>)}</div>{confidence && <p>已记录：{confidence}。诚实判断，比追求满分更重要。</p>}</section>
+            <section className="confidence-check"><h2>现在的我</h2><div>{["我还要复习一次", "我基本掌握了", "我能讲给别人听"].map((value) => <button aria-pressed={confidence === value} className={confidence === value ? "selected" : ""} key={value} onClick={() => setConfidence(value)}>{value}</button>)}</div>{confidence && <p><strong>间隔复习建议：</strong>{confidenceReviewPlan[confidence]}</p>}</section>
             <section className="study-prescription"><span className="eyebrow">自学导航</span><h2>我的下一步学习处方</h2><ol>{studyPrescription.map((item) => <li key={item}>{item}</li>)}</ol></section>
             {!lessonPassed && <aside className="completion-hint">要完成课程，还需要：{!interactionsPassed ? "完成两项互动；" : ""}{!openSubmitted ? "提交开放表达；" : ""}{!quizPassed ? "答对五道分层题。" : ""}</aside>}
             {lessonPassed && <p className="success-message">全部完成！点击“完成课程”返回课程地图。</p>}
