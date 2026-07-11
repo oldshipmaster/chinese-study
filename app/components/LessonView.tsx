@@ -165,6 +165,10 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   };
 
   const submitOpenTask = () => {
+    if (openRoute === null) {
+      setMessage("先选择一条创新挑战路线，再开始组织自己的表达。");
+      return;
+    }
     if (openResponse.trim().length < minimumResponseLength) {
       setMessage(`再多说一点：本年级至少写 ${minimumResponseLength} 个字，并包含一个发现和一个依据。`);
       return;
