@@ -223,7 +223,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
             <p className="learning-guide">学习路线：{course.lesson.learningGuide}</p>
             {pinyinTokens.length > 0 && <div className="pinyin-soundboard" aria-label="拼音点击发音">{pinyinTokens.map((token) => <button key={token} onClick={() => speakPinyin(token)} aria-label={`听 ${token} 的发音`}>{token}<small>点击听音</small></button>)}</div>}
             {pinyinTokens.length > 0 && <p className="speech-status">{speechMessage}</p>}
-            <ol className="animation-frames">{course.lesson.animationFrames.map((frame) => <li key={frame}>{frame}</li>)}</ol>
+            <ol className={`animation-frames ${playing ? "is-playing" : ""}`}>{course.lesson.animationFrames.map((frame, index) => <li className="story-beat" key={frame}><span>{index + 1}</span><p>{frame}</p></li>)}</ol>
           </div>
         )}
 

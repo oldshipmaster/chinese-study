@@ -132,3 +132,15 @@ test("rich lessons reveal knowledge, remember misconceptions, and ask for reflec
   assert.match(lesson, /confidence/);
   assert.match(lesson, /我能讲给别人听/);
 });
+
+test("every lesson intro runs a pausable three-beat HTML storyboard", async () => {
+  const [lesson, css] = await Promise.all([
+    readFile(new URL("../app/components/LessonView.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+  assert.match(lesson, /animation-frames.*is-playing/);
+  assert.match(lesson, /story-beat/);
+  assert.match(css, /@keyframes storyBeat/);
+  assert.match(css, /nth-child\(2\).*animation-delay/);
+  assert.match(css, /prefers-reduced-motion/);
+});
