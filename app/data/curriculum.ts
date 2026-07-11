@@ -29,6 +29,7 @@ export interface LessonQuestion {
   explanation: string;
   difficulty: QuestionDifficulty;
   feedback: Record<string, string>;
+  reviewTarget: string;
 }
 
 export interface LessonPractice {

@@ -35,6 +35,7 @@ export interface RichQuestion {
   explanation: string;
   difficulty: QuestionDifficulty;
   feedback: Record<string, string>;
+  reviewTarget: string;
 }
 
 export interface ExtensionCard {
@@ -330,6 +331,7 @@ const makeQuestion = (
       [distractors[0]]: "这个选项抓住了表面词语，却没有使用本课关键证据。",
       [distractors[1]]: "这个选项跳过了观察和推理，请回到知识卡再比较。",
     },
+    reviewTarget: difficulty === "remember" || difficulty === "understand" ? "核心知识卡" : difficulty === "apply" ? "证据知识卡" : difficulty === "reason" ? "方法知识卡" : "迁移知识卡",
   };
 };
 

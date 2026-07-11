@@ -323,7 +323,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
                 <div>{question.options.map((option) => (
                   <button className={answers[qIndex] === option ? option === question.answer ? "correct" : "wrong" : ""} key={option} onClick={() => chooseQuiz(qIndex, option)}>{option}</button>
                 ))}</div>
-                {answers[qIndex] && <small className={answers[qIndex] === question.answer ? "correct-feedback" : "wrong-feedback"}>{question.feedback[answers[qIndex]]}</small>}
+                {answers[qIndex] && <small className={answers[qIndex] === question.answer ? "correct-feedback" : "wrong-feedback"}>{question.feedback[answers[qIndex]]}{answers[qIndex] !== question.answer && <> <b>建议返回：{question.reviewTarget}</b></>}</small>}
               </fieldset>
             ))}</div>
             <p className="quiz-message">{message}</p>

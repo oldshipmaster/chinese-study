@@ -157,6 +157,7 @@ test("all 564 runtime courses satisfy the rich lesson quality floor", async () =
     for (const question of course.lesson.quiz) {
       assert.equal(new Set(question.options).size, question.options.length, `${course.id}:${question.difficulty}:duplicate-option`);
       assert.equal(question.options.filter((option) => option === question.answer).length, 1, `${course.id}:${question.difficulty}:answer-count`);
+      assert.match(question.reviewTarget, /核心|证据|方法|迁移/, `${course.id}:${question.difficulty}:review-target`);
     }
   }
 });
