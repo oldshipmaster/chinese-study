@@ -26,6 +26,9 @@ jobs:
       - uses: actions/configure-pages@v5
       - run: npm install --no-audit --no-fund
       - run: npm run build:pages
+      - run: npm run lint
+      - run: npm run audit:lessons
+      - run: node --test tests/*.test.mjs
       - uses: actions/upload-pages-artifact@v3
         with:
           path: pages-dist

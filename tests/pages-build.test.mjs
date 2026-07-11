@@ -31,6 +31,8 @@ test("Pages workflow uses official deployment actions and permissions", async ()
   assert.match(workflow, /actions\/upload-pages-artifact@v3/);
   assert.match(workflow, /actions\/deploy-pages@v4/);
   assert.match(workflow, /npm run build:pages/);
+  assert.match(workflow, /npm run audit:lessons/);
+  assert.match(workflow, /node --test tests\/\*\.test\.mjs/);
 });
 
 test("bundles playable WAV pronunciations for the complete pinyin course", async () => {
