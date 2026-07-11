@@ -94,6 +94,9 @@ test("generic lessons are complete rich self-study classrooms", async () => {
   assert.match(app, /view === "lesson" && <LessonView/);
   assert.doesNotMatch(app, /<AoeLesson/);
   assert.match(app, /onComplete=\{\(\) => persist\(completeCourse\(progress, currentCourse\.id\)\)\}/);
+  assert.match(app, /parseLessonDrafts/);
+  assert.match(curriculum, /继续第/);
+  assert.match(curriculum, /进行中/);
   assert.doesNotMatch(curriculum, /看看学习目标/);
 });
 
