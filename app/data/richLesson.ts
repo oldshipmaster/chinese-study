@@ -409,8 +409,8 @@ const makeQuestion = (
     difficulty,
     feedback: {
       [answer]: `回答正确。${explanation}`,
-      [distractors[0]]: "这个选项抓住了表面词语，却没有使用本课关键证据。",
-      [distractors[1]]: "这个选项跳过了观察和推理，请回到知识卡再比较。",
+      [distractors[0]]: `“${distractors[0]}”容易被选，是因为它看起来和题目有关，但没有使用本课关键证据。`,
+      [distractors[1]]: `“${distractors[1]}”跳过了观察、比较或推理，请回到${difficulty === "transfer" ? "迁移" : difficulty === "reason" ? "方法" : "证据"}知识卡再检查。`,
     },
     reviewTarget: difficulty === "remember" || difficulty === "understand" ? "核心知识卡" : difficulty === "apply" ? "证据知识卡" : difficulty === "reason" ? "方法知识卡" : "迁移知识卡",
   };
