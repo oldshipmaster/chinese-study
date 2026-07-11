@@ -22,7 +22,8 @@ const assetUrl = new URL(assetPath, baseUrl).href;
 const assetResponse = await fetchWithRetry(assetUrl);
 assert.equal(assetResponse.status, 200, `课堂脚本状态异常：${assetResponse.status}`);
 const bundle = await assetResponse.text();
-for (const feature of ["八站自学小径", "发音动作镜", "语文概念词典", "我预测仍然成立", "跨学科连接", "30 秒复述卡", "只重做错过的题", "继续第 "]) {
+const requiredFeatures = ["八站自学小径", "发音动作镜", "四声路径", "语文概念词典", "我预测仍然成立", "跨学科连接", "30 秒复述卡", "只重做错过的题", "继续第 "];
+for (const feature of requiredFeatures) {
   assert.ok(bundle.includes(feature), `线上课堂缺少功能：${feature}`);
 }
 
@@ -46,4 +47,4 @@ await Promise.all(Array.from({ length: 4 }, async () => {
 
 console.log(`GitHub Pages 验证通过：${baseUrl}`);
 console.log(`入口脚本：${assetUrl}`);
-console.log(`丰富课堂功能 8 项、拼音音频 ${audioFiles.length} 个均在线可用。`);
+console.log(`丰富课堂功能 ${requiredFeatures.length} 项、拼音音频 ${audioFiles.length} 个均在线可用。`);
