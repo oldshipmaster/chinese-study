@@ -142,6 +142,8 @@ test("every lesson intro runs a pausable three-beat HTML storyboard", async () =
   ]);
   assert.match(lesson, /animation-frames.*is-playing/);
   assert.match(lesson, /story-beat/);
+  assert.match(lesson, /activeStoryBeat/);
+  assert.match(lesson, /点击定格观察/);
   assert.match(css, /@keyframes storyBeat/);
   assert.match(css, /nth-child\(2\).*animation-delay/);
   assert.match(css, /prefers-reduced-motion/);

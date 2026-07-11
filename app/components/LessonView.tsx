@@ -22,6 +22,7 @@ const sameOrder = (left: string[], right: string[]) => left.length === right.len
 export function LessonView({ course, completed, onBack, onComplete, onReset }: LessonViewProps) {
   const [stage, setStage] = useState(0);
   const [playing, setPlaying] = useState(true);
+  const [activeStoryBeat, setActiveStoryBeat] = useState<number | null>(null);
   const [warmChoice, setWarmChoice] = useState("");
   const [interactionAnswers, setInteractionAnswers] = useState<Record<string, string[]>>({});
   const [openResponse, setOpenResponse] = useState("");
@@ -128,6 +129,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   const clearLessonState = (resetMessage: string) => {
     setStage(0);
     setPlaying(true);
+    setActiveStoryBeat(null);
     setWarmChoice("");
     setInteractionAnswers({});
     setOpenResponse("");
@@ -232,7 +234,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
             {pinyinTokens.length > 0 && <div className="pinyin-rate-control" aria-label="发音速度"><span>听音速度</span><button className={pinyinRate === "normal" ? "selected" : ""} onClick={() => setPinyinRate("normal")}>标准速度</button><button className={pinyinRate === "slow" ? "selected" : ""} onClick={() => setPinyinRate("slow")}>慢速辨音</button></div>}
             {pinyinTokens.length > 0 && <div className="pinyin-soundboard" aria-label="拼音点击发音">{pinyinTokens.map((token) => <button key={token} onClick={() => speakPinyin(token)} aria-label={`听 ${token} 的发音`}>{token}<small>点击听音</small></button>)}</div>}
             {pinyinTokens.length > 0 && <p className="speech-status">{speechMessage}</p>}
-            <ol className={`animation-frames ${playing ? "is-playing" : ""}`}>{course.lesson.animationFrames.map((frame, index) => <li className="story-beat" key={frame}><span>{index + 1}</span><p>{frame}</p></li>)}</ol>
+            <ol className={`animation-frames ${playing ? "is-playing" : ""}`}>{course.lesson.animationFrames.map((frame, index) => <li className={`story-beat ${activeStoryBeat === index ? "selected" : ""}`} key={frame}><span>{index + 1}</span><div><p>{frame}</p><button onClick={() => { setPlaying(false); setActiveStoryBeat(index); setMessage(`已定格第 ${index + 1} 幕。请指出这一幕里最重要的线索。`); }}>点击定格观察</button></div></li>)}</ol>
           </div>
         )}
 
@@ -353,7 +355,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
       </section>
 
       <footer className="lesson-controls">
-        <button onClick={() => { setPlaying(!playing); setMessage(playing ? "动画暂停了，你可以慢慢观察。" : "动画继续，我们一起学。"); }}>{playing ? "暂停" : "播放"}</button>
+        <button onClick={() => { setPlaying(!playing); if (!playing) setActiveStoryBeat(null); setMessage(playing ? "动画暂停了，你可以慢慢观察。" : "动画继续，我们一起学。"); }}>{playing ? "暂停" : "播放"}</button>
         <button onClick={replay}>重播</button>
         <div className="control-spacer" />
         <button disabled={stage === 0} onClick={() => setStage((value) => Math.max(0, value - 1))}>上一步</button>
