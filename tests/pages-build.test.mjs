@@ -39,6 +39,7 @@ test("bundles playable WAV pronunciations for the complete pinyin course", async
     const audio = await readFile(`static-site/public/audio/pinyin-${letter}.wav`);
     assert.equal(audio.subarray(0, 4).toString("ascii"), "RIFF");
     assert.equal(audio.subarray(8, 12).toString("ascii"), "WAVE");
+    assert.ok(audio.byteLength > 5_000 && audio.byteLength < 100_000, `${letter} audio size is suspicious: ${audio.byteLength}`);
   }
   assert.equal(tokens.length, 47);
 });
