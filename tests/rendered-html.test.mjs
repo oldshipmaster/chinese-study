@@ -107,6 +107,7 @@ test("rich classrooms expose eight learning stations and varied interaction stat
     assert.match(lesson, new RegExp(station));
   }
   assert.match(lesson, /interactionAnswers/);
+  assert.match(lesson, /重新排序/);
   assert.match(lesson, /openResponse/);
   assert.match(lesson, /course\.lesson\.knowledgePoints/);
   assert.match(lesson, /course\.lesson\.extension/);

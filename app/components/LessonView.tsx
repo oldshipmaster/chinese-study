@@ -317,6 +317,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
                     {Array.isArray(task.answer) && selected.includes(option) ? `${selected.indexOf(option) + 1}. ` : ""}{option}
                   </button>
                 ))}</div>
+                {Array.isArray(task.answer) && selected.length > 0 && <button className="sort-reset" onClick={() => { setInteractionAnswers((state) => ({ ...state, [task.id]: [] })); setMessage("顺序已清空，重新观察三步之间的先后关系。"); }}>↺ 重新排序</button>}
                 {selected.length > 0 && <small>{interactionCorrect(task) ? `✓ ${task.explanation}` : task.feedback[selected[selected.length - 1]]}</small>}
               </article>;
             })}</div>
