@@ -28,7 +28,6 @@ export function AoeLesson({ completed, onBack, onComplete, onReset }: AoeLessonP
   const [answers, setAnswers] = useState<string[]>([]);
   const [message, setMessage] = useState("跟着动画，轻轻读一遍");
   const [speechSupported, setSpeechSupported] = useState(true);
-  const [speechEnabled, setSpeechEnabled] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const userStartedSpeech = useRef(false);
 
@@ -45,7 +44,6 @@ export function AoeLesson({ completed, onBack, onComplete, onReset }: AoeLessonP
     }
     if (enable) {
       userStartedSpeech.current = true;
-      setSpeechEnabled(true);
     }
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(["啊", "喔", "鹅"][index]);
@@ -65,13 +63,13 @@ export function AoeLesson({ completed, onBack, onComplete, onReset }: AoeLessonP
 
   useEffect(() => {
     if (!playing || stage > 2) return;
-    const timer = window.setInterval(() => setLetter((current) => (current + 1) % 3), 1800);
+    const timer = window.setInterval(() => setLetter((current) => {
+      const nextLetter = (current + 1) % 3;
+      if (userStartedSpeech.current) speakLetter(nextLetter);
+      return nextLetter;
+    }), 1800);
     return () => window.clearInterval(timer);
-  }, [playing, stage]);
-
-  useEffect(() => {
-    if (playing && stage <= 2 && speechEnabled && userStartedSpeech.current) speakLetter(letter);
-  }, [letter, playing, speakLetter, speechEnabled, stage]);
+  }, [playing, speakLetter, stage]);
 
   const resetLessonState = () => {
     cancelSpeech();
@@ -80,7 +78,6 @@ export function AoeLesson({ completed, onBack, onComplete, onReset }: AoeLessonP
     setLetter(0);
     setAnswers([]);
     setMessage("进度已重置，从动画导入重新开始。");
-    setSpeechEnabled(false);
     userStartedSpeech.current = false;
   };
 
