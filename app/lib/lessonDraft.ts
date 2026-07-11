@@ -12,6 +12,7 @@ export interface LessonDraft {
   masteredKnowledge: number[];
   inquiryPredictions: Record<number, string>;
   openChecks: number[];
+  confidence: string;
 }
 
 export type LessonDrafts = Record<string, LessonDraft>;
@@ -28,6 +29,7 @@ export const emptyLessonDraft = (): LessonDraft => ({
   masteredKnowledge: [],
   inquiryPredictions: {},
   openChecks: [],
+  confidence: "",
 });
 
 const isStringArray = (value: unknown): value is string[] => Array.isArray(value) && value.every((item) => typeof item === "string");
@@ -50,7 +52,8 @@ const isLessonDraft = (value: unknown): value is LessonDraft => {
     && isStringArray(draft.answers)
     && (draft.masteredKnowledge === undefined || isNumberArray(draft.masteredKnowledge))
     && (draft.inquiryPredictions === undefined || isPredictionRecord(draft.inquiryPredictions))
-    && (draft.openChecks === undefined || isNumberArray(draft.openChecks));
+    && (draft.openChecks === undefined || isNumberArray(draft.openChecks))
+    && (draft.confidence === undefined || typeof draft.confidence === "string");
 };
 
 export function parseLessonDrafts(raw: string | null): LessonDrafts {
@@ -60,7 +63,7 @@ export function parseLessonDrafts(raw: string | null): LessonDrafts {
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
     const entries = Object.entries(parsed).filter((entry) => isLessonDraft(entry[1])).map(([id, value]) => {
       const draft = value as LessonDraft;
-      return [id, { ...draft, openRoute: draft.openRoute ?? null, masteredKnowledge: draft.masteredKnowledge ?? [], inquiryPredictions: draft.inquiryPredictions ?? {}, openChecks: draft.openChecks ?? [] }] as [string, LessonDraft];
+      return [id, { ...draft, openRoute: draft.openRoute ?? null, masteredKnowledge: draft.masteredKnowledge ?? [], inquiryPredictions: draft.inquiryPredictions ?? {}, openChecks: draft.openChecks ?? [], confidence: draft.confidence ?? "" }] as [string, LessonDraft];
     });
     return Object.fromEntries(entries);
   } catch {
