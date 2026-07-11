@@ -187,15 +187,12 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   };
 
   const speakPinyin = (token: string) => {
-    if (course.id === "a-o-e" && ["a", "o", "e"].includes(token)) {
-      const audio = new Audio(`${import.meta.env.BASE_URL}audio/pinyin-${token}.wav`);
-      audio.onplay = () => setSpeechMessage(`正在播放：${token}`);
-      audio.onended = () => setSpeechMessage(`播放完成：${token}。轮到你跟读。`);
-      audio.onerror = () => speakWithDevice(token);
-      void audio.play().catch(() => speakWithDevice(token));
-      return;
-    }
-    speakWithDevice(token);
+    const audioToken = token.replaceAll("ü", "v");
+    const audio = new Audio(`${import.meta.env.BASE_URL}audio/pinyin-${audioToken}.wav`);
+    audio.onplay = () => setSpeechMessage(`正在播放：${token}`);
+    audio.onended = () => setSpeechMessage(`播放完成：${token}。轮到你跟读。`);
+    audio.onerror = () => speakWithDevice(token);
+    void audio.play().catch(() => speakWithDevice(token));
   };
 
   return (

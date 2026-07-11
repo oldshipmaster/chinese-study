@@ -33,10 +33,12 @@ test("Pages workflow uses official deployment actions and permissions", async ()
   assert.match(workflow, /npm run build:pages/);
 });
 
-test("bundles playable WAV pronunciations for a o e", async () => {
-  for (const letter of ["a", "o", "e"]) {
+test("bundles playable WAV pronunciations for the complete pinyin course", async () => {
+  const tokens = ["a", "o", "e", "i", "u", "v", "y", "w", "b", "p", "m", "f", "d", "t", "n", "l", "g", "k", "h", "j", "q", "x", "z", "c", "s", "zh", "ch", "sh", "r", "ai", "ei", "ui", "ao", "ou", "iu", "ie", "ve", "er", "an", "en", "in", "un", "vn", "ang", "eng", "ing", "ong"];
+  for (const letter of tokens) {
     const audio = await readFile(`static-site/public/audio/pinyin-${letter}.wav`);
     assert.equal(audio.subarray(0, 4).toString("ascii"), "RIFF");
     assert.equal(audio.subarray(8, 12).toString("ascii"), "WAVE");
   }
+  assert.equal(tokens.length, 47);
 });
