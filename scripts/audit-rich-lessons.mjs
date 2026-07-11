@@ -43,6 +43,8 @@ for (const book of curriculum.books) {
       }
     }
     assert.ok(course.lesson.focus.length >= 10, `${course.id} 核心知识过短`);
+    assert.ok(course.lesson.hook.includes(course.title), `${course.id} 情境导入没有连接课题`);
+    assert.ok(course.lesson.summary.includes(course.title), `${course.id} 总结没有连接课题`);
     assert.equal(new Set(course.lesson.animationFrames).size, 3, `${course.id} 动画分镜重复`);
     assert.equal(new Set(course.lesson.examples).size, 3, `${course.id} 例子拆解重复`);
     assert.equal(course.lesson.knowledgePoints.length, 5, `${course.id} 知识卡数量不足`);
