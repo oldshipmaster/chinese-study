@@ -295,6 +295,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   const speakPinyin = (token: string) => {
     setActivePinyinToken(token);
     const audioToken = token.replaceAll("ü", "v");
+    window.speechSynthesis?.cancel();
     audioRef.current?.pause();
     const audio = new Audio(`${import.meta.env.BASE_URL}audio/pinyin-${audioToken}.wav`);
     audioRef.current = audio;
@@ -307,6 +308,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
 
   const speakTone = (token: string, toneIndex: number, mark: string) => {
     const audioToken = token.replaceAll("ü", "v");
+    window.speechSynthesis?.cancel();
     audioRef.current?.pause();
     const audio = new Audio(`${import.meta.env.BASE_URL}audio/pinyin-tone-${audioToken}${toneIndex + 1}.wav`);
     audioRef.current = audio;

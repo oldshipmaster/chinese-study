@@ -12,6 +12,8 @@ const result = await build({
 });
 const curriculum = await import(`data:text/javascript;base64,${Buffer.from(result.outputFiles[0].text).toString("base64")}`);
 const ids = new Set();
+const quizSignatures = new Set();
+const sceneSignatures = new Set();
 const report = [];
 
 for (const book of curriculum.books) {
@@ -22,6 +24,8 @@ for (const book of curriculum.books) {
     const expectedMinutes = book.grade <= 2 ? (expressive ? 20 : 18) : book.grade <= 4 ? (expressive ? 25 : 23) : expressive ? 30 : 28;
     assert.ok(!ids.has(course.id), `重复课程 ID：${course.id}`);
     ids.add(course.id);
+    quizSignatures.add(course.lesson.quiz.map((question) => `${question.prompt}|${question.answer}`).join("||"));
+    sceneSignatures.add(course.lesson.animationFrames.join("||"));
     assert.equal(course.lesson.curated, true, `${course.id} 缺少独立编辑内容`);
     assert.ok(!/待补充|敬请期待|课程正在生长|占位/.test(JSON.stringify(course.lesson)), `${course.id} 仍含占位内容`);
     assert.equal(course.lesson.lessonId, course.id, `${course.id} 课程内容标识错位`);
@@ -59,5 +63,7 @@ for (const book of curriculum.books) {
 assert.equal(curriculum.books.length, 12, "教材册数不是 12");
 assert.equal(curriculum.books.reduce((sum, book) => sum + book.units.length, 0), 95, "单元总数不是 95");
 assert.equal(ids.size, 564, "课程总数不是 564");
+assert.equal(quizSignatures.size, 564, "存在重复的整套五题闯关");
+assert.equal(sceneSignatures.size, 564, "存在重复的整套动画分镜");
 console.table(report);
-console.log(`逐册审计通过：12 册、95 个单元、${ids.size} 课；每课 5 张知识卡、3 个正式概念、3 个探究问题、4 件能力工具、3 条自主挑战路线、误区修正、跨学科连接、至少 2 项互动、5 道分层题。`);
+console.log(`逐册审计通过：12 册、95 个单元、${ids.size} 课；564 套动画与五题组合均唯一；每课 5 张知识卡、3 个正式概念、3 个探究问题、4 件能力工具、3 条自主挑战路线、误区修正、跨学科连接和至少 2 项互动。`);
