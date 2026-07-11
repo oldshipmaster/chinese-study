@@ -42,6 +42,15 @@ const pinyinMouthCue = (token: string) => {
   return "两个音连成一体，口形从前一个音自然滑向后一个音，中间不要停。";
 };
 
+const toneExamples: Record<string, Array<{ mark: string; word: string }>> = {
+  a: [{ mark: "ā", word: "妈" }, { mark: "á", word: "麻" }, { mark: "ǎ", word: "马" }, { mark: "à", word: "骂" }],
+  o: [{ mark: "ō", word: "波" }, { mark: "ó", word: "婆" }, { mark: "ǒ", word: "簸" }, { mark: "ò", word: "破" }],
+  e: [{ mark: "ē", word: "喝" }, { mark: "é", word: "河" }, { mark: "ě", word: "渴" }, { mark: "è", word: "课" }],
+  i: [{ mark: "ī", word: "衣" }, { mark: "í", word: "姨" }, { mark: "ǐ", word: "椅" }, { mark: "ì", word: "意" }],
+  u: [{ mark: "ū", word: "屋" }, { mark: "ú", word: "无" }, { mark: "ǔ", word: "五" }, { mark: "ù", word: "雾" }],
+  ü: [{ mark: "ǖ", word: "迂" }, { mark: "ǘ", word: "鱼" }, { mark: "ǚ", word: "雨" }, { mark: "ǜ", word: "玉" }],
+};
+
 export function LessonView({ course, completed, onBack, onComplete, onReset }: LessonViewProps) {
   const [stage, setStage] = useState(0);
   const [playing, setPlaying] = useState(true);
@@ -284,6 +293,16 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
     void audio.play().catch(() => speakWithDevice(token));
   };
 
+  const speakTone = (token: string, toneIndex: number, mark: string) => {
+    const audioToken = token.replaceAll("ü", "v");
+    const audio = new Audio(`${import.meta.env.BASE_URL}audio/pinyin-tone-${audioToken}${toneIndex + 1}.wav`);
+    audio.playbackRate = pinyinRate === "slow" ? 0.75 : 1;
+    audio.onplay = () => setSpeechMessage(`正在播放：${mark}，第 ${toneIndex + 1} 声`);
+    audio.onended = () => setSpeechMessage(`播放完成：${mark}。请用手势画出声音路线。`);
+    audio.onerror = () => speakWithDevice(mark);
+    void audio.play().catch(() => speakWithDevice(mark));
+  };
+
   return (
     <main className={`lesson-page generic-lesson rich-lesson type-${course.type} band-${course.lesson.gradeBand}`}>
       <header className="lesson-toolbar">
@@ -320,6 +339,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
             {pinyinTokens.length > 0 && <div className="pinyin-rate-control" aria-label="发音速度"><span>听音速度</span><button aria-pressed={pinyinRate === "normal"} className={pinyinRate === "normal" ? "selected" : ""} onClick={() => setPinyinRate("normal")}>标准速度</button><button aria-pressed={pinyinRate === "slow"} className={pinyinRate === "slow" ? "selected" : ""} onClick={() => setPinyinRate("slow")}>慢速辨音</button></div>}
             {pinyinTokens.length > 0 && <div className="pinyin-soundboard" aria-label="拼音点击发音">{pinyinTokens.map((token) => <button aria-pressed={activePinyinToken === token} className={activePinyinToken === token ? "active" : ""} key={token} onClick={() => speakPinyin(token)} aria-label={`听 ${token} 的发音`}>{token}<small>{activePinyinToken === token ? "正在练习" : "点击听音"}</small></button>)}</div>}
             {activePinyinToken && <aside className="mouth-cue"><div aria-hidden="true"><span>{activePinyinToken}</span><i /></div><section><strong>发音动作镜</strong><p>{pinyinMouthCue(activePinyinToken)}</p></section></aside>}
+            {toneExamples[activePinyinToken] && <section className="tone-lab"><div><strong>四声路径</strong><span>点击听例字，用手画出平、升、转、降</span></div><div>{toneExamples[activePinyinToken].map((tone, index) => <button key={tone.mark} onClick={() => speakTone(activePinyinToken, index, tone.mark)}><strong>{tone.mark}</strong><span>{index + 1} 声 · {tone.word}</span></button>)}</div></section>}
             {pinyinTokens.length > 0 && <p className="speech-status">{speechMessage}</p>}
             <ol className={`animation-frames ${playing ? "is-playing" : ""}`}>{course.lesson.animationFrames.map((frame, index) => <li className={`story-beat ${activeStoryBeat === index ? "selected" : ""}`} key={frame}><span>{index + 1}</span><div><p>{frame}</p><button onClick={() => { setPlaying(false); setActiveStoryBeat(index); setMessage(`已定格第 ${index + 1} 幕。请指出这一幕里最重要的线索。`); }}>点击定格观察</button></div></li>)}</ol>
           </div>

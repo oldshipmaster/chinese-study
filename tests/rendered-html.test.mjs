@@ -133,6 +133,8 @@ test("the rich pinyin classroom keeps pronunciation click-only", async () => {
   assert.match(lesson, /audio\.playbackRate/);
   assert.match(lesson, /pinyinMouthCue/);
   assert.match(lesson, /发音动作镜/);
+  assert.match(lesson, /四声路径/);
+  assert.match(lesson, /pinyin-tone-/);
   assert.doesNotMatch(lesson, /useEffect\([^)]*speakPinyin/s);
 });
 
