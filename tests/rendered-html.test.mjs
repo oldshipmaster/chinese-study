@@ -154,6 +154,8 @@ test("rich lessons reveal knowledge, remember misconceptions, and ask for reflec
   assert.match(lesson, /selectedTerms/);
   assert.match(lesson, /表达词篮/);
   assert.match(lesson, /标记为已掌握/);
+  assert.match(lesson, /重播导入/);
+  assert.match(lesson, /答案和草稿都会保留/);
   assert.match(lesson, /我的错因回顾/);
   assert.match(lesson, /confidence/);
   assert.match(lesson, /我能讲给别人听/);

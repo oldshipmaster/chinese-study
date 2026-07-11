@@ -225,7 +225,12 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
     setNotified(false);
   };
 
-  const replay = () => clearLessonState("从头再学一遍，这次试着发现新的线索。");
+  const replayIntro = () => {
+    setStage(0);
+    setPlaying(true);
+    setActiveStoryBeat(null);
+    setMessage("情境动画已从第一幕重播，已完成的答案和草稿都会保留。");
+  };
 
   const retryWrongQuestions = () => {
     if (wrongQuestionIndexes.length === 0) {
@@ -478,7 +483,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
 
       <footer className="lesson-controls">
         <button onClick={() => { setPlaying(!playing); if (!playing) setActiveStoryBeat(null); setMessage(playing ? "动画暂停了，你可以慢慢观察。" : "动画继续，我们一起学。"); }}>{playing ? "暂停" : "播放"}</button>
-        <button onClick={replay}>重播</button>
+        <button onClick={replayIntro}>重播导入</button>
         <div className="control-spacer" />
         <button disabled={stage === 0} onClick={() => setStage((value) => Math.max(0, value - 1))}>上一步</button>
         <button className="primary-button" disabled={stage === 7 && !lessonPassed} onClick={goNext}>{stage === 7 ? lessonPassed ? "完成课程" : "还有任务未完成" : "下一步 →"}</button>
