@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Course } from "../data/curriculum";
 import type { InteractionTask } from "../data/richLesson";
 import { LESSON_DRAFT_STORAGE_KEY, parseLessonDrafts, removeLessonDraft, upsertLessonDraft } from "../lib/lessonDraft";
@@ -52,6 +52,7 @@ const toneExamples: Record<string, Array<{ mark: string; word: string }>> = {
 };
 
 export function LessonView({ course, completed, onBack, onComplete, onReset }: LessonViewProps) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [stage, setStage] = useState(0);
   const [playing, setPlaying] = useState(true);
   const [activeStoryBeat, setActiveStoryBeat] = useState<number | null>(null);
@@ -196,6 +197,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   };
 
   const clearLessonState = (resetMessage: string) => {
+    audioRef.current?.pause();
     setStage(0);
     setPlaying(true);
     setActiveStoryBeat(null);
@@ -250,6 +252,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
         setNotified(true);
         onComplete();
       }
+      audioRef.current?.pause();
       onBack();
     }
     else setStage((value) => Math.min(7, value + 1));
@@ -292,7 +295,9 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   const speakPinyin = (token: string) => {
     setActivePinyinToken(token);
     const audioToken = token.replaceAll("ü", "v");
+    audioRef.current?.pause();
     const audio = new Audio(`${import.meta.env.BASE_URL}audio/pinyin-${audioToken}.wav`);
+    audioRef.current = audio;
     audio.playbackRate = pinyinRate === "slow" ? 0.68 : 1;
     audio.onplay = () => setSpeechMessage(`正在播放：${token}`);
     audio.onended = () => setSpeechMessage(`播放完成：${token}。轮到你跟读。`);
@@ -302,7 +307,9 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
 
   const speakTone = (token: string, toneIndex: number, mark: string) => {
     const audioToken = token.replaceAll("ü", "v");
+    audioRef.current?.pause();
     const audio = new Audio(`${import.meta.env.BASE_URL}audio/pinyin-tone-${audioToken}${toneIndex + 1}.wav`);
+    audioRef.current = audio;
     audio.playbackRate = pinyinRate === "slow" ? 0.75 : 1;
     audio.onplay = () => setSpeechMessage(`正在播放：${mark}，第 ${toneIndex + 1} 声`);
     audio.onended = () => setSpeechMessage(`播放完成：${mark}。请用手势画出声音路线。`);
@@ -313,7 +320,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   return (
     <main className={`lesson-page generic-lesson rich-lesson type-${course.type} band-${course.lesson.gradeBand}`}>
       <header className="lesson-toolbar">
-        <button className="back-button" onClick={onBack}>← 课程地图</button>
+        <button className="back-button" onClick={() => { audioRef.current?.pause(); onBack(); }}>← 课程地图</button>
         <div className="lesson-title">
           <span>{course.lesson.kindLabel} · {course.minutes} 分钟 <em className="curated-badge">丰富互动版 · {course.lesson.gradeBand === "lower" ? "启蒙" : course.lesson.gradeBand === "middle" ? "进阶" : "思辨"}</em></span>
           <strong>{course.title}</strong>
