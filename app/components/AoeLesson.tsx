@@ -30,6 +30,7 @@ export function AoeLesson({ completed, onBack, onComplete, onReset }: AoeLessonP
   const [speechSupported, setSpeechSupported] = useState(true);
   const [speaking, setSpeaking] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const quizPassed = questions.every((question, index) => answers[index] === question.answer);
 
   const cancelSpeech = useCallback(() => {
     if (audioRef.current) {
@@ -118,6 +119,11 @@ export function AoeLesson({ completed, onBack, onComplete, onReset }: AoeLessonP
     } else setMessage("再观察一下口形，换一个答案试试。");
   };
 
+  const goNext = () => {
+    if (stage === 4) onBack();
+    else setStage((value) => Math.min(4, value + 1));
+  };
+
   return (
     <main className="lesson-page">
       <header className="lesson-toolbar">
@@ -147,7 +153,7 @@ export function AoeLesson({ completed, onBack, onComplete, onReset }: AoeLessonP
         <button onClick={() => { cancelSpeech(); setLetter(0); setPlaying(true); setMessage("从头再看一遍"); }}>重播</button>
         <div className="control-spacer" />
         <button disabled={stage === 0} onClick={() => setStage((value) => Math.max(0, value - 1))}>上一步</button>
-        <button className="primary-button" disabled={stage === 4} onClick={() => setStage((value) => Math.min(4, value + 1))}>下一步 →</button>
+        <button className="primary-button" disabled={stage === 4 && !quizPassed} onClick={goNext}>{stage === 4 ? "完成课程" : "下一步 →"}</button>
       </footer>
     </main>
   );

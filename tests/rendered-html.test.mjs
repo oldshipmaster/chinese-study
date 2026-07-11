@@ -66,3 +66,12 @@ test("exposes reset controls and device pinyin speech", async () => {
   assert.match(lesson, /audio\.play\(\)/);
   assert.match(lesson, /onended/);
 });
+
+test("enables course completion after all three quiz answers are correct", async () => {
+  const lesson = await readFile(new URL("../app/components/AoeLesson.tsx", import.meta.url), "utf8");
+
+  assert.match(lesson, /const quizPassed = questions\.every/);
+  assert.match(lesson, /disabled=\{stage === 4 && !quizPassed\}/);
+  assert.match(lesson, /stage === 4 \? "完成课程" : "下一步 →"/);
+  assert.match(lesson, /if \(stage === 4\) onBack\(\)/);
+});
