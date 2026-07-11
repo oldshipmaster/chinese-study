@@ -189,6 +189,7 @@ test("final station gives a personalized next-study prescription", async () => {
   assert.match(lesson, /30 秒复述卡/);
   assert.match(lesson, /course\.lesson\.summary/);
   assert.match(lesson, /我的学习作品/);
+  assert.match(lesson, /window\.print/);
   assert.match(lesson, /confidenceReviewPlan/);
   assert.match(lesson, /间隔复习建议/);
 });
