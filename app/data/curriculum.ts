@@ -1,3 +1,5 @@
+import { getLessonSeed } from "./lessonSeeds";
+
 export type CourseType =
   | "pinyin"
   | "literacy"
@@ -24,6 +26,7 @@ export interface LessonPractice {
 }
 
 export interface LessonContent {
+  curated: boolean;
   kindLabel: string;
   symbol: string;
   hook: string;
@@ -131,9 +134,58 @@ const profiles: Record<CourseType, LessonProfile> = {
   },
 };
 
-function buildLesson(title: string, type: CourseType, objective: string): LessonContent {
+function buildLesson(id: string, title: string, type: CourseType, objective: string): LessonContent {
   const profile = profiles[type];
+  const seed = getLessonSeed(id);
+  if (seed) {
+    return {
+      curated: true,
+      kindLabel: profile.kindLabel,
+      symbol: profile.symbol,
+      hook: `先看一个和《${title}》有关的发现：${seed.example}`,
+      focus: seed.knowledge,
+      concept: `学习这一课，要把“看到什么”和“明白什么”连起来。${seed.knowledge}`,
+      animationFrames: [
+        `画面出现《${title}》的关键场景：${seed.example}`,
+        `放大镜圈出本课发现：${seed.knowledge}`,
+        `问题卡跳出来：${seed.checkPrompt}`,
+      ],
+      examples: [
+        seed.example,
+        `我从例子中发现：${seed.knowledge}`,
+        `我能用自己的话回答：“${seed.checkPrompt}”——${seed.checkAnswer}。`,
+      ],
+      practice: {
+        prompt: seed.checkPrompt,
+        options: [seed.checkAnswer, "只看标题不找线索", "跳过内容直接猜"],
+        answer: seed.checkAnswer,
+        feedback: `答对了！${seed.knowledge}`,
+      },
+      quiz: [
+        {
+          prompt: seed.checkPrompt,
+          options: [seed.checkAnswer, "和课文线索无关", "课文没有告诉我们"],
+          answer: seed.checkAnswer,
+          explanation: `${seed.example} 这个例子给出了答案线索。`,
+        },
+        {
+          prompt: `学习《${title}》时，最值得记住的知识是什么？`,
+          options: [seed.knowledge, "只记住课题的字数", "不观察也不思考"],
+          answer: seed.knowledge,
+          explanation: "这正是本课知识锦囊里的核心发现。",
+        },
+        {
+          prompt: "怎样证明自己真正理解了这一课？",
+          options: ["找到线索并用自己的话说明", "只把页面翻到最后", "照着标题重复一遍"],
+          answer: "找到线索并用自己的话说明",
+          explanation: "能找到线索并说明理由，才是真正理解。",
+        },
+      ],
+      summary: `你已经学会《${title}》的关键方法：${seed.knowledge}`,
+    };
+  }
   return {
+    curated: false,
     kindLabel: profile.kindLabel,
     symbol: profile.symbol,
     hook: `今天走进《${title}》，先把目标装进小书包：${objective}`,
@@ -209,7 +261,7 @@ const course = (
   objective,
   minutes,
   status: "ready",
-  lesson: buildLesson(title, type, objective),
+  lesson: buildLesson(id, title, type, objective),
 });
 
 const c = course;

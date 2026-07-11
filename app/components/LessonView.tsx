@@ -75,7 +75,10 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
     <main className={`lesson-page generic-lesson type-${course.type}`}>
       <header className="lesson-toolbar">
         <button className="back-button" onClick={onBack}>← 课程地图</button>
-        <div className="lesson-title"><span>{course.lesson.kindLabel} · {course.minutes} 分钟</span><strong>{course.title}</strong></div>
+        <div className="lesson-title">
+          <span>{course.lesson.kindLabel} · {course.minutes} 分钟 {course.lesson.curated && <em className="curated-badge">逐课精编</em>}</span>
+          <strong>{course.title}</strong>
+        </div>
         <div className="lesson-toolbar-actions">
           {completed && <button className="reset-button lesson-reset" onClick={resetLesson}>重置进度</button>}
           <div className="leaf-pill">叶 {answers.filter((value, index) => value === course.lesson.quiz[index]?.answer).length} / 3</div>

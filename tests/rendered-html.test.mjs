@@ -94,3 +94,10 @@ test("generic lessons are complete self-study classrooms", async () => {
   assert.match(app, /onComplete=\{\(\) => persist\(completeCourse\(progress, currentCourse\.id\)\)\}/);
   assert.doesNotMatch(curriculum, /看看学习目标/);
 });
+
+test("curated classrooms identify their editorial quality", async () => {
+  const lesson = await readFile(new URL("../app/components/LessonView.tsx", import.meta.url), "utf8");
+
+  assert.match(lesson, /course\.lesson\.curated/);
+  assert.match(lesson, /逐课精编/);
+});
