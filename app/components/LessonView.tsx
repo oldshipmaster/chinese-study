@@ -152,7 +152,8 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
     const current = interactionAnswers[task.id] ?? [];
     let next: string[];
     if (Array.isArray(task.answer)) {
-      if (current.length >= task.answer.length || current.includes(value)) next = [value];
+      if (current.includes(value)) next = current;
+      else if (current.length >= task.answer.length) next = [value];
       else next = [...current, value];
     } else next = [value];
     setInteractionAnswers((state) => ({ ...state, [task.id]: next }));
@@ -404,7 +405,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
               return <article key={task.id} className={interactionCorrect(task) ? "passed" : ""}>
                 <header><span>{interactionModeLabels[task.mode]}</span><h2>{task.title}</h2></header><p className="mode-guide">玩法：{interactionModeGuides[task.mode]}</p><p>{task.prompt}</p>
                 <div className="interaction-options">{task.options.map((option) => (
-                  <button className={selected.includes(option) ? "selected" : ""} key={option} onClick={() => chooseInteraction(task, option)}>
+                  <button disabled={Array.isArray(task.answer) && selected.includes(option)} className={selected.includes(option) ? "selected" : ""} key={option} onClick={() => chooseInteraction(task, option)}>
                     {Array.isArray(task.answer) && selected.includes(option) ? `${selected.indexOf(option) + 1}. ` : ""}{option}
                   </button>
                 ))}</div>
