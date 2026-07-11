@@ -22,6 +22,7 @@ for (const book of curriculum.books) {
     assert.ok(!ids.has(course.id), `重复课程 ID：${course.id}`);
     ids.add(course.id);
     assert.equal(course.lesson.curated, true, `${course.id} 缺少独立编辑内容`);
+    assert.ok(!/待补充|敬请期待|课程正在生长|占位/.test(JSON.stringify(course.lesson)), `${course.id} 仍含占位内容`);
     assert.equal(course.lesson.lessonId, course.id, `${course.id} 课程内容标识错位`);
     assert.equal(course.lesson.courseKind, course.type, `${course.id} 课型引擎错位`);
     assert.equal(course.minutes, expectedMinutes, `${course.id} 课时长度未按年级适配`);

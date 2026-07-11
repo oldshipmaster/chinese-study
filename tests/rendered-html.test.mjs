@@ -98,6 +98,8 @@ test("generic lessons are complete rich self-study classrooms", async () => {
   assert.match(app, /parseLessonDrafts/);
   assert.match(curriculum, /继续第/);
   assert.match(curriculum, /进行中/);
+  assert.match(curriculum, /本册进度/);
+  assert.match(curriculum, /<progress/);
   assert.doesNotMatch(curriculum, /看看学习目标/);
 });
 

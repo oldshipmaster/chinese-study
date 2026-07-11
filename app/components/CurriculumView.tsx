@@ -12,11 +12,13 @@ interface CurriculumViewProps {
 }
 
 export function CurriculumView({ book, completed, draftStages, onBack, onOpenCourse, onResetCourse }: CurriculumViewProps) {
+  const bookCourses = book.units.flatMap((unit) => unit.courses);
+  const completedInBook = bookCourses.filter((course) => completed.includes(course.id)).length;
   return (
     <main className="inner-page">
       <button className="back-button" onClick={onBack}>← 返回学习首页</button>
       <header className="book-header">
-        <div><span className="eyebrow">统编版课程地图</span><h1>{book.grade} 年级 · {book.term}</h1><p>{book.edition}</p></div>
+        <div><span className="eyebrow">统编版课程地图</span><h1>{book.grade} 年级 · {book.term}</h1><p>{book.edition}</p><div className="book-progress"><span>本册进度 · 已完成 {completedInBook} / {bookCourses.length}</span><progress value={completedInBook} max={bookCourses.length} aria-label={`本册已完成 ${completedInBook} 课，共 ${bookCourses.length} 课`} /></div></div>
         <div className="book-seal"><strong>{book.grade}</strong><span>年级</span></div>
       </header>
       {book.units.map((unit, index) => (
