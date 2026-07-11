@@ -58,7 +58,8 @@ test("exposes reset controls and device pinyin speech", async () => {
   assert.match(lesson, /utterance\.lang = "zh-CN"/);
   assert.match(lesson, /听发音/);
   assert.match(lesson, /音频播放失败，请检查设备是否静音/);
-  assert.match(lesson, /speakLetter\(nextLetter\)/);
+  assert.doesNotMatch(lesson, /speakLetter\(nextLetter\)/);
+  assert.match(lesson, /onClick=\{\(\) => speakLetter\(letter, true\)\}/);
   assert.doesNotMatch(lesson, /if \(playing && stage <= 2 && speechEnabled/);
   assert.match(lesson, /new Audio/);
   assert.match(lesson, /audio\/pinyin-/);

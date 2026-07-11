@@ -29,7 +29,6 @@ export function AoeLesson({ completed, onBack, onComplete, onReset }: AoeLessonP
   const [message, setMessage] = useState("跟着动画，轻轻读一遍");
   const [speechSupported, setSpeechSupported] = useState(true);
   const [speaking, setSpeaking] = useState(false);
-  const userStartedSpeech = useRef(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const cancelSpeech = useCallback(() => {
@@ -64,11 +63,8 @@ export function AoeLesson({ completed, onBack, onComplete, onReset }: AoeLessonP
 
   const speakLetter = useCallback((index: number, enable = false) => {
     if (typeof window === "undefined") return;
-    if (enable) {
-      userStartedSpeech.current = true;
-    }
     cancelSpeech();
-    setSpeechSupported(true);
+    if (enable) setSpeechSupported(true);
     const audio = new Audio(`${import.meta.env.BASE_URL}audio/pinyin-${letters[index].letter}.wav`);
     audioRef.current = audio;
     audio.preload = "auto";
@@ -89,11 +85,10 @@ export function AoeLesson({ completed, onBack, onComplete, onReset }: AoeLessonP
     if (!playing || stage > 2) return;
     const timer = window.setInterval(() => setLetter((current) => {
       const nextLetter = (current + 1) % 3;
-      if (userStartedSpeech.current) speakLetter(nextLetter);
       return nextLetter;
     }), 1800);
     return () => window.clearInterval(timer);
-  }, [playing, speakLetter, stage]);
+  }, [playing, stage]);
 
   const resetLessonState = () => {
     cancelSpeech();
@@ -102,7 +97,6 @@ export function AoeLesson({ completed, onBack, onComplete, onReset }: AoeLessonP
     setLetter(0);
     setAnswers([]);
     setMessage("进度已重置，从动画导入重新开始。");
-    userStartedSpeech.current = false;
   };
 
   const resetLesson = () => {
