@@ -7,6 +7,7 @@ import { LESSON_DRAFT_STORAGE_KEY, parseLessonDrafts, removeLessonDraft, upsertL
 
 const stages = ["情境导入", "旧知热身", "知识探秘", "例子拆解", "互动实验", "创新挑战", "五题闯关", "错因拓展"];
 const difficultyLabels = { remember: "记一记", understand: "懂一懂", apply: "用一用", reason: "想一想", transfer: "闯新关" };
+const difficultyDescriptions = { remember: "提取本课的关键信息", understand: "用自己的话解释核心知识", apply: "选择或使用具体证据", reason: "比较依据并说明推理", transfer: "把方法调整后用于新情境" };
 const interactionModeLabels = { match: "配对发现", sort: "顺序推理", evidence: "证据侦探", scenario: "情境应答", classify: "分类归纳", revise: "修改升级" };
 const interactionModeGuides = { match: "比较特征，找到最严密的对应关系。", sort: "按先后点击三步，随时可以重新排序。", evidence: "先读结论，再选择能直接证明它的材料。", scenario: "想清对象、目的和现场条件后再应答。", classify: "先确定分类标准，再检查每项是否符合。", revise: "比较修改前后，看哪一项更准确、具体、连贯。" };
 
@@ -459,8 +460,9 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
           <div className="stage-content quiz generic-quiz rich-quiz">
             <span className="eyebrow">五题闯关</span>
             <h1>从记忆到迁移，一层一层挑战</h1>
+            <ol className="difficulty-path">{course.lesson.quiz.map((question, index) => <li key={question.difficulty}><span>{index + 1}</span><div><strong>{difficultyLabels[question.difficulty]}</strong><small>{difficultyDescriptions[question.difficulty]}</small></div></li>)}</ol>
             <div className="quiz-list">{course.lesson.quiz.map((question, qIndex) => (
-              <fieldset key={question.prompt}><legend><em>{difficultyLabels[question.difficulty]}</em>{qIndex + 1}. {question.prompt}</legend>
+              <fieldset key={question.prompt}><legend><em title={difficultyDescriptions[question.difficulty]}>{difficultyLabels[question.difficulty]}</em>{qIndex + 1}. {question.prompt}</legend>
                 <div>{question.options.map((option) => (
                   <button className={answers[qIndex] === option ? option === question.answer ? "correct" : "wrong" : ""} key={option} onClick={() => chooseQuiz(qIndex, option)}>{option}</button>
                 ))}</div>
