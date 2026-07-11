@@ -33,6 +33,8 @@ test("Pages workflow uses official deployment actions and permissions", async ()
   assert.match(workflow, /npm run build:pages/);
   assert.match(workflow, /npm run audit:lessons/);
   assert.match(workflow, /node --test tests\/\*\.test\.mjs/);
+  assert.match(workflow, /needs: deploy/);
+  assert.match(workflow, /npm run verify:pages/);
 });
 
 test("bundles playable WAV pronunciations for the complete pinyin course", async () => {
