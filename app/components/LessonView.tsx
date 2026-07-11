@@ -77,6 +77,9 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   const [quizHints, setQuizHints] = useState<number[]>([]);
   const [retellSeconds, setRetellSeconds] = useState(30);
   const [retellRunning, setRetellRunning] = useState(false);
+  const [customQuestion, setCustomQuestion] = useState("");
+  const [customAnswer, setCustomAnswer] = useState("");
+  const [customReason, setCustomReason] = useState("");
   const [message, setMessage] = useState("带着问题走进情境，看看今天会发现什么。");
   const [speechMessage, setSpeechMessage] = useState("点击字母或音节，听清后再跟读。");
   const [pinyinRate, setPinyinRate] = useState<"normal" | "slow">("normal");
@@ -123,6 +126,9 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
         setConfidence(draft.confidence);
         setQuizHints(draft.quizHints);
         setSelectedTerms(draft.selectedTerms);
+        setCustomQuestion(draft.customQuestion);
+        setCustomAnswer(draft.customAnswer);
+        setCustomReason(draft.customReason);
         setMessage("已恢复上次学习位置，可以从这里继续。");
       }
       setDraftReady(true);
@@ -133,10 +139,10 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   useEffect(() => {
     if (!draftReady) return;
     const drafts = parseLessonDrafts(window.localStorage.getItem(LESSON_DRAFT_STORAGE_KEY));
-    const isEmpty = stage === 0 && !warmChoice && Object.keys(interactionAnswers).length === 0 && !openResponse && openRoute === null && !openSubmitted && openChecks.length === 0 && !confidence && quizHints.length === 0 && selectedTerms.length === 0 && Object.keys(wrongAttempts).length === 0 && answers.length === 0 && masteredKnowledge.length === 0 && Object.keys(inquiryPredictions).length === 0;
-    const next = isEmpty ? removeLessonDraft(drafts, course.id) : upsertLessonDraft(drafts, course.id, { stage, warmChoice, interactionAnswers, openResponse, openRoute, openSubmitted, openChecks, confidence, quizHints, selectedTerms, wrongAttempts, answers, masteredKnowledge, inquiryPredictions });
+    const isEmpty = stage === 0 && !warmChoice && Object.keys(interactionAnswers).length === 0 && !openResponse && openRoute === null && !openSubmitted && openChecks.length === 0 && !confidence && quizHints.length === 0 && selectedTerms.length === 0 && !customQuestion && !customAnswer && !customReason && Object.keys(wrongAttempts).length === 0 && answers.length === 0 && masteredKnowledge.length === 0 && Object.keys(inquiryPredictions).length === 0;
+    const next = isEmpty ? removeLessonDraft(drafts, course.id) : upsertLessonDraft(drafts, course.id, { stage, warmChoice, interactionAnswers, openResponse, openRoute, openSubmitted, openChecks, confidence, quizHints, selectedTerms, customQuestion, customAnswer, customReason, wrongAttempts, answers, masteredKnowledge, inquiryPredictions });
     try { window.localStorage.setItem(LESSON_DRAFT_STORAGE_KEY, JSON.stringify(next)); } catch { /* The lesson still works when storage is unavailable. */ }
-  }, [answers, confidence, course.id, draftReady, inquiryPredictions, interactionAnswers, masteredKnowledge, openChecks, openResponse, openRoute, openSubmitted, quizHints, selectedTerms, stage, warmChoice, wrongAttempts]);
+  }, [answers, confidence, course.id, customAnswer, customQuestion, customReason, draftReady, inquiryPredictions, interactionAnswers, masteredKnowledge, openChecks, openResponse, openRoute, openSubmitted, quizHints, selectedTerms, stage, warmChoice, wrongAttempts]);
 
   useEffect(() => {
     if (!retellRunning) return;
@@ -241,6 +247,9 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
     setQuizHints([]);
     setRetellSeconds(30);
     setRetellRunning(false);
+    setCustomQuestion("");
+    setCustomAnswer("");
+    setCustomReason("");
     setActivePinyinToken("");
     setMessage(resetMessage);
   };
@@ -300,6 +309,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
     "我基本掌握了": "三天后用 30 秒复述卡回忆本课；如果说不出证据，再打开对应知识卡。",
     "我能讲给别人听": "一周后把本课讲给家人听，并寻找一个新例子或反例检验方法。",
   };
+  const questionMakerReady = customQuestion.trim().length >= 8 && customAnswer.trim().length >= 4 && customReason.trim().length >= 6;
 
   const speakWithDevice = (text: string) => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) {
@@ -507,6 +517,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
               <article><strong>{selectedCorrectCount} / 5</strong><span>当前正确 · 首次答对 {firstTryCorrectCount}/5 · 提示 {quizHints.length} 次</span></article>
             </div>
             <div className="extension-card"><strong>知识再长一片叶</strong><p>{course.lesson.extension.fact}</p><aside className="cross-connection"><span>跨学科连接 · {course.lesson.extension.connection.field}</span><p>{course.lesson.extension.connection.insight}</p></aside><h2>带走挑战</h2><p>{course.lesson.extension.challenge}</p></div>
+            <section className={`question-maker ${questionMakerReady ? "ready" : ""}`}><span className="eyebrow">我来当出题人</span><h2>为《{course.title}》设计一道有思考价值的新题</h2><p>好题不能只靠猜：题目要清楚，答案要能核对，还要解释为什么。</p><label><strong>1 · 我的题目</strong><textarea maxLength={240} value={customQuestion} onChange={(event) => setCustomQuestion(event.target.value)} placeholder={course.lesson.gradeBand === "upper" ? "试试加入条件、比较或反例……" : "围绕本课知识，问一个需要观察或思考的问题……"} /></label><label><strong>2 · 参考答案</strong><textarea maxLength={320} value={customAnswer} onChange={(event) => setCustomAnswer(event.target.value)} placeholder="写出可以核对的参考答案……" /></label><label><strong>3 · 判断依据</strong><textarea maxLength={320} value={customReason} onChange={(event) => setCustomReason(event.target.value)} placeholder="说明答案为什么成立，要回到哪条知识或证据……" /></label><p className="maker-status">{questionMakerReady ? "✓ 出题卡完成：请把题目给家人做，再根据他的回答修改题目。" : "完成题目、答案和依据后，你就从答题者升级为出题人。"}</p></section>
             <section className={`retell-card ${retellRunning ? "is-running" : ""}`}><span className="eyebrow">30 秒复述卡</span><h2>{retellRunning ? `脱稿复述中 · ${retellSeconds} 秒` : course.lesson.summary}</h2>{retellRunning ? <p className="retell-live">不看答案，依次讲清：课题、发现、证据和迁移。卡住时先说“我从……看出来……”。</p> : <ol><li><strong>课题：</strong>我学习了《{course.title}》。</li><li><strong>发现：</strong>{course.lesson.knowledgePoints[0].detail}</li><li><strong>证据：</strong>{course.lesson.knowledgePoints[1].detail}</li><li><strong>迁移：</strong>下一次遇到新问题，我会使用{course.lesson.toolkit.map((tool) => tool.name).join("、")}中的合适工具。</li></ol>}<div className="retell-actions"><button onClick={() => { setRetellSeconds(30); setRetellRunning(true); setMessage("开始 30 秒脱稿复述。页面已收起答案，只保留提纲。"); }}>{retellSeconds === 0 ? "再挑战一次" : "开始 30 秒脱稿复述"}</button>{retellRunning && <button onClick={() => { setRetellRunning(false); setMessage("复述已暂停，可以先看复述卡整理思路，再重新挑战。"); }}>暂停并看提示</button>}</div></section>
             {openSubmitted && <section className="expression-artifact"><span className="eyebrow">我的学习作品</span><h2>{openRoute !== null ? course.lesson.openTask.routes[openRoute].label : "开放表达"}</h2><p>{openResponse}</p><small>我使用了：{selectedTerms.length > 0 ? selectedTerms.join("、") : "自己的话和本课证据"}</small></section>}
             <button className="print-artifact" onClick={() => window.print()}>打印或保存本课学习作品</button>

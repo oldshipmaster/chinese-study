@@ -15,6 +15,9 @@ export interface LessonDraft {
   confidence: string;
   quizHints: number[];
   selectedTerms: string[];
+  customQuestion: string;
+  customAnswer: string;
+  customReason: string;
 }
 
 export type LessonDrafts = Record<string, LessonDraft>;
@@ -34,6 +37,9 @@ export const emptyLessonDraft = (): LessonDraft => ({
   confidence: "",
   quizHints: [],
   selectedTerms: [],
+  customQuestion: "",
+  customAnswer: "",
+  customReason: "",
 });
 
 const isStringArray = (value: unknown): value is string[] => Array.isArray(value) && value.every((item) => typeof item === "string");
@@ -61,7 +67,10 @@ const isLessonDraft = (value: unknown): value is LessonDraft => {
     && (draft.openChecks === undefined || isNumberArray(draft.openChecks))
     && (draft.confidence === undefined || (typeof draft.confidence === "string" && confidenceValues.includes(draft.confidence)))
     && (draft.quizHints === undefined || isNumberArray(draft.quizHints))
-    && (draft.selectedTerms === undefined || isStringArray(draft.selectedTerms));
+    && (draft.selectedTerms === undefined || isStringArray(draft.selectedTerms))
+    && (draft.customQuestion === undefined || typeof draft.customQuestion === "string")
+    && (draft.customAnswer === undefined || typeof draft.customAnswer === "string")
+    && (draft.customReason === undefined || typeof draft.customReason === "string");
 };
 
 export function parseLessonDrafts(raw: string | null): LessonDrafts {
@@ -80,6 +89,9 @@ export function parseLessonDrafts(raw: string | null): LessonDrafts {
         confidence: draft.confidence ?? "",
         quizHints: [...new Set(draft.quizHints ?? [])],
         selectedTerms: [...new Set(draft.selectedTerms ?? [])],
+        customQuestion: draft.customQuestion ?? "",
+        customAnswer: draft.customAnswer ?? "",
+        customReason: draft.customReason ?? "",
       }] as [string, LessonDraft];
     });
     return Object.fromEntries(entries);

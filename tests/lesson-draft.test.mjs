@@ -4,7 +4,7 @@ import test from "node:test";
 import { emptyLessonDraft, parseLessonDrafts, removeLessonDraft, upsertLessonDraft } from "../app/lib/lessonDraft.ts";
 
 test("lesson drafts survive reload and stay isolated by course", () => {
-  const first = { ...emptyLessonDraft(), stage: 5, openResponse: "我发现了证据", answers: ["甲"] };
+  const first = { ...emptyLessonDraft(), stage: 5, openResponse: "我发现了证据", answers: ["甲"], customQuestion: "为什么这样判断？", customAnswer: "因为有具体证据", customReason: "答案能回到材料核对" };
   const second = { ...emptyLessonDraft(), stage: 2, warmChoice: "认真观察" };
   const stored = upsertLessonDraft(upsertLessonDraft({}, "course-a", first), "course-b", second);
   const restored = parseLessonDrafts(JSON.stringify(stored));
@@ -45,4 +45,7 @@ test("older drafts migrate with an empty knowledge self-check", () => {
   assert.equal(parseLessonDrafts(JSON.stringify({ old: legacy })).old.confidence, "");
   assert.deepEqual(parseLessonDrafts(JSON.stringify({ old: legacy })).old.quizHints, []);
   assert.deepEqual(parseLessonDrafts(JSON.stringify({ old: legacy })).old.selectedTerms, []);
+  assert.equal(parseLessonDrafts(JSON.stringify({ old: legacy })).old.customQuestion, "");
+  assert.equal(parseLessonDrafts(JSON.stringify({ old: legacy })).old.customAnswer, "");
+  assert.equal(parseLessonDrafts(JSON.stringify({ old: legacy })).old.customReason, "");
 });

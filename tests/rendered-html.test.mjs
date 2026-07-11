@@ -204,3 +204,13 @@ test("thirty-second retell is an active retrieval exercise", async () => {
   assert.match(lesson, /复述完成/);
   assert.match(lesson, /发现、证据和迁移/);
 });
+
+test("final station lets learners build and save their own question", async () => {
+  const lesson = await readFile(new URL("../app/components/LessonView.tsx", import.meta.url), "utf8");
+  assert.match(lesson, /我来当出题人/);
+  assert.match(lesson, /customQuestion/);
+  assert.match(lesson, /customAnswer/);
+  assert.match(lesson, /customReason/);
+  assert.match(lesson, /questionMakerReady/);
+  assert.match(lesson, /从答题者升级为出题人/);
+});
