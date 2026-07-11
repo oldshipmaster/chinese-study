@@ -25,6 +25,9 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   const [openResponse, setOpenResponse] = useState("");
   const [openSubmitted, setOpenSubmitted] = useState(false);
   const [showOpenExample, setShowOpenExample] = useState(false);
+  const [revealedKnowledge, setRevealedKnowledge] = useState<number[]>([]);
+  const [wrongAttempts, setWrongAttempts] = useState<Record<number, string[]>>({});
+  const [confidence, setConfidence] = useState("");
   const [answers, setAnswers] = useState<string[]>([]);
   const [message, setMessage] = useState("带着问题走进情境，看看今天会发现什么。");
   const [speechMessage, setSpeechMessage] = useState("点击字母或音节，听清后再跟读。");
@@ -71,6 +74,12 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
     setAnswers(next);
     const question = course.lesson.quiz[questionIndex];
     const correct = value === question.answer;
+    if (!correct) {
+      setWrongAttempts((state) => {
+        const current = state[questionIndex] ?? [];
+        return current.includes(value) ? state : { ...state, [questionIndex]: [...current, value] };
+      });
+    }
     setMessage(question.feedback[value] ?? (correct ? question.explanation : "回到知识卡再比较一次。"));
     if (correct && completeIfReady(next)) setMessage("五题全对，互动和表达也完成了！你收获了 3 片竹叶。");
   };
@@ -92,6 +101,9 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
     setOpenResponse("");
     setOpenSubmitted(false);
     setShowOpenExample(false);
+    setRevealedKnowledge([]);
+    setWrongAttempts({});
+    setConfidence("");
     setAnswers([]);
     setMessage(resetMessage);
   };
@@ -198,8 +210,11 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
           <div className="stage-content knowledge-stage">
             <span className="eyebrow">知识探秘</span>
             <h1>五张知识卡，层层打开本课</h1>
-            <div className="knowledge-grid">{course.lesson.knowledgePoints.map((point) => (
-              <article key={point.title}><span>{point.label}</span><h2>{point.title}</h2><p>{point.detail}</p><small>{point.tip}</small></article>
+            <div className="knowledge-grid">{course.lesson.knowledgePoints.map((point, index) => (
+              <article key={point.title} className={revealedKnowledge.includes(index) ? "revealed" : ""}><span>{point.label}</span><h2>{point.title}</h2><p>{point.detail}</p>
+                <button className="knowledge-reveal" onClick={() => setRevealedKnowledge((values) => values.includes(index) ? values.filter((value) => value !== index) : [...values, index])}>{revealedKnowledge.includes(index) ? "收起方法提示" : "点击翻开方法提示"}</button>
+                {revealedKnowledge.includes(index) && <small>{point.tip}</small>}
+              </article>
             ))}</div>
           </div>
         )}
@@ -273,6 +288,11 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
               <article><strong>{selectedCorrectCount} / 5</strong><span>分层问题</span></article>
             </div>
             <div className="extension-card"><strong>知识再长一片叶</strong><p>{course.lesson.extension.fact}</p><h2>带走挑战</h2><p>{course.lesson.extension.challenge}</p></div>
+            <section className="mistake-review"><h2>我的错因回顾</h2>{Object.keys(wrongAttempts).length === 0 ? <p>本轮没有错答。下一次可以尝试更快说出证据。</p> : Object.entries(wrongAttempts).map(([index, values]) => {
+              const question = course.lesson.quiz[Number(index)];
+              return <article key={index}><strong>{question.prompt}</strong>{values.map((value) => <p key={value}>曾选“{value}”：{question.feedback[value]}</p>)}<small>正确思路：{question.explanation}</small></article>;
+            })}</section>
+            <section className="confidence-check"><h2>现在的我</h2><div>{["我还要复习一次", "我基本掌握了", "我能讲给别人听"].map((value) => <button className={confidence === value ? "selected" : ""} key={value} onClick={() => setConfidence(value)}>{value}</button>)}</div>{confidence && <p>已记录：{confidence}。诚实判断，比追求满分更重要。</p>}</section>
             {!lessonPassed && <aside className="completion-hint">要完成课程，还需要：{!interactionsPassed ? "完成两项互动；" : ""}{!openSubmitted ? "提交开放表达；" : ""}{!quizPassed ? "答对五道分层题。" : ""}</aside>}
             {lessonPassed && <p className="success-message">全部完成！点击“完成课程”返回课程地图。</p>}
           </div>

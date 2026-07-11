@@ -121,3 +121,14 @@ test("the rich pinyin classroom keeps pronunciation click-only", async () => {
   assert.match(lesson, /onClick=\{\(\) => speakPinyin/);
   assert.doesNotMatch(lesson, /useEffect\([^)]*speakPinyin/s);
 });
+
+test("rich lessons reveal knowledge, remember misconceptions, and ask for reflection", async () => {
+  const lesson = await readFile(new URL("../app/components/LessonView.tsx", import.meta.url), "utf8");
+
+  assert.match(lesson, /revealedKnowledge/);
+  assert.match(lesson, /点击翻开方法提示/);
+  assert.match(lesson, /wrongAttempts/);
+  assert.match(lesson, /我的错因回顾/);
+  assert.match(lesson, /confidence/);
+  assert.match(lesson, /我能讲给别人听/);
+});
