@@ -127,6 +127,8 @@ test("grade adaptation changes support and challenge depth", async () => {
   assert.notEqual(lower.inquiries[0].guide, upper.inquiries[0].guide);
   assert.match(lower.quiz[3].prompt, /看一看|读一读|试一试/);
   assert.match(upper.quiz[3].prompt, /证据|反例|条件/);
+  assert.match(lower.openTask.routes[0].prompt, /画一画|说一两句/);
+  assert.match(upper.openTask.routes[0].prompt, /两条证据|反例|适用条件/);
 });
 
 test("all 564 runtime courses satisfy the rich lesson quality floor", async () => {

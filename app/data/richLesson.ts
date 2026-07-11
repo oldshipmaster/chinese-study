@@ -403,7 +403,7 @@ export function buildRichLesson(context: RichLessonContext): RichLessonData {
       example: `我的发现是：${seed.knowledge} 依据是：${seed.example}`,
       routes: [
         { label: "生活侦探", prompt: `在生活或课外阅读中，为《${title}》找到一个新例子，并解释它与“${seed.knowledge}”的联系。` },
-        { label: "反例挑战", prompt: `为《${title}》想一个看似不符合本课发现的例子，再判断是结论错误，还是适用条件发生了变化。` },
+        { label: "反例挑战", prompt: `为《${title}》想一个看似不符合本课发现的例子，再判断原来的发现要不要修改，并说出理由。` },
         { label: "当小老师", prompt: `假设要把《${title}》讲给低年级同学，请用一个例子、一个问题和一句方法提示帮助他学会。` },
       ],
     },
@@ -452,12 +452,17 @@ export function adaptRichLessonForGrade<T extends RichLessonData>(lesson: T, gra
     : gradeBand === "middle"
       ? " 把你的预测和证据分别记下来，再检查是否一致。"
       : " 再主动寻找一个反例，说明结论成立需要哪些条件。";
+  const routeTail = gradeBand === "lower"
+    ? " 可以画一画或说一两句，并指出你看见的线索。"
+    : gradeBand === "middle"
+      ? " 写清你的发现和一条具体依据。"
+      : " 至少比较两条证据，并说明可能的反例和适用条件。";
 
   return {
     ...lesson,
     gradeBand,
     learningGuide: settings.guide,
-    openTask: { ...lesson.openTask, prompt: settings.prompt, support: settings.support },
+    openTask: { ...lesson.openTask, prompt: settings.prompt, support: settings.support, routes: lesson.openTask.routes.map((route) => ({ ...route, prompt: `${route.prompt}${routeTail}` })) },
     inquiries: lesson.inquiries.map((inquiry) => ({ ...inquiry, guide: `${inquiry.guide}${inquiryTail}` })),
     quiz: lesson.quiz.map((question, index) => index < 3 ? question : { ...question, prompt: `${quizLead}${question.prompt}` }),
     extension: { ...lesson.extension, challenge: `${lesson.extension.challenge} ${settings.challenge}` },
