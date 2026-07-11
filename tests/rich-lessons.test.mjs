@@ -218,3 +218,12 @@ test("seven course engines add a four-part subject toolkit", async () => {
   }
   assert.equal(new Set(toolkitSignatures).size, 7);
 });
+
+test("warm-ups activate prior knowledge differently for seven course types", async () => {
+  const { buildRichLesson } = await import("../app/data/richLesson.ts");
+  const warmUps = ["pinyin", "literacy", "reading", "poetry", "speaking", "writing", "garden"].map((type) => buildRichLesson({
+    id: `warm-${type}`, title: "热身课", type, objective: "唤醒旧知", action: "开始", seed: { knowledge: "知识", example: "例子", checkPrompt: "问题？", checkAnswer: "答案" },
+  }).warmUp);
+  assert.equal(new Set(warmUps.map((task) => `${task.prompt}|${task.answer}`)).size, 7);
+  assert.ok(warmUps.every((task) => task.prompt.includes("《热身课》")));
+});

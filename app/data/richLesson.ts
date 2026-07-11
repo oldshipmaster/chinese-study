@@ -271,6 +271,20 @@ const toolkits: Record<CourseKind, LearningTool[]> = {
   ],
 };
 
+const buildWarmUp = (context: RichLessonContext): InteractionTask => {
+  const warmUps: Record<CourseKind, [string, string, [string, string], string]> = {
+    pinyin: [`准备学习《${context.title}》时，哪种热身能让发音更准确？`, "先听一遍，再照镜子观察口形并轻声试读", ["只看字母颜色", "不出声地快速翻过"], "耳朵、眼睛和发音动作一起参与，才容易辨清细小差别。"],
+    literacy: [`遇到《${context.title}》里的新字，先做什么更容易唤醒旧知识？`, "找熟悉部件，再联系见过的词语或生活画面", ["把每个字都当成新图案", "只数一遍总笔画"], "熟字、部件和生活经验能搭起认识新字的桥。"],
+    reading: [`打开《${context.title}》前，怎样读题目才能形成有用的猜想？`, "圈出题目关键词，提出一个能回文中验证的问题", ["只数题目有几个字", "看到题目就决定全文结论"], "好猜想不是随便猜，而是带着问题等待文本证据。"],
+    poetry: [`朗读《${context.title}》前，哪种准备最能帮助进入诗的画面？`, "先读准字音和停顿，再圈出景物与动作", ["只看诗句排了几行", "所有句子都用同一种速度"], "节奏和意象是走进诗歌画面的两扇门。"],
+    speaking: [`开始《${context.title}》的交流前，首先应该想清什么？`, "听者是谁、交流目的是什么、需要讲清哪些要点", ["怎样把声音变得最大", "只准备自己想说的话，不管听者"], "对象、目的和要点决定表达方式。"],
+    writing: [`动笔写《${context.title}》前，哪项准备最能避免内容散乱？`, "确定中心，再从经历中筛选最能表现中心的材料", ["先堆很多漂亮词语", "想到哪句就抄哪句"], "先定中心再选材，细节才有共同方向。"],
+    garden: [`整理《${context.title}》前，怎样唤醒本单元已经学过的方法？`, "回忆典型任务，把知识和方法按用途分组", ["只按页码从小到大抄写", "只挑自己最喜欢的一页"], "按用途整理能看见知识之间的联系，也方便迁移。"],
+  };
+  const [prompt, answer, distractors, explanation] = warmUps[context.type];
+  return choice("warm-up", "scenario", "旧知热身", prompt, answer, distractors, explanation);
+};
+
 const buildInquiries = (context: RichLessonContext): InquiryPrompt[] => {
   const { title, type, seed } = context;
   const common: InquiryPrompt = {
@@ -339,7 +353,7 @@ export function buildRichLesson(context: RichLessonContext): RichLessonData {
   const { title, seed, objective, type, action } = context;
   const engine = engines[type];
   const deep = deepQuestions[type];
-  const warmUp = arrangeInteraction(choice("warm-up", "scenario", "旧知热身", `走进《${title}》前，哪种学习状态最有帮助？`, "带着问题观察并说出理由", ["只等页面给答案", "看到长句就直接跳过"], "主动提问能唤醒旧知识，也能为新发现留下位置。"), `${context.id}-warm-up`);
+  const warmUp = arrangeInteraction(buildWarmUp(context), `${context.id}-warm-up`);
   const interactions = engine.interactions(context).map((task) => arrangeInteraction(task, `${context.id}-${task.id}`));
   const quiz = [
     makeQuestion(seed.checkPrompt, seed.checkAnswer, ["只凭课题猜答案", "没有回到材料找线索"], seed.example, "remember"),
