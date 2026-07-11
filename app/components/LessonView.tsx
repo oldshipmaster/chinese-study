@@ -467,7 +467,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
                 <div>{question.options.map((option) => (
                   <button className={answers[qIndex] === option ? option === question.answer ? "correct" : "wrong" : ""} key={option} onClick={() => chooseQuiz(qIndex, option)}>{option}</button>
                 ))}</div>
-                <button className="quiz-hint" aria-expanded={quizHints.includes(qIndex)} onClick={() => setQuizHints((values) => values.includes(qIndex) ? values.filter((value) => value !== qIndex) : [...values, qIndex])}>{quizHints.includes(qIndex) ? `线索：回到${question.reviewTarget}，先说出判断步骤。` : "给我一个线索，不看答案"}</button>
+                <button disabled={quizHints.includes(qIndex)} className="quiz-hint" aria-expanded={quizHints.includes(qIndex)} onClick={() => setQuizHints((values) => values.includes(qIndex) ? values : [...values, qIndex])}>{quizHints.includes(qIndex) ? `线索：回到${question.reviewTarget}，先说出判断步骤。` : "给我一个线索，不看答案"}</button>
                 {answers[qIndex] && <small className={answers[qIndex] === question.answer ? "correct-feedback" : "wrong-feedback"}>{question.feedback[answers[qIndex]]}{answers[qIndex] !== question.answer && <> <b>建议返回：{question.reviewTarget}</b></>}</small>}
                 {answers[qIndex] && answers[qIndex] !== question.answer && <button className="review-now" onClick={() => { navigateStage(2); setMessage(`请找到${question.reviewTarget}，复述后再回五题闯关。`); }}>← 马上回{question.reviewTarget}复习</button>}
               </fieldset>
