@@ -62,7 +62,6 @@ export function parseLessonDrafts(raw: string | null): LessonDrafts {
       const draft = value as LessonDraft;
       return [id, { ...draft, openRoute: draft.openRoute ?? null, masteredKnowledge: draft.masteredKnowledge ?? [], inquiryPredictions: draft.inquiryPredictions ?? {}, openChecks: draft.openChecks ?? [] }] as [string, LessonDraft];
     });
-    if (entries.length !== Object.keys(parsed).length) return {};
     return Object.fromEntries(entries);
   } catch {
     return {};

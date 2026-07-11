@@ -21,6 +21,12 @@ test("invalid lesson draft storage falls back safely", () => {
   assert.deepEqual(parseLessonDrafts('{"bad":{"stage":99}}'), {});
 });
 
+test("one damaged course draft does not erase other courses", () => {
+  const good = emptyLessonDraft();
+  const restored = parseLessonDrafts(JSON.stringify({ good, bad: { stage: 99 } }));
+  assert.deepEqual(restored, { good });
+});
+
 test("older drafts migrate with an empty knowledge self-check", () => {
   const legacy = { stage: 2, warmChoice: "观察", interactionAnswers: {}, openResponse: "", openSubmitted: false, wrongAttempts: {}, answers: [] };
   assert.deepEqual(parseLessonDrafts(JSON.stringify({ old: legacy })).old.masteredKnowledge, []);
