@@ -6,6 +6,7 @@ import {
   type InteractionTask,
   type InquiryPrompt,
   type KnowledgePoint,
+  type LearningTool,
   type OpenTask,
   type QuestionDifficulty,
 } from "./richLesson";
@@ -52,6 +53,7 @@ export interface LessonContent {
   interactions: InteractionTask[];
   openTask: OpenTask;
   inquiries: InquiryPrompt[];
+  toolkit: LearningTool[];
   quiz: LessonQuestion[];
   extension: ExtensionCard;
   summary: string;

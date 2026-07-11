@@ -278,6 +278,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
               <article key={example}><span>{index + 1}</span><h2>{["看见什么", "说明什么", "怎样迁移"][index]}</h2><p>{example}</p></article>
             ))}</div>
             <p>读完后，试着指出“哪一句是证据，哪一句是结论”。</p>
+            <section className="learning-toolkit"><div><span className="eyebrow">能力工具箱</span><h2>{course.lesson.kindLabel}学习的四件工具</h2></div><div>{course.lesson.toolkit.map((tool) => <article key={tool.name}><strong>{tool.name}</strong><p>{tool.use}</p></article>)}</div></section>
           </div>
         )}
 

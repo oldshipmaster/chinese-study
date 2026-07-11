@@ -48,6 +48,11 @@ export interface InquiryPrompt {
   guide: string;
 }
 
+export interface LearningTool {
+  name: string;
+  use: string;
+}
+
 export interface RichLessonData {
   gradeBand: "lower" | "middle" | "upper";
   learningGuide: string;
@@ -56,6 +61,7 @@ export interface RichLessonData {
   interactions: InteractionTask[];
   openTask: OpenTask;
   inquiries: InquiryPrompt[];
+  toolkit: LearningTool[];
   quiz: RichQuestion[];
   extension: ExtensionCard;
 }
@@ -219,6 +225,51 @@ const deepQuestions: Record<CourseKind, DeepQuestionBlueprint> = {
   },
 };
 
+const toolkits: Record<CourseKind, LearningTool[]> = {
+  pinyin: [
+    { name: "口形镜", use: "观察嘴巴开合、圆扁和舌头位置，找到发音动作。" },
+    { name: "送气纸", use: "用薄纸比较气流强弱，辨别容易混淆的声母。" },
+    { name: "声调手势", use: "用手画出四声路线，让音高变化看得见。" },
+    { name: "拼读链", use: "把声母、韵母和声调逐步连接，再完整听辨。" },
+  ],
+  literacy: [
+    { name: "部件镜", use: "拆分汉字部件，观察相同与不同的位置和形状。" },
+    { name: "偏旁灯", use: "借偏旁提示大致意思，再到词句中核对。" },
+    { name: "熟字桥", use: "联系已经认识的字，通过加减换部件学习新字。" },
+    { name: "语境尺", use: "把字放进词语和句子，检验读音与意思是否合适。" },
+  ],
+  reading: [
+    { name: "线索圈", use: "圈出人物、时间、地点、动作和变化等重要信息。" },
+    { name: "证据夹", use: "保存能够直接支持观点的关键词句和具体细节。" },
+    { name: "因果链", use: "用“因为—所以”连接事件，检查推理有没有断开。" },
+    { name: "观点秤", use: "比较不同理解各自的证据强弱，不只凭个人感觉。" },
+  ],
+  poetry: [
+    { name: "节奏线", use: "标出停顿、重音与声音长短，读出诗句韵律。" },
+    { name: "意象窗", use: "抓住景物、动作和色彩，把文字还原成画面。" },
+    { name: "炼字镜", use: "替换关键词再比较，发现原字准确生动的地方。" },
+    { name: "情感桥", use: "从意象、语气和背景走向情感，并指出依据。" },
+  ],
+  speaking: [
+    { name: "对象卡", use: "先判断和谁说、在什么场合说，再选择表达方式。" },
+    { name: "要点篮", use: "筛选最重要的信息，避免遗漏和无关内容。" },
+    { name: "顺序路", use: "按照时间、空间或重要程度把话讲得有条理。" },
+    { name: "倾听灯", use: "从对方回应判断是否听懂，并及时补充或调整。" },
+  ],
+  writing: [
+    { name: "中心针", use: "先确定最想表达的意思，让所有材料围绕它。" },
+    { name: "素材筛", use: "保留最能表现中心的经历、细节和真实感受。" },
+    { name: "结构架", use: "安排开头、发展和结尾，让段落之间连接自然。" },
+    { name: "修改镜", use: "检查是否具体、准确、连贯，删改不服务中心的句子。" },
+  ],
+  garden: [
+    { name: "分类盒", use: "按字词特点、用途或方法把零散知识放到一起。" },
+    { name: "比较桥", use: "寻找相同点、不同点和规律成立的条件。" },
+    { name: "方法库", use: "记录每种方法解决什么问题，需要哪些步骤。" },
+    { name: "迁移门", use: "面对新任务先辨认条件，再选择或组合已有方法。" },
+  ],
+};
+
 const buildInquiries = (context: RichLessonContext): InquiryPrompt[] => {
   const { title, type, seed } = context;
   const common: InquiryPrompt = {
@@ -312,6 +363,7 @@ export function buildRichLesson(context: RichLessonContext): RichLessonData {
       example: `我的发现是：${seed.knowledge} 依据是：${seed.example}`,
     },
     inquiries: buildInquiries(context),
+    toolkit: toolkits[type],
     quiz,
     extension: {
       title: `${title} · 再往前一步`,

@@ -205,3 +205,15 @@ test("all courses include three inquiry prompts beyond the quiz", async () => {
     assert.ok(course.lesson.inquiries.every((item) => item.guide.length >= 12), course.id);
   }
 });
+
+test("seven course engines add a four-part subject toolkit", async () => {
+  const { buildRichLesson } = await import("../app/data/richLesson.ts");
+  const toolkitSignatures = [];
+  for (const type of ["pinyin", "literacy", "reading", "poetry", "speaking", "writing", "garden"]) {
+    const lesson = buildRichLesson({ id: `tools-${type}`, title: "工具课", type, objective: "会使用工具", action: "练习", seed: { knowledge: "知识", example: "例子", checkPrompt: "问题？", checkAnswer: "答案" } });
+    assert.equal(lesson.toolkit.length, 4, type);
+    assert.ok(lesson.toolkit.every((tool) => tool.name.length >= 2 && tool.use.length >= 8), type);
+    toolkitSignatures.push(lesson.toolkit.map((tool) => tool.name).join("|"));
+  }
+  assert.equal(new Set(toolkitSignatures).size, 7);
+});
