@@ -26,6 +26,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   const [warmChoice, setWarmChoice] = useState("");
   const [interactionAnswers, setInteractionAnswers] = useState<Record<string, string[]>>({});
   const [openResponse, setOpenResponse] = useState("");
+  const [openRoute, setOpenRoute] = useState<number | null>(null);
   const [openSubmitted, setOpenSubmitted] = useState(false);
   const [showOpenExample, setShowOpenExample] = useState(false);
   const [revealedKnowledge, setRevealedKnowledge] = useState<number[]>([]);
@@ -57,6 +58,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
         setWarmChoice(draft.warmChoice);
         setInteractionAnswers(draft.interactionAnswers);
         setOpenResponse(draft.openResponse);
+        setOpenRoute(draft.openRoute);
         setOpenSubmitted(draft.openSubmitted);
         setWrongAttempts(draft.wrongAttempts);
         setAnswers(draft.answers);
@@ -71,10 +73,10 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   useEffect(() => {
     if (!draftReady) return;
     const drafts = parseLessonDrafts(window.localStorage.getItem(LESSON_DRAFT_STORAGE_KEY));
-    const isEmpty = stage === 0 && !warmChoice && Object.keys(interactionAnswers).length === 0 && !openResponse && !openSubmitted && Object.keys(wrongAttempts).length === 0 && answers.length === 0 && masteredKnowledge.length === 0;
-    const next = isEmpty ? removeLessonDraft(drafts, course.id) : upsertLessonDraft(drafts, course.id, { stage, warmChoice, interactionAnswers, openResponse, openSubmitted, wrongAttempts, answers, masteredKnowledge });
+    const isEmpty = stage === 0 && !warmChoice && Object.keys(interactionAnswers).length === 0 && !openResponse && openRoute === null && !openSubmitted && Object.keys(wrongAttempts).length === 0 && answers.length === 0 && masteredKnowledge.length === 0;
+    const next = isEmpty ? removeLessonDraft(drafts, course.id) : upsertLessonDraft(drafts, course.id, { stage, warmChoice, interactionAnswers, openResponse, openRoute, openSubmitted, wrongAttempts, answers, masteredKnowledge });
     try { window.localStorage.setItem(LESSON_DRAFT_STORAGE_KEY, JSON.stringify(next)); } catch { /* The lesson still works when storage is unavailable. */ }
-  }, [answers, course.id, draftReady, interactionAnswers, masteredKnowledge, openResponse, openSubmitted, stage, warmChoice, wrongAttempts]);
+  }, [answers, course.id, draftReady, interactionAnswers, masteredKnowledge, openResponse, openRoute, openSubmitted, stage, warmChoice, wrongAttempts]);
 
   const completeIfReady = (nextAnswers: string[]) => {
     const passedQuiz = course.lesson.quiz.every((question, index) => nextAnswers[index] === question.answer);
@@ -135,6 +137,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
     setWarmChoice("");
     setInteractionAnswers({});
     setOpenResponse("");
+    setOpenRoute(null);
     setOpenSubmitted(false);
     setShowOpenExample(false);
     setRevealedKnowledge([]);
@@ -325,6 +328,8 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
           <div className="stage-content open-stage">
             <span className="eyebrow">创新挑战</span>
             <h1>{course.lesson.openTask.prompt}</h1>
+            <div className="challenge-routes" aria-label="选择创新挑战路线">{course.lesson.openTask.routes.map((route, index) => <button className={openRoute === index ? "selected" : ""} key={route.label} onClick={() => { setOpenRoute(index); setMessage(`已选择“${route.label}”，没有唯一答案，大胆提出自己的证据。`); }}><strong>{route.label}</strong><span>{route.prompt}</span></button>)}</div>
+            {openRoute !== null && <aside className="chosen-route"><strong>我的挑战：</strong>{course.lesson.openTask.routes[openRoute].prompt}</aside>}
             <div className="sentence-starters">{course.lesson.openTask.support.map((support) => <button key={support} onClick={() => setOpenResponse((value) => `${value}${value ? " " : ""}${support}`)}>{support}</button>)}</div>
             <textarea value={openResponse} onChange={(event) => setOpenResponse(event.target.value)} placeholder="在这里写下你的发现和依据……" aria-label="开放表达答案" />
             <div className="open-actions"><button onClick={() => setShowOpenExample((value) => !value)}>{showOpenExample ? "收起表达支架" : "需要一点提示"}</button><button className="primary-button" onClick={submitOpenTask}>{openSubmitted ? "已提交，可继续修改" : "提交我的表达"}</button></div>

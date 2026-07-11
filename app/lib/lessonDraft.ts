@@ -5,6 +5,7 @@ export interface LessonDraft {
   warmChoice: string;
   interactionAnswers: Record<string, string[]>;
   openResponse: string;
+  openRoute: number | null;
   openSubmitted: boolean;
   wrongAttempts: Record<number, string[]>;
   answers: string[];
@@ -18,6 +19,7 @@ export const emptyLessonDraft = (): LessonDraft => ({
   warmChoice: "",
   interactionAnswers: {},
   openResponse: "",
+  openRoute: null,
   openSubmitted: false,
   wrongAttempts: {},
   answers: [],
@@ -36,6 +38,7 @@ const isLessonDraft = (value: unknown): value is LessonDraft => {
     && typeof draft.warmChoice === "string"
     && isAnswerRecord(draft.interactionAnswers)
     && typeof draft.openResponse === "string"
+    && (draft.openRoute === undefined || draft.openRoute === null || (Number.isInteger(draft.openRoute) && Number(draft.openRoute) >= 0 && Number(draft.openRoute) <= 2))
     && typeof draft.openSubmitted === "boolean"
     && isAnswerRecord(draft.wrongAttempts)
     && isStringArray(draft.answers)
@@ -49,7 +52,7 @@ export function parseLessonDrafts(raw: string | null): LessonDrafts {
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
     const entries = Object.entries(parsed).filter((entry) => isLessonDraft(entry[1])).map(([id, value]) => {
       const draft = value as LessonDraft;
-      return [id, { ...draft, masteredKnowledge: draft.masteredKnowledge ?? [] }] as [string, LessonDraft];
+      return [id, { ...draft, openRoute: draft.openRoute ?? null, masteredKnowledge: draft.masteredKnowledge ?? [] }] as [string, LessonDraft];
     });
     if (entries.length !== Object.keys(parsed).length) return {};
     return Object.fromEntries(entries);

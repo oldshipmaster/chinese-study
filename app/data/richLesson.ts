@@ -26,6 +26,7 @@ export interface OpenTask {
   prompt: string;
   support: string[];
   example: string;
+  routes: Array<{ label: string; prompt: string }>;
 }
 
 export interface RichQuestion {
@@ -400,6 +401,11 @@ export function buildRichLesson(context: RichLessonContext): RichLessonData {
       prompt: `请用自己的话讲清《${title}》最重要的发现，并指出一个依据。`,
       support: ["我的发现是……", "我从……看出来……", "如果换一个情境，我会……"],
       example: `我的发现是：${seed.knowledge} 依据是：${seed.example}`,
+      routes: [
+        { label: "生活侦探", prompt: `在生活或课外阅读中，为《${title}》找到一个新例子，并解释它与“${seed.knowledge}”的联系。` },
+        { label: "反例挑战", prompt: `为《${title}》想一个看似不符合本课发现的例子，再判断是结论错误，还是适用条件发生了变化。` },
+        { label: "当小老师", prompt: `假设要把《${title}》讲给低年级同学，请用一个例子、一个问题和一句方法提示帮助他学会。` },
+      ],
     },
     inquiries: buildInquiries(context),
     toolkit: toolkits[type],

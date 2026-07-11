@@ -239,3 +239,11 @@ test("every course type teaches through a misconception contrast case", async ()
   assert.equal(new Set(cases.map((item) => item.misconception)).size, 7);
   assert.ok(cases.every((item) => item.misconception.length >= 8 && item.diagnosis.length >= 12 && item.repair.length >= 12));
 });
+
+test("open challenges offer three distinct learner-choice routes", async () => {
+  const { buildRichLesson } = await import("../app/data/richLesson.ts");
+  const lesson = buildRichLesson({ id: "choice-routes", title: "路线课", type: "reading", objective: "自主探究", action: "选择", seed: { knowledge: "用证据说明观点", example: "人物前后发生变化", checkPrompt: "为什么？", checkAnswer: "因为有线索" } });
+  assert.deepEqual(lesson.openTask.routes.map((route) => route.label), ["生活侦探", "反例挑战", "当小老师"]);
+  assert.equal(new Set(lesson.openTask.routes.map((route) => route.prompt)).size, 3);
+  assert.ok(lesson.openTask.routes.every((route) => route.prompt.includes("《路线课》")));
+});
