@@ -30,36 +30,60 @@ export function AoeLesson({ completed, onBack, onComplete, onReset }: AoeLessonP
   const [speechSupported, setSpeechSupported] = useState(true);
   const [speaking, setSpeaking] = useState(false);
   const userStartedSpeech = useRef(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const cancelSpeech = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
     if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel();
     setSpeaking(false);
   }, []);
 
-  const speakLetter = useCallback((index: number, enable = false) => {
+  const speakWithDevice = useCallback((index: number) => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) {
       setSpeechSupported(false);
-      setMessage("当前设备不支持语音朗读，请跟着口形提示练习。");
+      setMessage("音频播放失败，请检查设备是否静音。");
       return;
     }
-    if (enable) {
-      userStartedSpeech.current = true;
-    }
-    window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(["啊", "喔", "鹅"][index]);
     utterance.lang = "zh-CN";
     utterance.rate = 0.72;
     utterance.pitch = 1.05;
     utterance.onstart = () => setSpeaking(true);
     utterance.onend = () => setSpeaking(false);
-    utterance.onerror = () => setSpeaking(false);
+    utterance.onerror = () => {
+      setSpeaking(false);
+      setSpeechSupported(false);
+      setMessage("音频播放失败，请检查设备是否静音。");
+    };
     window.speechSynthesis.speak(utterance);
   }, []);
 
+  const speakLetter = useCallback((index: number, enable = false) => {
+    if (typeof window === "undefined") return;
+    if (enable) {
+      userStartedSpeech.current = true;
+    }
+    cancelSpeech();
+    setSpeechSupported(true);
+    const audio = new Audio(`${import.meta.env.BASE_URL}audio/pinyin-${letters[index].letter}.wav`);
+    audioRef.current = audio;
+    audio.preload = "auto";
+    audio.onplay = () => setSpeaking(true);
+    audio.onended = () => {
+      setSpeaking(false);
+      audioRef.current = null;
+    };
+    audio.onerror = () => speakWithDevice(index);
+    void audio.play().catch(() => speakWithDevice(index));
+  }, [cancelSpeech, speakWithDevice]);
+
   useEffect(() => {
-    setSpeechSupported(typeof window !== "undefined" && "speechSynthesis" in window);
-    return () => { if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel(); };
-  }, []);
+    return cancelSpeech;
+  }, [cancelSpeech]);
 
   useEffect(() => {
     if (!playing || stage > 2) return;
@@ -117,8 +141,8 @@ export function AoeLesson({ completed, onBack, onComplete, onReset }: AoeLessonP
 
       <section className="classroom-stage" aria-live="polite">
         <div className="lesson-landscape" aria-hidden="true"><div className="lesson-sun" /><div className="lesson-hill one" /><div className="lesson-hill two" /><div className="lesson-water" /></div>
-        {stage === 0 && <div className="stage-content intro-content"><span className="eyebrow">听，山谷里是谁在唱歌？</span><h1>三个单韵母朋友</h1><div className={`letter-trio ${playing ? "is-playing" : ""}`}>{letters.map((item, index) => <button aria-label={`听 ${item.letter} 的发音`} key={item.letter} className={letter === index ? "current" : ""} onClick={() => { setLetter(index); speakLetter(index, true); }}>{item.letter}</button>)}</div><button className="speech-button" aria-pressed={speaking} disabled={!speechSupported} onClick={() => speakLetter(letter, true)}>{speaking ? "正在发音…" : "听发音"}</button><p aria-live="polite">{speechSupported ? letters[letter].clue : "当前设备不支持语音朗读"}</p></div>}
-        {stage === 1 && <div className="stage-content pronunciation"><span className="eyebrow">看口形，再开口</span><h1>{letters[letter].letter}</h1><div className={`mouth mouth-${letters[letter].letter}`} aria-hidden="true"><i /></div><p>{letters[letter].mouth}</p><div className="letter-switch">{letters.map((item, index) => <button className={letter === index ? "active" : ""} key={item.letter} onClick={() => { setLetter(index); speakLetter(index, true); }}>{item.letter}</button>)}</div><button className="speech-button" aria-pressed={speaking} disabled={!speechSupported} onClick={() => speakLetter(letter, true)}>{speaking ? "正在发音…" : "听发音"}</button></div>}
+        {stage === 0 && <div className="stage-content intro-content"><span className="eyebrow">听，山谷里是谁在唱歌？</span><h1>三个单韵母朋友</h1><div className={`letter-trio ${playing ? "is-playing" : ""}`}>{letters.map((item, index) => <button aria-label={`听 ${item.letter} 的发音`} key={item.letter} className={letter === index ? "current" : ""} onClick={() => { setLetter(index); speakLetter(index, true); }}>{item.letter}</button>)}</div><button className="speech-button" aria-pressed={speaking} onClick={() => speakLetter(letter, true)}>{speaking ? "正在发音…" : "听发音"}</button><p aria-live="polite">{speechSupported ? letters[letter].clue : "音频播放失败，请检查设备是否静音"}</p></div>}
+        {stage === 1 && <div className="stage-content pronunciation"><span className="eyebrow">看口形，再开口</span><h1>{letters[letter].letter}</h1><div className={`mouth mouth-${letters[letter].letter}`} aria-hidden="true"><i /></div><p>{letters[letter].mouth}</p><div className="letter-switch">{letters.map((item, index) => <button className={letter === index ? "active" : ""} key={item.letter} onClick={() => { setLetter(index); speakLetter(index, true); }}>{item.letter}</button>)}</div><button className="speech-button" aria-pressed={speaking} onClick={() => speakLetter(letter, true)}>{speaking ? "正在发音…" : "听发音"}</button></div>}
         {stage === 2 && <div className="stage-content tones"><span className="eyebrow">小帽子的方向，会改变声音</span><h1>跟着小路读四声</h1><div className="tone-path"><span className="tone-one">ā</span><span className="tone-two">á</span><span className="tone-three">ǎ</span><span className="tone-four">à</span></div><p>一声平，二声扬，三声拐弯，四声降。</p></div>}
         {stage === 3 && <div className="stage-content practice"><span className="eyebrow">用眼睛找一找</span><h1>声音和图形牵牵手</h1><div className="match-grid">{letters.map((item) => <button key={item.letter} onClick={() => setMessage(`${item.letter}：${item.mouth}`)}><strong>{item.letter}</strong><span>{item.clue}</span></button>)}</div><p>{message}</p></div>}
         {stage === 4 && <div className="stage-content quiz"><span className="eyebrow">最后一站</span><h1>三题闯关</h1><div className="quiz-list">{questions.map((question, qIndex) => <fieldset key={question.prompt}><legend>{qIndex + 1}. {question.prompt}</legend><div>{question.options.map((option) => <button className={answers[qIndex] === option ? option === question.answer ? "correct" : "wrong" : ""} key={option} onClick={() => choose(qIndex, option)}>{option}</button>)}</div></fieldset>)}</div><p className="quiz-message">{message}</p></div>}

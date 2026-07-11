@@ -32,3 +32,11 @@ test("Pages workflow uses official deployment actions and permissions", async ()
   assert.match(workflow, /actions\/deploy-pages@v4/);
   assert.match(workflow, /npm run build:pages/);
 });
+
+test("bundles playable WAV pronunciations for a o e", async () => {
+  for (const letter of ["a", "o", "e"]) {
+    const audio = await readFile(`static-site/public/audio/pinyin-${letter}.wav`);
+    assert.equal(audio.subarray(0, 4).toString("ascii"), "RIFF");
+    assert.equal(audio.subarray(8, 12).toString("ascii"), "WAVE");
+  }
+});
