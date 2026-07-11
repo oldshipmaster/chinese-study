@@ -14,6 +14,7 @@ export interface LessonDraft {
   openChecks: number[];
   confidence: string;
   quizHints: number[];
+  selectedTerms: string[];
 }
 
 export type LessonDrafts = Record<string, LessonDraft>;
@@ -32,6 +33,7 @@ export const emptyLessonDraft = (): LessonDraft => ({
   openChecks: [],
   confidence: "",
   quizHints: [],
+  selectedTerms: [],
 });
 
 const isStringArray = (value: unknown): value is string[] => Array.isArray(value) && value.every((item) => typeof item === "string");
@@ -56,7 +58,8 @@ const isLessonDraft = (value: unknown): value is LessonDraft => {
     && (draft.inquiryPredictions === undefined || isPredictionRecord(draft.inquiryPredictions))
     && (draft.openChecks === undefined || isNumberArray(draft.openChecks))
     && (draft.confidence === undefined || typeof draft.confidence === "string")
-    && (draft.quizHints === undefined || isNumberArray(draft.quizHints));
+    && (draft.quizHints === undefined || isNumberArray(draft.quizHints))
+    && (draft.selectedTerms === undefined || isStringArray(draft.selectedTerms));
 };
 
 export function parseLessonDrafts(raw: string | null): LessonDrafts {
@@ -66,7 +69,7 @@ export function parseLessonDrafts(raw: string | null): LessonDrafts {
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
     const entries = Object.entries(parsed).filter((entry) => isLessonDraft(entry[1])).map(([id, value]) => {
       const draft = value as LessonDraft;
-      return [id, { ...draft, openRoute: draft.openRoute ?? null, masteredKnowledge: draft.masteredKnowledge ?? [], inquiryPredictions: draft.inquiryPredictions ?? {}, openChecks: draft.openChecks ?? [], confidence: draft.confidence ?? "", quizHints: draft.quizHints ?? [] }] as [string, LessonDraft];
+      return [id, { ...draft, openRoute: draft.openRoute ?? null, masteredKnowledge: draft.masteredKnowledge ?? [], inquiryPredictions: draft.inquiryPredictions ?? {}, openChecks: draft.openChecks ?? [], confidence: draft.confidence ?? "", quizHints: draft.quizHints ?? [], selectedTerms: draft.selectedTerms ?? [] }] as [string, LessonDraft];
     });
     return Object.fromEntries(entries);
   } catch {

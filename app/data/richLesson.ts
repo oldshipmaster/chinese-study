@@ -502,7 +502,7 @@ export function buildRichLesson(context: RichLessonContext): RichLessonData {
     },
     inquiries: buildInquiries(context),
     toolkit: toolkits[type],
-    glossary: glossaries[type].map((item) => ({ ...item, example: `联系本课例子：“${seed.example}”` })),
+    glossary: glossaries[type].map((item) => ({ ...item, example: `试着用“${item.term}”观察本课例子：“${seed.example}”` })),
     contrastCase: buildContrastCase(context),
     quiz,
     extension: {
