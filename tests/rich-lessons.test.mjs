@@ -104,3 +104,26 @@ test("grade adaptation changes support and challenge depth", async () => {
   assert.ok(lower.openTask.support[0].length < upper.openTask.support[0].length);
   assert.notEqual(lower.extension.challenge, upper.extension.challenge);
 });
+
+test("all 564 runtime courses satisfy the rich lesson quality floor", async () => {
+  const { build } = await import("esbuild");
+  const result = await build({ entryPoints: ["app/data/curriculum.ts"], bundle: true, platform: "node", format: "esm", write: false, logLevel: "silent" });
+  const bundled = result.outputFiles[0].text;
+  const curriculum = await import(`data:text/javascript;base64,${Buffer.from(bundled).toString("base64")}`);
+  const courses = curriculum.books.flatMap((book) => book.units.flatMap((unit) => unit.courses.map((course) => ({ ...course, grade: book.grade }))));
+  const modes = new Set(courses.flatMap((course) => course.lesson.interactions.map((interaction) => interaction.mode)));
+
+  assert.equal(curriculum.books.length, 12);
+  assert.equal(courses.length, 564);
+  assert.equal(new Set(courses.map((course) => course.id)).size, 564);
+  assert.ok(modes.size >= 6);
+  for (const course of courses) {
+    assert.ok(course.lesson.knowledgePoints.length >= 3 && course.lesson.knowledgePoints.length <= 5, course.id);
+    assert.ok(course.lesson.interactions.length >= 2, course.id);
+    assert.equal(course.lesson.quiz.length, 5, course.id);
+    assert.ok(course.lesson.openTask.prompt.length > 10, course.id);
+    assert.ok(course.lesson.extension.fact.length > 15, course.id);
+    assert.ok(course.lesson.quiz.every((question) => question.options.every((option) => question.feedback[option]?.length > 0)), course.id);
+    assert.equal(course.lesson.gradeBand, course.grade <= 2 ? "lower" : course.grade <= 4 ? "middle" : "upper", course.id);
+  }
+});
