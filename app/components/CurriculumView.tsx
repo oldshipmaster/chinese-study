@@ -23,7 +23,7 @@ export function CurriculumView({ book, completed, draftStages, onBack, onOpenCou
       </header>
       {book.units.map((unit, index) => (
         <section className="unit-section" key={unit.id}>
-          <div className="unit-title"><span>第 {index + 1} 单元</span><div><h2>{unit.title}</h2><p>{unit.theme}</p></div></div>
+          <div className="unit-title"><span>第 {index + 1} 单元</span><div><h2>{unit.title}</h2><p>{unit.theme}</p></div><small className="unit-progress">单元进度 {unit.courses.filter((course) => completed.includes(course.id)).length}/{unit.courses.length}{unit.courses.some((course) => !completed.includes(course.id) && course.id in draftStages) ? " · 有课程进行中" : ""}</small></div>
           <div className="course-grid">
             {unit.courses.map((item, courseIndex) => {
               const done = completed.includes(item.id);
