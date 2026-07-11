@@ -51,6 +51,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   const [openResponse, setOpenResponse] = useState("");
   const [openRoute, setOpenRoute] = useState<number | null>(null);
   const [openSubmitted, setOpenSubmitted] = useState(false);
+  const [openChecks, setOpenChecks] = useState<number[]>([]);
   const [showOpenExample, setShowOpenExample] = useState(false);
   const [revealedKnowledge, setRevealedKnowledge] = useState<number[]>([]);
   const [masteredKnowledge, setMasteredKnowledge] = useState<number[]>([]);
@@ -89,6 +90,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
         setAnswers(draft.answers);
         setMasteredKnowledge(draft.masteredKnowledge);
         setInquiryPredictions(draft.inquiryPredictions);
+        setOpenChecks(draft.openChecks);
         setMessage("已恢复上次学习位置，可以从这里继续。");
       }
       setDraftReady(true);
@@ -99,10 +101,10 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   useEffect(() => {
     if (!draftReady) return;
     const drafts = parseLessonDrafts(window.localStorage.getItem(LESSON_DRAFT_STORAGE_KEY));
-    const isEmpty = stage === 0 && !warmChoice && Object.keys(interactionAnswers).length === 0 && !openResponse && openRoute === null && !openSubmitted && Object.keys(wrongAttempts).length === 0 && answers.length === 0 && masteredKnowledge.length === 0 && Object.keys(inquiryPredictions).length === 0;
-    const next = isEmpty ? removeLessonDraft(drafts, course.id) : upsertLessonDraft(drafts, course.id, { stage, warmChoice, interactionAnswers, openResponse, openRoute, openSubmitted, wrongAttempts, answers, masteredKnowledge, inquiryPredictions });
+    const isEmpty = stage === 0 && !warmChoice && Object.keys(interactionAnswers).length === 0 && !openResponse && openRoute === null && !openSubmitted && openChecks.length === 0 && Object.keys(wrongAttempts).length === 0 && answers.length === 0 && masteredKnowledge.length === 0 && Object.keys(inquiryPredictions).length === 0;
+    const next = isEmpty ? removeLessonDraft(drafts, course.id) : upsertLessonDraft(drafts, course.id, { stage, warmChoice, interactionAnswers, openResponse, openRoute, openSubmitted, openChecks, wrongAttempts, answers, masteredKnowledge, inquiryPredictions });
     try { window.localStorage.setItem(LESSON_DRAFT_STORAGE_KEY, JSON.stringify(next)); } catch { /* The lesson still works when storage is unavailable. */ }
-  }, [answers, course.id, draftReady, inquiryPredictions, interactionAnswers, masteredKnowledge, openResponse, openRoute, openSubmitted, stage, warmChoice, wrongAttempts]);
+  }, [answers, course.id, draftReady, inquiryPredictions, interactionAnswers, masteredKnowledge, openChecks, openResponse, openRoute, openSubmitted, stage, warmChoice, wrongAttempts]);
 
   const completeIfReady = (nextAnswers: string[]) => {
     const passedQuiz = course.lesson.quiz.every((question, index) => nextAnswers[index] === question.answer);
@@ -152,6 +154,10 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
       setMessage("再多说一点：至少写出一个发现和一个依据。");
       return;
     }
+    if (openChecks.length < course.lesson.openTask.rubric.length) {
+      setMessage("先完成三项表达自检：观点、证据和联系都要照顾到。");
+      return;
+    }
     setOpenSubmitted(true);
     setMessage("表达已收下！开放题没有唯一答案，重点是发现清楚、依据真实。");
   };
@@ -165,6 +171,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
     setOpenResponse("");
     setOpenRoute(null);
     setOpenSubmitted(false);
+    setOpenChecks([]);
     setShowOpenExample(false);
     setRevealedKnowledge([]);
     setMasteredKnowledge([]);
@@ -364,6 +371,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
             {openRoute !== null && <aside className="chosen-route"><strong>我的挑战：</strong>{course.lesson.openTask.routes[openRoute].prompt}</aside>}
             <div className="sentence-starters">{course.lesson.openTask.support.map((support) => <button key={support} onClick={() => setOpenResponse((value) => `${value}${value ? " " : ""}${support}`)}>{support}</button>)}</div>
             <textarea value={openResponse} onChange={(event) => setOpenResponse(event.target.value)} placeholder="在这里写下你的发现和依据……" aria-label="开放表达答案" />
+            <section className="open-rubric"><strong>提交前，我自己检查</strong><div>{course.lesson.openTask.rubric.map((item, index) => <button className={openChecks.includes(index) ? "checked" : ""} key={item} onClick={() => setOpenChecks((values) => values.includes(index) ? values.filter((value) => value !== index) : [...values, index])}><span>{openChecks.includes(index) ? "✓" : index + 1}</span>{item}</button>)}</div></section>
             <div className="open-actions"><button onClick={() => setShowOpenExample((value) => !value)}>{showOpenExample ? "收起表达支架" : "需要一点提示"}</button><button className="primary-button" onClick={submitOpenTask}>{openSubmitted ? "已提交，可继续修改" : "提交我的表达"}</button></div>
             {showOpenExample && <aside><strong>表达支架，不是唯一答案</strong><p>{course.lesson.openTask.example}</p></aside>}
             <p>{message}</p>

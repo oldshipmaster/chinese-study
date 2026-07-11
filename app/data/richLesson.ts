@@ -27,6 +27,7 @@ export interface OpenTask {
   support: string[];
   example: string;
   routes: Array<{ label: string; prompt: string }>;
+  rubric: string[];
 }
 
 export interface RichQuestion {
@@ -417,6 +418,7 @@ export function buildRichLesson(context: RichLessonContext): RichLessonData {
         { label: "反例挑战", prompt: `为《${title}》想一个看似不符合本课发现的例子，再判断原来的发现要不要修改，并说出理由。` },
         { label: "当小老师", prompt: `假设要把《${title}》讲给低年级同学，请用一个例子、一个问题和一句方法提示帮助他学会。` },
       ],
+      rubric: ["我写清了自己的发现或观点", "我提供了一个具体、真实的依据", "我解释了依据和观点之间的联系"],
     },
     inquiries: buildInquiries(context),
     toolkit: toolkits[type],
@@ -469,12 +471,17 @@ export function adaptRichLessonForGrade<T extends RichLessonData>(lesson: T, gra
     : gradeBand === "middle"
       ? " 写清你的发现和一条具体依据。"
       : " 至少比较两条证据，并说明可能的反例和适用条件。";
+  const rubric = gradeBand === "lower"
+    ? ["我说清了自己的发现", "我举了一个看得见的例子", "我用“因为”说了一句理由"]
+    : gradeBand === "middle"
+      ? ["我写清了自己的发现或观点", "我提供了一个具体、真实的依据", "我解释了依据和观点之间的联系"]
+      : ["我的观点明确且有适用条件", "我引用了具体证据并解释其作用", "我回应了可能的另一种理解或反例"];
 
   return {
     ...lesson,
     gradeBand,
     learningGuide: settings.guide,
-    openTask: { ...lesson.openTask, prompt: settings.prompt, support: settings.support, routes: lesson.openTask.routes.map((route) => ({ ...route, prompt: `${route.prompt}${routeTail}` })) },
+    openTask: { ...lesson.openTask, prompt: settings.prompt, support: settings.support, rubric, routes: lesson.openTask.routes.map((route) => ({ ...route, prompt: `${route.prompt}${routeTail}` })) },
     inquiries: lesson.inquiries.map((inquiry) => ({ ...inquiry, guide: `${inquiry.guide}${inquiryTail}` })),
     quiz: lesson.quiz.map((question, index) => index < 3 ? question : { ...question, prompt: `${quizLead}${question.prompt}` }),
     extension: { ...lesson.extension, challenge: `${lesson.extension.challenge} ${settings.challenge}` },

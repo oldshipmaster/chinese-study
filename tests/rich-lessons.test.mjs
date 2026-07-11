@@ -129,6 +129,7 @@ test("grade adaptation changes support and challenge depth", async () => {
   assert.match(upper.quiz[3].prompt, /证据|反例|条件/);
   assert.match(lower.openTask.routes[0].prompt, /画一画|说一两句/);
   assert.match(upper.openTask.routes[0].prompt, /两条证据|反例|适用条件/);
+  assert.notDeepEqual(lower.openTask.rubric, upper.openTask.rubric);
 });
 
 test("all 564 runtime courses satisfy the rich lesson quality floor", async () => {
@@ -257,4 +258,5 @@ test("open challenges offer three distinct learner-choice routes", async () => {
   assert.deepEqual(lesson.openTask.routes.map((route) => route.label), ["生活侦探", "反例挑战", "当小老师"]);
   assert.equal(new Set(lesson.openTask.routes.map((route) => route.prompt)).size, 3);
   assert.ok(lesson.openTask.routes.every((route) => route.prompt.includes("《路线课》")));
+  assert.equal(lesson.openTask.rubric.length, 3);
 });
