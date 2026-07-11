@@ -197,6 +197,11 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
     setMessage("表达已收下！开放题没有唯一答案，重点是发现清楚、依据真实。");
   };
 
+  const navigateStage = (nextStage: number) => {
+    setStage(Math.max(0, Math.min(7, nextStage)));
+    window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }));
+  };
+
   const clearLessonState = (resetMessage: string) => {
     audioRef.current?.pause();
     setStage(0);
@@ -230,7 +235,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   };
 
   const replayIntro = () => {
-    setStage(0);
+    navigateStage(0);
     setPlaying(true);
     setActiveStoryBeat(null);
     setMessage("情境动画已从第一幕重播，已完成的答案和草稿都会保留。");
@@ -239,11 +244,11 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   const retryWrongQuestions = () => {
     if (wrongQuestionIndexes.length === 0) {
       setMessage("本轮没有错题，可以选择一道高阶题讲给家人听。");
-      setStage(6);
+      navigateStage(6);
       return;
     }
     setAnswers((current) => current.map((answer, index) => wrongQuestionIndexes.includes(index) ? "" : answer));
-    setStage(6);
+    navigateStage(6);
     setMessage(`已保留答对的题，只需重新挑战 ${wrongQuestionIndexes.length} 道错题。`);
   };
 
@@ -256,7 +261,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
       audioRef.current?.pause();
       onBack();
     }
-    else setStage((value) => Math.min(7, value + 1));
+    else navigateStage(stage + 1);
   };
 
   const selectedCorrectCount = answers.filter((value, index) => value === course.lesson.quiz[index]?.answer).length;
@@ -337,7 +342,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
       <nav className="stage-nav rich-stage-nav" aria-label="课程步骤">
         {stages.map((name, index) => {
           const done = stageComplete(index);
-          return <button key={name} className={index === stage ? "active" : done ? "done" : ""} onClick={() => setStage(index)} aria-current={index === stage ? "step" : undefined}>
+          return <button key={name} className={index === stage ? "active" : done ? "done" : ""} onClick={() => navigateStage(index)} aria-current={index === stage ? "step" : undefined}>
             <span>{done ? "✓" : index + 1}</span>{name}
           </button>;
         })}
@@ -461,7 +466,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
                 ))}</div>
                 <button className="quiz-hint" aria-expanded={quizHints.includes(qIndex)} onClick={() => setQuizHints((values) => values.includes(qIndex) ? values.filter((value) => value !== qIndex) : [...values, qIndex])}>{quizHints.includes(qIndex) ? `线索：回到${question.reviewTarget}，先说出判断步骤。` : "给我一个线索，不看答案"}</button>
                 {answers[qIndex] && <small className={answers[qIndex] === question.answer ? "correct-feedback" : "wrong-feedback"}>{question.feedback[answers[qIndex]]}{answers[qIndex] !== question.answer && <> <b>建议返回：{question.reviewTarget}</b></>}</small>}
-                {answers[qIndex] && answers[qIndex] !== question.answer && <button className="review-now" onClick={() => { setStage(2); setMessage(`请找到${question.reviewTarget}，复述后再回五题闯关。`); }}>← 马上回{question.reviewTarget}复习</button>}
+                {answers[qIndex] && answers[qIndex] !== question.answer && <button className="review-now" onClick={() => { navigateStage(2); setMessage(`请找到${question.reviewTarget}，复述后再回五题闯关。`); }}>← 马上回{question.reviewTarget}复习</button>}
               </fieldset>
             ))}</div>
             <p className="quiz-message">{message}</p>
@@ -485,7 +490,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
             <section className="mistake-review"><h2>我的错因回顾</h2>{wrongQuestionIndexes.length === 0 ? <p>本轮没有错答。下一次可以尝试更快说出证据。</p> : Object.entries(wrongAttempts).filter(([index]) => course.lesson.quiz[Number(index)]).map(([index, values]) => {
               const question = course.lesson.quiz[Number(index)];
               return <article key={index}><strong>{question.prompt}</strong>{values.map((value) => <p key={value}>曾选“{value}”：{question.feedback[value]}</p>)}<small>正确思路：{question.explanation}</small></article>;
-            })}<div className="mistake-actions"><button onClick={() => setStage(2)}>回知识卡复习</button><button onClick={retryWrongQuestions}>只重做错过的题</button></div></section>
+            })}<div className="mistake-actions"><button onClick={() => navigateStage(2)}>回知识卡复习</button><button onClick={retryWrongQuestions}>只重做错过的题</button></div></section>
             <section className="confidence-check"><h2>现在的我</h2><div>{["我还要复习一次", "我基本掌握了", "我能讲给别人听"].map((value) => <button aria-pressed={confidence === value} className={confidence === value ? "selected" : ""} key={value} onClick={() => setConfidence(value)}>{value}</button>)}</div>{confidence && <p><strong>间隔复习建议：</strong>{confidenceReviewPlan[confidence]}</p>}</section>
             <section className="study-prescription"><span className="eyebrow">自学导航</span><h2>我的下一步学习处方</h2><ol>{studyPrescription.map((item) => <li key={item}>{item}</li>)}</ol></section>
             {!lessonPassed && <aside className="completion-hint">要完成课程，还需要：{!interactionsPassed ? "完成两项互动；" : ""}{!openSubmitted ? "提交开放表达；" : ""}{!quizPassed ? "答对五道分层题。" : ""}</aside>}
@@ -498,7 +503,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
         <button onClick={() => { setPlaying(!playing); if (!playing) setActiveStoryBeat(null); setMessage(playing ? "动画暂停了，你可以慢慢观察。" : "动画继续，我们一起学。"); }}>{playing ? "暂停" : "播放"}</button>
         <button onClick={replayIntro}>重播导入</button>
         <div className="control-spacer" />
-        <button disabled={stage === 0} onClick={() => setStage((value) => Math.max(0, value - 1))}>上一步</button>
+        <button disabled={stage === 0} onClick={() => navigateStage(stage - 1)}>上一步</button>
         <button className="primary-button" disabled={stage === 7 && !lessonPassed} onClick={goNext}>{stage === 7 ? lessonPassed ? "完成课程" : "还有任务未完成" : "下一步 →"}</button>
       </footer>
     </main>

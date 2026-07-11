@@ -75,6 +75,8 @@ test("enables rich course completion after all requirements are satisfied", asyn
   assert.match(lesson, /还有任务未完成/);
   assert.match(lesson, /disabled=\{stage === 7 && !lessonPassed\}/);
   assert.match(lesson, /stageComplete/);
+  assert.match(lesson, /const navigateStage/);
+  assert.match(lesson, /window\.scrollTo/);
   assert.match(lesson, /minimumResponseLength/);
   assert.match(lesson, /stage === 7 \? lessonPassed \? "完成课程" : "还有任务未完成" : "下一步 →"/);
 });
