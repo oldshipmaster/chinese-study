@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { books, getBook, getCourse } from "../data/curriculum";
-import { completeCourse, defaultProgress, parseProgress, PROGRESS_STORAGE_KEY, resetCourse } from "../lib/progress";
+import { completeCourse, defaultProgress, parseProgress, PROGRESS_STORAGE_KEY, resetCourse, visitCourse } from "../lib/progress";
 import { LESSON_DRAFT_STORAGE_KEY, parseLessonDrafts, removeLessonDraft, type LessonDrafts } from "../lib/lessonDraft";
 import { CurriculumView } from "./CurriculumView";
 import { HomeView } from "./HomeView";
@@ -25,7 +25,7 @@ export function CourseApp() {
     try { window.localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(next)); } catch { /* Learning remains available without storage. */ }
   };
   const openBook = (id: string) => { setBookId(id); setView("curriculum"); window.scrollTo({ top: 0, behavior: "smooth" }); };
-  const openCourse = (id: string) => { setCourseId(id); setView("lesson"); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  const openCourse = (id: string) => { persist(visitCourse(progress, id)); setCourseId(id); setView("lesson"); window.scrollTo({ top: 0, behavior: "smooth" }); };
   const returnToCurriculum = () => { setLessonDrafts(parseLessonDrafts(window.localStorage.getItem(LESSON_DRAFT_STORAGE_KEY))); setView("curriculum"); };
   const handleReset = (id: string) => {
     const selected = getCourse(id);

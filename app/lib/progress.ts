@@ -63,6 +63,10 @@ export function completeCourse(
   };
 }
 
+export function visitCourse(progress: LearningProgressV1, courseId: string): LearningProgressV1 {
+  return progress.recentCourseId === courseId ? progress : { ...progress, recentCourseId: courseId };
+}
+
 export function resetCourse(
   progress: LearningProgressV1,
   courseId: string,

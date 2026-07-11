@@ -21,6 +21,13 @@ test("course completion is immutable and idempotent", async () => {
   assert.match(source, /recentCourseId: courseId/);
 });
 
+test("opening a course updates the resumable recent course without rewards", async () => {
+  const source = await readFile("app/lib/progress.ts", "utf8");
+  assert.match(source, /export function visitCourse/);
+  assert.match(source, /recentCourseId === courseId \? progress/);
+  assert.doesNotMatch(source.match(/export function visitCourse[\s\S]*?\n\}/)?.[0] ?? "", /leaves:/);
+});
+
 test("single-course reset removes completion and safely returns its reward", async () => {
   const source = await readFile("app/lib/progress.ts", "utf8");
 
