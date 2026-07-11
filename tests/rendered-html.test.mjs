@@ -62,7 +62,7 @@ test("exposes reset controls and device pinyin speech", async () => {
   assert.match(lesson, /audio\/pinyin-/);
   assert.match(lesson, /audio\.play\(\)/);
   assert.match(lesson, /onended/);
-  assert.doesNotMatch(lesson, /useEffect/);
+  assert.doesNotMatch(lesson, /useEffect\(\(\) => \{\s*(?:speak|speakPinyin|speakWithDevice)/);
 });
 
 test("enables rich course completion after all requirements are satisfied", async () => {

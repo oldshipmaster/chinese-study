@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Course } from "../data/curriculum";
 import type { InteractionTask } from "../data/richLesson";
+import { LESSON_DRAFT_STORAGE_KEY, parseLessonDrafts, removeLessonDraft, upsertLessonDraft } from "../lib/lessonDraft";
 
 const stages = ["情境导入", "旧知热身", "知识探秘", "例子拆解", "互动实验", "创新挑战", "五题闯关", "错因拓展"];
 const difficultyLabels = { remember: "记一记", understand: "懂一懂", apply: "用一用", reason: "想一想", transfer: "闯新关" };
@@ -34,6 +35,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   const [message, setMessage] = useState("带着问题走进情境，看看今天会发现什么。");
   const [speechMessage, setSpeechMessage] = useState("点击字母或音节，听清后再跟读。");
   const [notified, setNotified] = useState(completed);
+  const [draftReady, setDraftReady] = useState(false);
   const quizPassed = course.lesson.quiz.every((question, index) => answers[index] === question.answer);
 
   const interactionCorrect = (task: InteractionTask) => {
@@ -42,6 +44,33 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   };
   const interactionsPassed = course.lesson.interactions.every(interactionCorrect);
   const lessonPassed = interactionsPassed && openSubmitted && quizPassed;
+
+  useEffect(() => {
+    const drafts = parseLessonDrafts(window.localStorage.getItem(LESSON_DRAFT_STORAGE_KEY));
+    const draft = drafts[course.id];
+    const timer = window.setTimeout(() => {
+      if (draft) {
+        setStage(draft.stage);
+        setWarmChoice(draft.warmChoice);
+        setInteractionAnswers(draft.interactionAnswers);
+        setOpenResponse(draft.openResponse);
+        setOpenSubmitted(draft.openSubmitted);
+        setWrongAttempts(draft.wrongAttempts);
+        setAnswers(draft.answers);
+        setMessage("已恢复上次学习位置，可以从这里继续。");
+      }
+      setDraftReady(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [course.id]);
+
+  useEffect(() => {
+    if (!draftReady) return;
+    const drafts = parseLessonDrafts(window.localStorage.getItem(LESSON_DRAFT_STORAGE_KEY));
+    const isEmpty = stage === 0 && !warmChoice && Object.keys(interactionAnswers).length === 0 && !openResponse && !openSubmitted && Object.keys(wrongAttempts).length === 0 && answers.length === 0;
+    const next = isEmpty ? removeLessonDraft(drafts, course.id) : upsertLessonDraft(drafts, course.id, { stage, warmChoice, interactionAnswers, openResponse, openSubmitted, wrongAttempts, answers });
+    try { window.localStorage.setItem(LESSON_DRAFT_STORAGE_KEY, JSON.stringify(next)); } catch { /* The lesson still works when storage is unavailable. */ }
+  }, [answers, course.id, draftReady, interactionAnswers, openResponse, openSubmitted, stage, warmChoice, wrongAttempts]);
 
   const completeIfReady = (nextAnswers: string[]) => {
     const passedQuiz = course.lesson.quiz.every((question, index) => nextAnswers[index] === question.answer);

@@ -1,0 +1,22 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import { emptyLessonDraft, parseLessonDrafts, removeLessonDraft, upsertLessonDraft } from "../app/lib/lessonDraft.ts";
+
+test("lesson drafts survive reload and stay isolated by course", () => {
+  const first = { ...emptyLessonDraft(), stage: 5, openResponse: "我发现了证据", answers: ["甲"] };
+  const second = { ...emptyLessonDraft(), stage: 2, warmChoice: "认真观察" };
+  const stored = upsertLessonDraft(upsertLessonDraft({}, "course-a", first), "course-b", second);
+  const restored = parseLessonDrafts(JSON.stringify(stored));
+
+  assert.deepEqual(restored["course-a"], first);
+  assert.deepEqual(restored["course-b"], second);
+  assert.deepEqual(removeLessonDraft(restored, "course-a"), { "course-b": second });
+});
+
+test("invalid lesson draft storage falls back safely", () => {
+  assert.deepEqual(parseLessonDrafts(null), {});
+  assert.deepEqual(parseLessonDrafts("not json"), {});
+  assert.deepEqual(parseLessonDrafts("[]"), {});
+  assert.deepEqual(parseLessonDrafts('{"bad":{"stage":99}}'), {});
+});
