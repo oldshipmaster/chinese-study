@@ -502,7 +502,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
       <footer className="lesson-controls">
         <button onClick={() => { setPlaying(!playing); if (!playing) setActiveStoryBeat(null); setMessage(playing ? "动画暂停了，你可以慢慢观察。" : "动画继续，我们一起学。"); }}>{playing ? "暂停" : "播放"}</button>
         <button onClick={replayIntro}>重播导入</button>
-        <div className="control-spacer" />
+        <div className="control-spacer"><span>第 {stage + 1} / 8 站 · {stages[stage]}</span></div>
         <button disabled={stage === 0} onClick={() => navigateStage(stage - 1)}>上一步</button>
         <button className="primary-button" disabled={stage === 7 && !lessonPassed} onClick={goNext}>{stage === 7 ? lessonPassed ? "完成课程" : "还有任务未完成" : "下一步 →"}</button>
       </footer>
