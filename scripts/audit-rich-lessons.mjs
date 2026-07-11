@@ -37,4 +37,4 @@ for (const book of curriculum.books) {
 assert.equal(curriculum.books.length, 12, "教材册数不是 12");
 assert.equal(ids.size, 564, "课程总数不是 564");
 console.table(report);
-console.log(`逐册审计通过：12 册，${ids.size} 课；每课 5 张知识卡、3 个探究问题、4 件能力工具、至少 2 项互动、5 道分层题。`);
+console.log(`逐册审计通过：12 册，${ids.size} 课；每课 5 张知识卡、3 个探究问题、4 件能力工具、3 条自主挑战路线、误区修正、跨学科连接、至少 2 项互动、5 道分层题。`);

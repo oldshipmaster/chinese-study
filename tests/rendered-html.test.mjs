@@ -70,8 +70,9 @@ test("enables rich course completion after all requirements are satisfied", asyn
 
   assert.match(lesson, /const quizPassed = course\.lesson\.quiz\.every/);
   assert.match(lesson, /const lessonPassed = interactionsPassed && openSubmitted && quizPassed/);
+  assert.match(lesson, /还有任务未完成/);
   assert.match(lesson, /disabled=\{stage === 7 && !lessonPassed\}/);
-  assert.match(lesson, /stage === 7 \? "完成课程" : "下一步 →"/);
+  assert.match(lesson, /stage === 7 \? lessonPassed \? "完成课程" : "还有任务未完成" : "下一步 →"/);
 });
 
 test("generic lessons are complete rich self-study classrooms", async () => {

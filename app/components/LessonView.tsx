@@ -384,7 +384,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
         <button onClick={replay}>重播</button>
         <div className="control-spacer" />
         <button disabled={stage === 0} onClick={() => setStage((value) => Math.max(0, value - 1))}>上一步</button>
-        <button className="primary-button" disabled={stage === 7 && !lessonPassed} onClick={goNext}>{stage === 7 ? "完成课程" : "下一步 →"}</button>
+        <button className="primary-button" disabled={stage === 7 && !lessonPassed} onClick={goNext}>{stage === 7 ? lessonPassed ? "完成课程" : "还有任务未完成" : "下一步 →"}</button>
       </footer>
     </main>
   );
