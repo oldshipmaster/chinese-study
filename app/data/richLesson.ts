@@ -341,7 +341,10 @@ const buildInquiries = (context: RichLessonContext): InquiryPrompt[] => {
       { question: "哪条规律有例外？遇到例外时怎样修正方法？", guide: "先举一个符合规律的例子，再找反例，补充方法适用的条件。" },
     ],
   };
-  return [...byType[type], common];
+  return [...byType[type], common].map((inquiry, index) => index === 2 ? inquiry : ({
+    question: `${inquiry.question} 请联系《${title}》中的具体发现。`,
+    guide: `${inquiry.guide} 本课可以先从“${seed.example}”这条线索出发。`,
+  }));
 };
 
 const makeQuestion = (

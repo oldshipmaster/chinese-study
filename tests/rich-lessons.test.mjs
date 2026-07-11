@@ -136,12 +136,14 @@ test("all 564 runtime courses satisfy the rich lesson quality floor", async () =
   const curriculum = await import(`data:text/javascript;base64,${Buffer.from(bundled).toString("base64")}`);
   const courses = curriculum.books.flatMap((book) => book.units.flatMap((unit) => unit.courses.map((course) => ({ ...course, grade: book.grade }))));
   const modes = new Set(courses.flatMap((course) => course.lesson.interactions.map((interaction) => interaction.mode)));
+  const inquirySignatures = new Set();
 
   assert.equal(curriculum.books.length, 12);
   assert.equal(courses.length, 564);
   assert.equal(new Set(courses.map((course) => course.id)).size, 564);
   assert.ok(modes.size >= 6);
   for (const course of courses) {
+    inquirySignatures.add(course.lesson.inquiries.map((inquiry) => `${inquiry.question}|${inquiry.guide}`).join("||"));
     assert.ok(course.lesson.knowledgePoints.length >= 3 && course.lesson.knowledgePoints.length <= 5, course.id);
     assert.ok(course.lesson.interactions.length >= 2, course.id);
     assert.equal(course.lesson.quiz.length, 5, course.id);
@@ -160,6 +162,7 @@ test("all 564 runtime courses satisfy the rich lesson quality floor", async () =
       assert.match(question.reviewTarget, /核心|证据|方法|迁移/, `${course.id}:${question.difficulty}:review-target`);
     }
   }
+  assert.equal(inquirySignatures.size, 564, "each course should have a unique inquiry set");
 });
 
 test("choice positions are deterministic without always putting answers first", async () => {
