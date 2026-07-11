@@ -87,6 +87,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   const interactionsPassed = course.lesson.interactions.every(interactionCorrect);
   const lessonPassed = interactionsPassed && openSubmitted && quizPassed;
   const minimumResponseLength = course.lesson.gradeBand === "lower" ? 6 : course.lesson.gradeBand === "middle" ? 16 : 28;
+  const hasLocalWork = stage > 0 || Boolean(warmChoice) || Object.keys(interactionAnswers).length > 0 || Boolean(openResponse) || answers.length > 0;
   const stageComplete = (index: number) => [
     stage > 0,
     warmChoice === course.lesson.warmUp.answer,
@@ -318,7 +319,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
           <strong>{course.title}</strong>
         </div>
         <div className="lesson-toolbar-actions">
-          {completed && <button className="reset-button lesson-reset" onClick={resetLesson}>重置进度</button>}
+          {(completed || hasLocalWork) && <button className="reset-button lesson-reset" onClick={resetLesson}>{completed ? "重置进度" : "清空本课"}</button>}
           <div className="leaf-pill">叶 {selectedCorrectCount} / 5</div>
         </div>
       </header>
