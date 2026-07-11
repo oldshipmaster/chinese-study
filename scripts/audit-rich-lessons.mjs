@@ -17,11 +17,14 @@ for (const book of curriculum.books) {
   const courses = book.units.flatMap((unit) => unit.courses);
   const typeCounts = Object.fromEntries([...new Set(courses.map((course) => course.type))].map((type) => [type, courses.filter((course) => course.type === type).length]));
   for (const course of courses) {
+    const expressive = course.type === "writing" || course.type === "speaking";
+    const expectedMinutes = book.grade <= 2 ? (expressive ? 20 : 18) : book.grade <= 4 ? (expressive ? 25 : 23) : expressive ? 30 : 28;
     assert.ok(!ids.has(course.id), `重复课程 ID：${course.id}`);
     ids.add(course.id);
     assert.equal(course.lesson.curated, true, `${course.id} 缺少独立编辑内容`);
     assert.equal(course.lesson.lessonId, course.id, `${course.id} 课程内容标识错位`);
     assert.equal(course.lesson.courseKind, course.type, `${course.id} 课型引擎错位`);
+    assert.equal(course.minutes, expectedMinutes, `${course.id} 课时长度未按年级适配`);
     assert.ok(course.lesson.focus.length >= 10, `${course.id} 核心知识过短`);
     assert.equal(new Set(course.lesson.animationFrames).size, 3, `${course.id} 动画分镜重复`);
     assert.equal(new Set(course.lesson.examples).size, 3, `${course.id} 例子拆解重复`);
@@ -41,6 +44,7 @@ for (const book of curriculum.books) {
 }
 
 assert.equal(curriculum.books.length, 12, "教材册数不是 12");
+assert.equal(curriculum.books.reduce((sum, book) => sum + book.units.length, 0), 95, "单元总数不是 95");
 assert.equal(ids.size, 564, "课程总数不是 564");
 console.table(report);
-console.log(`逐册审计通过：12 册，${ids.size} 课；每课 5 张知识卡、3 个探究问题、4 件能力工具、3 条自主挑战路线、误区修正、跨学科连接、至少 2 项互动、5 道分层题。`);
+console.log(`逐册审计通过：12 册、95 个单元、${ids.size} 课；每课 5 张知识卡、3 个探究问题、4 件能力工具、3 条自主挑战路线、误区修正、跨学科连接、至少 2 项互动、5 道分层题。`);
