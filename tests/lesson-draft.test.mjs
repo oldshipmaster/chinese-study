@@ -27,6 +27,15 @@ test("one damaged course draft does not erase other courses", () => {
   assert.deepEqual(restored, { good });
 });
 
+test("duplicate self-check values cannot inflate restored progress", () => {
+  const duplicated = { ...emptyLessonDraft(), masteredKnowledge: [1, 1, 2], openChecks: [0, 0], quizHints: [4, 4], selectedTerms: ["证据", "证据"] };
+  const restored = parseLessonDrafts(JSON.stringify({ course: duplicated })).course;
+  assert.deepEqual(restored.masteredKnowledge, [1, 2]);
+  assert.deepEqual(restored.openChecks, [0]);
+  assert.deepEqual(restored.quizHints, [4]);
+  assert.deepEqual(restored.selectedTerms, ["证据"]);
+});
+
 test("older drafts migrate with an empty knowledge self-check", () => {
   const legacy = { stage: 2, warmChoice: "观察", interactionAnswers: {}, openResponse: "", openSubmitted: false, wrongAttempts: {}, answers: [] };
   assert.deepEqual(parseLessonDrafts(JSON.stringify({ old: legacy })).old.masteredKnowledge, []);

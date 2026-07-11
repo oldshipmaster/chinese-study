@@ -69,7 +69,16 @@ export function parseLessonDrafts(raw: string | null): LessonDrafts {
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
     const entries = Object.entries(parsed).filter((entry) => isLessonDraft(entry[1])).map(([id, value]) => {
       const draft = value as LessonDraft;
-      return [id, { ...draft, openRoute: draft.openRoute ?? null, masteredKnowledge: draft.masteredKnowledge ?? [], inquiryPredictions: draft.inquiryPredictions ?? {}, openChecks: draft.openChecks ?? [], confidence: draft.confidence ?? "", quizHints: draft.quizHints ?? [], selectedTerms: draft.selectedTerms ?? [] }] as [string, LessonDraft];
+      return [id, {
+        ...draft,
+        openRoute: draft.openRoute ?? null,
+        masteredKnowledge: [...new Set(draft.masteredKnowledge ?? [])],
+        inquiryPredictions: draft.inquiryPredictions ?? {},
+        openChecks: [...new Set(draft.openChecks ?? [])],
+        confidence: draft.confidence ?? "",
+        quizHints: [...new Set(draft.quizHints ?? [])],
+        selectedTerms: [...new Set(draft.selectedTerms ?? [])],
+      }] as [string, LessonDraft];
     });
     return Object.fromEntries(entries);
   } catch {
