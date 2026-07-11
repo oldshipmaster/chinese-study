@@ -90,7 +90,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
 
   const chooseWarmUp = (value: string) => {
     setWarmChoice(value);
-    setMessage(value === course.lesson.warmUp.answer ? course.lesson.warmUp.explanation : "再想一想：真正的热身会让旧知识和新问题连接起来。");
+    setMessage(course.lesson.warmUp.feedback[value] ?? course.lesson.warmUp.explanation);
   };
 
   const chooseInteraction = (task: InteractionTask, value: string) => {
