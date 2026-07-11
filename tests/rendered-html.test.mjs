@@ -101,3 +101,15 @@ test("curated classrooms identify their editorial quality", async () => {
   assert.match(lesson, /course\.lesson\.curated/);
   assert.match(lesson, /逐课精编/);
 });
+
+test("rich classrooms expose eight learning stations and varied interaction state", async () => {
+  const lesson = await readFile(new URL("../app/components/LessonView.tsx", import.meta.url), "utf8");
+
+  for (const station of ["情境导入", "旧知热身", "知识探秘", "例子拆解", "互动实验", "创新挑战", "五题闯关", "错因拓展"]) {
+    assert.match(lesson, new RegExp(station));
+  }
+  assert.match(lesson, /interactionAnswers/);
+  assert.match(lesson, /openResponse/);
+  assert.match(lesson, /course\.lesson\.knowledgePoints/);
+  assert.match(lesson, /course\.lesson\.extension/);
+});

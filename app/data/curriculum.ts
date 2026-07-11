@@ -1,4 +1,12 @@
 import { getLessonSeed } from "./lessonSeeds";
+import {
+  buildRichLesson,
+  type ExtensionCard,
+  type InteractionTask,
+  type KnowledgePoint,
+  type OpenTask,
+  type QuestionDifficulty,
+} from "./richLesson";
 
 export type CourseType =
   | "pinyin"
@@ -16,6 +24,8 @@ export interface LessonQuestion {
   options: string[];
   answer: string;
   explanation: string;
+  difficulty: QuestionDifficulty;
+  feedback: Record<string, string>;
 }
 
 export interface LessonPractice {
@@ -35,7 +45,12 @@ export interface LessonContent {
   animationFrames: string[];
   examples: string[];
   practice: LessonPractice;
+  warmUp: InteractionTask;
+  knowledgePoints: KnowledgePoint[];
+  interactions: InteractionTask[];
+  openTask: OpenTask;
   quiz: LessonQuestion[];
+  extension: ExtensionCard;
   summary: string;
 }
 
@@ -137,6 +152,19 @@ const profiles: Record<CourseType, LessonProfile> = {
 function buildLesson(id: string, title: string, type: CourseType, objective: string): LessonContent {
   const profile = profiles[type];
   const seed = getLessonSeed(id);
+  const rich = buildRichLesson({
+    id,
+    title,
+    type,
+    objective,
+    action: profile.action,
+    seed: seed ?? {
+      knowledge: `${profile.skill}，并围绕《${title}》说清自己的发现。`,
+      example: objective,
+      checkPrompt: `学习《${title}》最重要的方法是什么？`,
+      checkAnswer: profile.practiceAnswer,
+    },
+  });
   if (seed) {
     return {
       curated: true,
@@ -182,6 +210,7 @@ function buildLesson(id: string, title: string, type: CourseType, objective: str
         },
       ],
       summary: `你已经学会《${title}》的关键方法：${seed.knowledge}`,
+      ...rich,
     };
   }
   return {
@@ -228,6 +257,7 @@ function buildLesson(id: string, title: string, type: CourseType, objective: str
       },
     ],
     summary: `完成《${title}》后，你已经练过：${profile.skill}。把这个方法带到下一课，会越读越有底气。`,
+    ...rich,
   };
 }
 
