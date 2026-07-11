@@ -54,6 +54,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   const [openChecks, setOpenChecks] = useState<number[]>([]);
   const [showOpenExample, setShowOpenExample] = useState(false);
   const [revealedKnowledge, setRevealedKnowledge] = useState<number[]>([]);
+  const [revealedExamples, setRevealedExamples] = useState<number[]>([]);
   const [masteredKnowledge, setMasteredKnowledge] = useState<number[]>([]);
   const [revealedInquiries, setRevealedInquiries] = useState<number[]>([]);
   const [inquiryPredictions, setInquiryPredictions] = useState<Record<number, string>>({});
@@ -185,6 +186,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
     setOpenChecks([]);
     setShowOpenExample(false);
     setRevealedKnowledge([]);
+    setRevealedExamples([]);
     setMasteredKnowledge([]);
     setRevealedInquiries([]);
     setInquiryPredictions({});
@@ -346,7 +348,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
             <span className="eyebrow">例子拆解</span>
             <h1>从现象、证据到结论</h1>
             <div className="example-grid">{course.lesson.examples.map((example, index) => (
-              <article key={example}><span>{index + 1}</span><h2>{["看见什么", "说明什么", "怎样迁移"][index]}</h2><p>{example}</p></article>
+              <article className={revealedExamples.includes(index) ? "revealed" : ""} key={example}><span>{index + 1}</span><h2>{["看见什么", "说明什么", "怎样迁移"][index]}</h2><p>{revealedExamples.includes(index) ? example : ["先在脑中还原本课的具体画面。", "先猜哪条发现能解释这个画面。", "先想换一个情境还能怎样使用。"][index]}</p><button onClick={() => setRevealedExamples((values) => values.includes(index) ? values.filter((value) => value !== index) : [...values, index])}>{revealedExamples.includes(index) ? "收起例子" : "翻开例子，对照猜想"}</button></article>
             ))}</div>
             <p>读完后，试着指出“哪一句是证据，哪一句是结论”。</p>
             <section className="learning-toolkit"><div><span className="eyebrow">能力工具箱</span><h2>{course.lesson.kindLabel}学习的四件工具</h2></div><div>{course.lesson.toolkit.map((tool) => <article key={tool.name}><strong>{tool.name}</strong><p>{tool.use}</p></article>)}</div></section>
