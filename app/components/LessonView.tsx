@@ -29,6 +29,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   const [openSubmitted, setOpenSubmitted] = useState(false);
   const [showOpenExample, setShowOpenExample] = useState(false);
   const [revealedKnowledge, setRevealedKnowledge] = useState<number[]>([]);
+  const [masteredKnowledge, setMasteredKnowledge] = useState<number[]>([]);
   const [revealedInquiries, setRevealedInquiries] = useState<number[]>([]);
   const [wrongAttempts, setWrongAttempts] = useState<Record<number, string[]>>({});
   const [confidence, setConfidence] = useState("");
@@ -136,6 +137,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
     setOpenSubmitted(false);
     setShowOpenExample(false);
     setRevealedKnowledge([]);
+    setMasteredKnowledge([]);
     setRevealedInquiries([]);
     setWrongAttempts({});
     setConfidence("");
@@ -183,6 +185,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
       ? `重点复习${wrongQuestionIndexes.map((index) => `“${difficultyLabels[course.lesson.quiz[index].difficulty]}”`).join("、")}层级，先解释错项为什么不成立。`
       : "五个层级暂未留下错项，可以限时重答或向家人讲解其中一题。",
     lessonPassed ? "挑战拓展任务：寻找新例子或反例，检验本课方法的适用条件。" : "完成未通过的项目后，再进入带走挑战。",
+    masteredKnowledge.length < course.lesson.knowledgePoints.length ? `还有 ${course.lesson.knowledgePoints.length - masteredKnowledge.length} 张知识卡未标记掌握，复述后再诚实检查一次。` : "五张知识卡均已自检，可以随机抽一张脱离页面复述。",
   ];
 
   const speakWithDevice = (text: string) => {
@@ -267,6 +270,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
             <div className="knowledge-grid">{course.lesson.knowledgePoints.map((point, index) => (
               <article key={point.title} className={revealedKnowledge.includes(index) ? "revealed" : ""}><span>{point.label}</span><h2>{point.title}</h2><p>{point.detail}</p>
                 <button className="knowledge-reveal" onClick={() => setRevealedKnowledge((values) => values.includes(index) ? values.filter((value) => value !== index) : [...values, index])}>{revealedKnowledge.includes(index) ? "收起方法提示" : "点击翻开方法提示"}</button>
+                <button className={`knowledge-master ${masteredKnowledge.includes(index) ? "selected" : ""}`} onClick={() => setMasteredKnowledge((values) => values.includes(index) ? values.filter((value) => value !== index) : [...values, index])}>{masteredKnowledge.includes(index) ? "✓ 已掌握，点击取消" : "标记为已掌握"}</button>
                 {revealedKnowledge.includes(index) && <small>{point.tip}</small>}
               </article>
             ))}</div>
@@ -349,6 +353,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
             <span className="eyebrow">错因拓展</span>
             <h1>{course.lesson.extension.title}</h1>
             <div className="result-dashboard">
+              <article><strong>{masteredKnowledge.length} / 5</strong><span>知识自检</span></article>
               <article><strong>{interactionsPassed ? "2 / 2" : `${course.lesson.interactions.filter(interactionCorrect).length} / 2`}</strong><span>互动实验</span></article>
               <article><strong>{openSubmitted ? "已表达" : "待表达"}</strong><span>创新挑战</span></article>
               <article><strong>{selectedCorrectCount} / 5</strong><span>分层问题</span></article>

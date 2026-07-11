@@ -130,6 +130,8 @@ test("rich lessons reveal knowledge, remember misconceptions, and ask for reflec
   assert.match(lesson, /revealedKnowledge/);
   assert.match(lesson, /点击翻开方法提示/);
   assert.match(lesson, /wrongAttempts/);
+  assert.match(lesson, /masteredKnowledge/);
+  assert.match(lesson, /标记为已掌握/);
   assert.match(lesson, /我的错因回顾/);
   assert.match(lesson, /confidence/);
   assert.match(lesson, /我能讲给别人听/);
