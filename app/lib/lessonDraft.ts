@@ -40,8 +40,10 @@ const isStringArray = (value: unknown): value is string[] => Array.isArray(value
 const isNumberArray = (value: unknown): value is number[] => Array.isArray(value) && value.every((item) => Number.isInteger(item) && item >= 0 && item <= 4);
 const isAnswerRecord = (value: unknown): value is Record<string, string[]> => Boolean(value) && typeof value === "object" && !Array.isArray(value)
   && Object.values(value).every(isStringArray);
+const predictionValues = ["我预测仍然成立", "我预测会发生变化", "我还不确定"];
 const isPredictionRecord = (value: unknown): value is Record<string, string> => Boolean(value) && typeof value === "object" && !Array.isArray(value)
-  && Object.values(value).every((item) => typeof item === "string");
+  && Object.values(value).every((item) => typeof item === "string" && predictionValues.includes(item));
+const confidenceValues = ["", "我还要复习一次", "我基本掌握了", "我能讲给别人听"];
 
 const isLessonDraft = (value: unknown): value is LessonDraft => {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
@@ -57,7 +59,7 @@ const isLessonDraft = (value: unknown): value is LessonDraft => {
     && (draft.masteredKnowledge === undefined || isNumberArray(draft.masteredKnowledge))
     && (draft.inquiryPredictions === undefined || isPredictionRecord(draft.inquiryPredictions))
     && (draft.openChecks === undefined || isNumberArray(draft.openChecks))
-    && (draft.confidence === undefined || typeof draft.confidence === "string")
+    && (draft.confidence === undefined || (typeof draft.confidence === "string" && confidenceValues.includes(draft.confidence)))
     && (draft.quizHints === undefined || isNumberArray(draft.quizHints))
     && (draft.selectedTerms === undefined || isStringArray(draft.selectedTerms));
 };

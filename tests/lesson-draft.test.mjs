@@ -19,6 +19,7 @@ test("invalid lesson draft storage falls back safely", () => {
   assert.deepEqual(parseLessonDrafts("not json"), {});
   assert.deepEqual(parseLessonDrafts("[]"), {});
   assert.deepEqual(parseLessonDrafts('{"bad":{"stage":99}}'), {});
+  assert.deepEqual(parseLessonDrafts(JSON.stringify({ bad: { ...emptyLessonDraft(), confidence: "随便填" } })), {});
 });
 
 test("one damaged course draft does not erase other courses", () => {
