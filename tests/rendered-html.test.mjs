@@ -42,3 +42,20 @@ test("ships the selected visual system and accessible motion fallback", async ()
   assert.match(css, /prefers-reduced-motion/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
 });
+
+test("exposes reset controls and device pinyin speech", async () => {
+  const [app, curriculum, lesson] = await Promise.all([
+    readFile(new URL("../app/components/CourseApp.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/CurriculumView.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/AoeLesson.tsx", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(app, /resetCourse/);
+  assert.match(app, /confirm/);
+  assert.match(curriculum, /重置进度/);
+  assert.match(lesson, /speechSynthesis/);
+  assert.match(lesson, /SpeechSynthesisUtterance/);
+  assert.match(lesson, /utterance\.lang = "zh-CN"/);
+  assert.match(lesson, /听发音/);
+  assert.match(lesson, /当前设备不支持语音朗读/);
+});

@@ -7,9 +7,10 @@ interface CurriculumViewProps {
   completed: string[];
   onBack: () => void;
   onOpenCourse: (courseId: string) => void;
+  onResetCourse: (courseId: string) => void;
 }
 
-export function CurriculumView({ book, completed, onBack, onOpenCourse }: CurriculumViewProps) {
+export function CurriculumView({ book, completed, onBack, onOpenCourse, onResetCourse }: CurriculumViewProps) {
   return (
     <main className="inner-page">
       <button className="back-button" onClick={onBack}>← 返回学习首页</button>
@@ -29,6 +30,7 @@ export function CurriculumView({ book, completed, onBack, onOpenCourse }: Curric
                   <div className="course-index">{String(courseIndex + 1).padStart(2, "0")}</div>
                   <h3>{item.title}</h3><p>{item.objective}</p>
                   <button onClick={() => onOpenCourse(item.id)}>{done ? "再学一次" : item.status === "ready" ? "开始学习" : "看看学习目标"}<span aria-hidden="true">→</span></button>
+                  {done && <button className="reset-button" onClick={() => onResetCourse(item.id)}>重置进度</button>}
                   {done && <span className="done-mark">已完成</span>}
                 </article>
               );
