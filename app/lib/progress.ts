@@ -26,8 +26,8 @@ export function parseProgress(raw: string | null): LearningProgressV1 {
     if (
       value.version !== 1 ||
       !Array.isArray(value.completedCourseIds) ||
-      typeof value.leaves !== "number" ||
-      typeof value.streak !== "number" ||
+      typeof value.leaves !== "number" || !Number.isFinite(value.leaves) ||
+      typeof value.streak !== "number" || !Number.isFinite(value.streak) ||
       typeof value.recentCourseId !== "string"
     ) {
       return defaultProgress();

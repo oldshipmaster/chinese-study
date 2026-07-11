@@ -10,6 +10,7 @@ test("progress is versioned and invalid storage has a safe fallback", async () =
   assert.match(source, /catch/);
   assert.match(source, /defaultProgress/);
   assert.match(source, /new Set\(value\.completedCourseIds/);
+  assert.match(source, /Number\.isFinite\(value\.leaves\)/);
 });
 
 test("course completion is immutable and idempotent", async () => {
