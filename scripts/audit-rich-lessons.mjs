@@ -38,6 +38,7 @@ for (const book of curriculum.books) {
     assert.ok(course.lesson.contrastCase.repair.length >= 12, `${course.id} 缺少误区修正`);
     assert.ok(course.lesson.extension.connection.insight.length >= 20, `${course.id} 缺少跨学科连接`);
     assert.ok(course.lesson.interactions.length >= 2, `${course.id} 互动数量不足`);
+    assert.ok([course.lesson.warmUp, ...course.lesson.interactions].every((task) => task.reflection.length >= 12), `${course.id} 互动后缺少自我解释`);
     assert.equal(course.lesson.quiz.length, 5, `${course.id} 分层题数量不足`);
     assert.equal(new Set(course.lesson.quiz.map((question) => question.difficulty)).size, 5, `${course.id} 分层题难度不完整`);
     assert.ok(course.lesson.quiz.every((question) => question.options.includes(question.answer)), `${course.id} 存在无答案题目`);

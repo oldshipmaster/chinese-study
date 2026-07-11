@@ -135,7 +135,8 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
 
   const chooseWarmUp = (value: string) => {
     setWarmChoice(value);
-    setMessage(course.lesson.warmUp.feedback[value] ?? course.lesson.warmUp.explanation);
+    const feedback = course.lesson.warmUp.feedback[value] ?? course.lesson.warmUp.explanation;
+    setMessage(value === course.lesson.warmUp.answer ? `${feedback} 再想一步：${course.lesson.warmUp.reflection}` : feedback);
   };
 
   const chooseInteraction = (task: InteractionTask, value: string) => {
