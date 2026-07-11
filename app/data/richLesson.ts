@@ -181,6 +181,7 @@ export function buildRichLesson(context: RichLessonContext): RichLessonData {
       { label: "证据", title: "从例子看证据", detail: seed.example, tip: "圈出最能证明核心发现的词或动作。" },
       { label: "方法", title: "可以带走的方法", detail: engine.method, tip: action },
       { label: "迁移", title: "换个问题也会用", detail: `${seed.checkPrompt} 可以回答：${seed.checkAnswer}。`, tip: "答案后面再补一句“因为……”。" },
+      { label: "目标", title: "能力坐标", detail: objective, tip: "学完后回到这里，检查自己能不能独立完成。" },
     ],
     interactions: engine.interactions(context),
     openTask: {

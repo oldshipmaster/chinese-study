@@ -197,7 +197,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
         {stage === 2 && (
           <div className="stage-content knowledge-stage">
             <span className="eyebrow">知识探秘</span>
-            <h1>四张知识卡，层层打开本课</h1>
+            <h1>五张知识卡，层层打开本课</h1>
             <div className="knowledge-grid">{course.lesson.knowledgePoints.map((point) => (
               <article key={point.title}><span>{point.label}</span><h2>{point.title}</h2><p>{point.detail}</p><small>{point.tip}</small></article>
             ))}</div>
