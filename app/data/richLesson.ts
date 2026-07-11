@@ -71,6 +71,12 @@ export interface ContrastCase {
   repair: string;
 }
 
+export interface QuestionStudio {
+  mission: string;
+  stems: string[];
+  qualityCheck: string;
+}
+
 export interface RichLessonData {
   lessonId: string;
   courseKind: CourseKind;
@@ -84,6 +90,7 @@ export interface RichLessonData {
   toolkit: LearningTool[];
   glossary: GlossaryItem[];
   contrastCase: ContrastCase;
+  questionStudio: QuestionStudio;
   quiz: RichQuestion[];
   extension: ExtensionCard;
 }
@@ -373,6 +380,19 @@ const widerConnections: Record<CourseKind, { field: string; insight: string }> =
   garden: { field: "信息整理", insight: "分类、比较和建立索引能降低记忆负担，让零散知识变成随时可调用的网络。" },
 };
 
+const buildQuestionStudio = (context: RichLessonContext): QuestionStudio => {
+  const studios: Record<CourseKind, Omit<QuestionStudio, "mission">> = {
+    pinyin: { stems: ["哪两个音最容易混淆？怎样用口形或气流分辨？", "改变声调后，读音和词义会发生什么变化？", "把这个发音方法迁移到哪个新音节？"], qualityCheck: "答案必须能通过听音、口形、气流或声调路线进行验证。" },
+    literacy: { stems: ["换掉一个部件，字形和字义会怎样变化？", "把生字放进哪个语境最合适？为什么？", "哪一个形近字最容易误用？怎样区分？"], qualityCheck: "答案必须同时核对字形部件、读音、字义或真实语境。" },
+    reading: { stems: ["哪条文本证据最能支持这个人物判断？", "如果关键情节改变，原来的结论还成立吗？", "两种不同理解各自有哪些证据和漏洞？"], qualityCheck: "答案必须引用具体文本证据，并解释证据与观点之间的联系。" },
+    poetry: { stems: ["哪个意象最能表现诗人的情感？为什么？", "换掉一个动词，画面和节奏会怎样变化？", "把本诗与另一首同类诗比较，有什么异同？"], qualityCheck: "答案必须联系诗句中的意象、动作、节奏或表达背景。" },
+    speaking: { stems: ["换一个交流对象，这句话应该怎样调整？", "怎样回应对方的追问，才能继续推进交流？", "哪种表达看似有礼貌却没有讲清关键信息？"], qualityCheck: "答案必须说明交流对象、场合、目的以及对方可能的回应。" },
+    writing: { stems: ["哪段材料最能表现中心？为什么？", "怎样修改一句话，让动作或感受更具体？", "删掉哪个细节反而能让重点更突出？"], qualityCheck: "答案必须检查中心、选材、顺序与具体细节是否彼此服务。" },
+    garden: { stems: ["这些知识可以按什么共同标准分类？", "哪条规律换到新情境仍然适用？", "设计一个容易套错方法的题，怎样识别陷阱？"], qualityCheck: "答案必须说明分类标准、共同规律以及迁移时需要检查的条件。" },
+  };
+  return { mission: `围绕《${context.title}》设计一道真正需要${context.type === "pinyin" ? "辨音" : context.type === "literacy" ? "比较形义" : context.type === "reading" ? "寻找证据" : context.type === "poetry" ? "想象与品读" : context.type === "speaking" ? "判断情境" : context.type === "writing" ? "选择与修改" : "整理与迁移"}的新题。`, ...studios[context.type] };
+};
+
 const buildWarmUp = (context: RichLessonContext): InteractionTask => {
   const warmUps: Record<CourseKind, [string, string, [string, string], string]> = {
     pinyin: [`准备学习《${context.title}》时，哪种热身能让发音更准确？`, "先听一遍，再照镜子观察口形并轻声试读", ["只看字母颜色", "不出声地快速翻过"], "耳朵、眼睛和发音动作一起参与，才容易辨清细小差别。"],
@@ -513,6 +533,7 @@ export function buildRichLesson(context: RichLessonContext): RichLessonData {
     toolkit: toolkits[type],
     glossary: glossaries[type].map((item) => ({ ...item, example: `试着用“${item.term}”观察本课例子：“${seed.example}”` })),
     contrastCase: buildContrastCase(context),
+    questionStudio: buildQuestionStudio(context),
     quiz,
     extension: {
       title: `${title} · 再往前一步`,

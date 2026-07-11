@@ -274,3 +274,12 @@ test("open challenges offer three distinct learner-choice routes", async () => {
   assert.ok(lesson.openTask.routes.every((route) => route.prompt.includes("《路线课》")));
   assert.equal(lesson.openTask.rubric.length, 3);
 });
+
+test("seven course types provide distinct question-making studios", async () => {
+  const { buildRichLesson } = await import("../app/data/richLesson.ts");
+  const studios = ["pinyin", "literacy", "reading", "poetry", "speaking", "writing", "garden"].map((type) => buildRichLesson({
+    id: `studio-${type}`, title: "出题课", type, objective: "主动建构", action: "出题", seed: { knowledge: "本课知识", example: "本课例子", checkPrompt: "问题？", checkAnswer: "答案" },
+  }).questionStudio);
+  assert.equal(new Set(studios.map((studio) => studio.stems.join("|"))).size, 7);
+  assert.ok(studios.every((studio) => studio.mission.includes("《出题课》") && studio.stems.length === 3 && studio.qualityCheck.length >= 16));
+});

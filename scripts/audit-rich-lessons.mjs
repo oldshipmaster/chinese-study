@@ -56,6 +56,9 @@ for (const book of curriculum.books) {
     assert.equal(course.lesson.openTask.organizer.length, 3, `${course.id} 缺少三步思考组织器`);
     assert.equal(new Set(course.lesson.openTask.organizer.map((step) => step.label)).size, 3, `${course.id} 思考组织器步骤重复`);
     assert.ok(course.lesson.openTask.organizer.every((step) => step.prompt.includes(course.title) || step.prompt.length >= 18), `${course.id} 思考组织器提示过于空泛`);
+    assert.equal(course.lesson.questionStudio.stems.length, 3, `${course.id} 出题工坊题干支架不足`);
+    assert.ok(course.lesson.questionStudio.mission.includes(course.title), `${course.id} 出题任务没有连接课题`);
+    assert.ok(course.lesson.questionStudio.qualityCheck.length >= 16, `${course.id} 出题质量标准不足`);
     assert.ok(course.lesson.contrastCase.repair.length >= 12, `${course.id} 缺少误区修正`);
     assert.ok(course.lesson.extension.connection.insight.length >= 20, `${course.id} 缺少跨学科连接`);
     assert.ok(course.lesson.interactions.length >= 2, `${course.id} 互动数量不足`);

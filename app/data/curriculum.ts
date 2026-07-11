@@ -11,6 +11,7 @@ import {
   type LearningTool,
   type OpenTask,
   type QuestionDifficulty,
+  type QuestionStudio,
 } from "./richLesson";
 
 export type CourseType =
@@ -61,6 +62,7 @@ export interface LessonContent {
   toolkit: LearningTool[];
   glossary: GlossaryItem[];
   contrastCase: ContrastCase;
+  questionStudio: QuestionStudio;
   quiz: LessonQuestion[];
   extension: ExtensionCard;
   summary: string;
