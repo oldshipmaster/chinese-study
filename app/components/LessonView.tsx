@@ -444,6 +444,10 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
           <div className="stage-content open-stage">
             <span className="eyebrow">创新挑战</span>
             <h1>{course.lesson.openTask.prompt}</h1>
+            <section className="thinking-organizer" aria-label="三步思考组织器">
+              <div><span className="eyebrow">先搭思路再表达</span><h2>{course.lesson.gradeBand === "upper" ? "主张—证据—反例" : course.lesson.gradeBand === "middle" ? "观点—证据—迁移" : "发现—线索—理由"}</h2></div>
+              <ol>{course.lesson.openTask.organizer.map((step, index) => <li key={step.label}><span>{index + 1}</span><div><strong>{step.label}</strong><p>{step.prompt}</p></div></li>)}</ol>
+            </section>
             <div className="challenge-routes" aria-label="选择创新挑战路线">{course.lesson.openTask.routes.map((route, index) => <button aria-pressed={openRoute === index} className={openRoute === index ? "selected" : ""} key={route.label} onClick={() => { setOpenRoute(index); setOpenSubmitted(false); setMessage(`已选择“${route.label}”，没有唯一答案，大胆提出自己的证据。`); }}><strong>{route.label}</strong><span>{route.prompt}</span></button>)}</div>
             {openRoute !== null && <aside className="chosen-route"><strong>我的挑战：</strong>{course.lesson.openTask.routes[openRoute].prompt}</aside>}
             {selectedTerms.length > 0 && <div className="term-basket"><strong>表达词篮</strong>{selectedTerms.map((term) => <button key={term} onClick={() => { setOpenSubmitted(false); setOpenResponse((value) => `${value}${value ? " " : ""}${term}：`); }}>{term} ＋</button>)}</div>}

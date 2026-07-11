@@ -53,6 +53,9 @@ for (const book of curriculum.books) {
     assert.equal(course.lesson.glossary.length, 3, `${course.id} 语文概念数量不足`);
     assert.equal(course.lesson.openTask.routes.length, 3, `${course.id} 自主挑战路线不足`);
     assert.equal(course.lesson.openTask.rubric.length, 3, `${course.id} 表达自检标准不足`);
+    assert.equal(course.lesson.openTask.organizer.length, 3, `${course.id} 缺少三步思考组织器`);
+    assert.equal(new Set(course.lesson.openTask.organizer.map((step) => step.label)).size, 3, `${course.id} 思考组织器步骤重复`);
+    assert.ok(course.lesson.openTask.organizer.every((step) => step.prompt.includes(course.title) || step.prompt.length >= 18), `${course.id} 思考组织器提示过于空泛`);
     assert.ok(course.lesson.contrastCase.repair.length >= 12, `${course.id} 缺少误区修正`);
     assert.ok(course.lesson.extension.connection.insight.length >= 20, `${course.id} 缺少跨学科连接`);
     assert.ok(course.lesson.interactions.length >= 2, `${course.id} 互动数量不足`);
@@ -71,5 +74,5 @@ assert.equal(quizSignatures.size, 564, "存在重复的整套五题闯关");
 assert.equal(sceneSignatures.size, 564, "存在重复的整套动画分镜");
 assert.ok(answerPositions.every((count) => count >= 700), `正确答案位置分布不均：${answerPositions.join(",")}`);
 console.table(report);
-console.log(`逐册审计通过：12 册、95 个单元、${ids.size} 课；564 套动画与五题组合均唯一；每课 5 张知识卡、3 个正式概念、3 个探究问题、4 件能力工具、3 条自主挑战路线、误区修正、跨学科连接和至少 2 项互动。`);
+console.log(`逐册审计通过：12 册、95 个单元、${ids.size} 课；564 套动画与五题组合均唯一；每课 5 张知识卡、3 个正式概念、3 个探究问题、4 件能力工具、3 步思考组织器、3 条自主挑战路线、误区修正、跨学科连接和至少 2 项互动。`);
 console.log(`五题正确答案位置分布：第1位 ${answerPositions[0]} 题，第2位 ${answerPositions[1]} 题，第3位 ${answerPositions[2]} 题。`);
