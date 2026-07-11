@@ -35,9 +35,9 @@ export function parseProgress(raw: string | null): LearningProgressV1 {
 
     return {
       version: 1,
-      completedCourseIds: value.completedCourseIds.filter(
+      completedCourseIds: [...new Set(value.completedCourseIds.filter(
         (id): id is string => typeof id === "string",
-      ),
+      ))],
       leaves: Math.max(0, value.leaves),
       streak: Math.max(1, value.streak),
       recentCourseId: value.recentCourseId || "a-o-e",

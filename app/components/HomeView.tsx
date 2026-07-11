@@ -51,6 +51,7 @@ export function HomeView({ progress, onOpenBook, onStart }: HomeViewProps) {
             <div className="leaf-medal">叶</div>
             <div><small>我的竹叶</small><strong>{progress.leaves} 片</strong></div>
             <div><small>连续学习</small><strong>{progress.streak} 天</strong></div>
+            <div><small>完成课程</small><strong>{progress.completedCourseIds.length} / {totalCourses}</strong></div>
           </div>
         </aside>
       </section>
