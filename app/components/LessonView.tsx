@@ -266,6 +266,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   };
 
   const selectedCorrectCount = answers.filter((value, index) => value === course.lesson.quiz[index]?.answer).length;
+  const firstTryCorrectCount = answers.filter((value, index) => value === course.lesson.quiz[index]?.answer && !wrongAttempts[index]?.length).length;
   const pinyinTokens = course.type === "pinyin" ? course.title.split(/\s+/).filter(Boolean) : [];
   const wrongQuestionIndexes = Object.keys(wrongAttempts).map(Number).filter((index) => index >= 0 && index < course.lesson.quiz.length);
   const studyPrescription = [
@@ -483,7 +484,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
               <article><strong>{masteredKnowledge.length} / 5</strong><span>知识自检</span></article>
               <article><strong>{interactionsPassed ? "2 / 2" : `${course.lesson.interactions.filter(interactionCorrect).length} / 2`}</strong><span>互动实验</span></article>
               <article><strong>{openSubmitted ? "已表达" : "待表达"}</strong><span>创新挑战</span></article>
-              <article><strong>{selectedCorrectCount} / 5</strong><span>分层问题</span></article>
+              <article><strong>{selectedCorrectCount} / 5</strong><span>当前正确 · 首次答对 {firstTryCorrectCount}/5 · 提示 {quizHints.length} 次</span></article>
             </div>
             <div className="extension-card"><strong>知识再长一片叶</strong><p>{course.lesson.extension.fact}</p><aside className="cross-connection"><span>跨学科连接 · {course.lesson.extension.connection.field}</span><p>{course.lesson.extension.connection.insight}</p></aside><h2>带走挑战</h2><p>{course.lesson.extension.challenge}</p></div>
             <section className="retell-card"><span className="eyebrow">30 秒复述卡</span><h2>{course.lesson.summary}</h2><ol><li><strong>课题：</strong>我学习了《{course.title}》。</li><li><strong>发现：</strong>{course.lesson.knowledgePoints[0].detail}</li><li><strong>证据：</strong>{course.lesson.knowledgePoints[1].detail}</li><li><strong>迁移：</strong>下一次遇到新问题，我会使用{course.lesson.toolkit.map((tool) => tool.name).join("、")}中的合适工具。</li></ol></section>
