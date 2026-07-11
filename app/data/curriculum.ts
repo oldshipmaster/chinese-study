@@ -42,6 +42,7 @@ export interface LessonPractice {
 
 export interface LessonContent {
   curated: boolean;
+  lessonId: string;
   courseKind: CourseType;
   kindLabel: string;
   symbol: string;

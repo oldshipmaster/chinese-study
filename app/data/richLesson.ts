@@ -64,6 +64,7 @@ export interface ContrastCase {
 }
 
 export interface RichLessonData {
+  lessonId: string;
   courseKind: CourseKind;
   gradeBand: "lower" | "middle" | "upper";
   learningGuide: string;
@@ -430,6 +431,7 @@ export function buildRichLesson(context: RichLessonContext): RichLessonData {
   ].map((question) => ({ ...question, options: rotateOptions(question.options, `${context.id}-${question.difficulty}`) }));
 
   return {
+    lessonId: context.id,
     courseKind: type,
     gradeBand: "middle",
     learningGuide: "先观察，再找证据，最后用自己的话解释。",
@@ -515,7 +517,7 @@ export function adaptRichLessonForGrade<T extends RichLessonData>(lesson: T, gra
         ...lesson.quiz.slice(0, 3),
         makeQuestion(...lowerDeepQuestions[lesson.courseKind].reason, "reason"),
         makeQuestion(...lowerDeepQuestions[lesson.courseKind].transfer, "transfer"),
-      ].map((question, index) => ({ ...question, prompt: index < 3 ? question.prompt : `${quizLead}${question.prompt}`, options: rotateOptions(question.options, `lower-${lesson.courseKind}-${question.difficulty}`) }))
+      ].map((question, index) => ({ ...question, prompt: index < 3 ? question.prompt : `${quizLead}${question.prompt}`, options: rotateOptions(question.options, `lower-${lesson.lessonId}-${lesson.courseKind}-${question.difficulty}`) }))
     : lesson.quiz.map((question, index) => index < 3 ? question : { ...question, prompt: `${quizLead}${question.prompt}` });
 
   return {

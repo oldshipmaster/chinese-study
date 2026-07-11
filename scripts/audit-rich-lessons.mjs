@@ -20,6 +20,8 @@ for (const book of curriculum.books) {
     assert.ok(!ids.has(course.id), `重复课程 ID：${course.id}`);
     ids.add(course.id);
     assert.equal(course.lesson.curated, true, `${course.id} 缺少独立编辑内容`);
+    assert.equal(course.lesson.lessonId, course.id, `${course.id} 课程内容标识错位`);
+    assert.equal(course.lesson.courseKind, course.type, `${course.id} 课型引擎错位`);
     assert.ok(course.lesson.focus.length >= 10, `${course.id} 核心知识过短`);
     assert.equal(new Set(course.lesson.animationFrames).size, 3, `${course.id} 动画分镜重复`);
     assert.equal(new Set(course.lesson.examples).size, 3, `${course.id} 例子拆解重复`);
