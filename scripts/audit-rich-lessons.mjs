@@ -23,6 +23,9 @@ for (const book of curriculum.books) {
     assert.equal(course.lesson.knowledgePoints.length, 5, `${course.id} 知识卡数量不足`);
     assert.equal(course.lesson.inquiries.length, 3, `${course.id} 探究问题数量不足`);
     assert.equal(course.lesson.toolkit.length, 4, `${course.id} 能力工具数量不足`);
+    assert.equal(course.lesson.openTask.routes.length, 3, `${course.id} 自主挑战路线不足`);
+    assert.ok(course.lesson.contrastCase.repair.length >= 12, `${course.id} 缺少误区修正`);
+    assert.ok(course.lesson.extension.connection.insight.length >= 20, `${course.id} 缺少跨学科连接`);
     assert.ok(course.lesson.interactions.length >= 2, `${course.id} 互动数量不足`);
     assert.equal(course.lesson.quiz.length, 5, `${course.id} 分层题数量不足`);
     assert.equal(new Set(course.lesson.quiz.map((question) => question.difficulty)).size, 5, `${course.id} 分层题难度不完整`);
