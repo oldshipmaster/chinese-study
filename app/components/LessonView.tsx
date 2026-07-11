@@ -335,6 +335,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
                 {revealedKnowledge.includes(index) && <small>{point.tip}</small>}
               </article>
             ))}</div>
+            <section className="concept-glossary"><div><span className="eyebrow">语文概念词典</span><h2>会使用术语，才能把发现说得更准确</h2></div><dl>{course.lesson.glossary.map((item) => <div key={item.term}><dt>{item.term}</dt><dd>{item.meaning}<small>{item.example}</small></dd></div>)}</dl></section>
             <section className="inquiry-lab">
               <div><span className="eyebrow">探究问号</span><h2>没有标准套路，先大胆预测再找证据</h2></div>
               <div className="inquiry-grid">{course.lesson.inquiries.map((inquiry, index) => (

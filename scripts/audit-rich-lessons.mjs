@@ -32,6 +32,7 @@ for (const book of curriculum.books) {
     assert.equal(course.lesson.knowledgePoints.length, 5, `${course.id} 知识卡数量不足`);
     assert.equal(course.lesson.inquiries.length, 3, `${course.id} 探究问题数量不足`);
     assert.equal(course.lesson.toolkit.length, 4, `${course.id} 能力工具数量不足`);
+    assert.equal(course.lesson.glossary.length, 3, `${course.id} 语文概念数量不足`);
     assert.equal(course.lesson.openTask.routes.length, 3, `${course.id} 自主挑战路线不足`);
     assert.equal(course.lesson.openTask.rubric.length, 3, `${course.id} 表达自检标准不足`);
     assert.ok(course.lesson.contrastCase.repair.length >= 12, `${course.id} 缺少误区修正`);
@@ -48,4 +49,4 @@ assert.equal(curriculum.books.length, 12, "教材册数不是 12");
 assert.equal(curriculum.books.reduce((sum, book) => sum + book.units.length, 0), 95, "单元总数不是 95");
 assert.equal(ids.size, 564, "课程总数不是 564");
 console.table(report);
-console.log(`逐册审计通过：12 册、95 个单元、${ids.size} 课；每课 5 张知识卡、3 个探究问题、4 件能力工具、3 条自主挑战路线、误区修正、跨学科连接、至少 2 项互动、5 道分层题。`);
+console.log(`逐册审计通过：12 册、95 个单元、${ids.size} 课；每课 5 张知识卡、3 个正式概念、3 个探究问题、4 件能力工具、3 条自主挑战路线、误区修正、跨学科连接、至少 2 项互动、5 道分层题。`);

@@ -5,6 +5,7 @@ import {
   type ExtensionCard,
   type ContrastCase,
   type InteractionTask,
+  type GlossaryItem,
   type InquiryPrompt,
   type KnowledgePoint,
   type LearningTool,
@@ -58,6 +59,7 @@ export interface LessonContent {
   openTask: OpenTask;
   inquiries: InquiryPrompt[];
   toolkit: LearningTool[];
+  glossary: GlossaryItem[];
   contrastCase: ContrastCase;
   quiz: LessonQuestion[];
   extension: ExtensionCard;

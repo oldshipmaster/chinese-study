@@ -226,6 +226,17 @@ test("seven course engines add a four-part subject toolkit", async () => {
   assert.equal(new Set(toolkitSignatures).size, 7);
 });
 
+test("seven course engines teach distinct three-term glossaries", async () => {
+  const { buildRichLesson } = await import("../app/data/richLesson.ts");
+  const signatures = ["pinyin", "literacy", "reading", "poetry", "speaking", "writing", "garden"].map((type) => {
+    const lesson = buildRichLesson({ id: `glossary-${type}`, title: "概念课", type, objective: "理解术语", action: "解释", seed: { knowledge: "核心知识", example: "具体例子", checkPrompt: "问题？", checkAnswer: "答案" } });
+    assert.equal(lesson.glossary.length, 3);
+    assert.ok(lesson.glossary.every((item) => item.meaning.length >= 10 && item.example.includes("具体例子")));
+    return lesson.glossary.map((item) => item.term).join("|");
+  });
+  assert.equal(new Set(signatures).size, 7);
+});
+
 test("warm-ups activate prior knowledge differently for seven course types", async () => {
   const { buildRichLesson } = await import("../app/data/richLesson.ts");
   const warmUps = ["pinyin", "literacy", "reading", "poetry", "speaking", "writing", "garden"].map((type) => buildRichLesson({

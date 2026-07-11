@@ -57,6 +57,12 @@ export interface LearningTool {
   use: string;
 }
 
+export interface GlossaryItem {
+  term: string;
+  meaning: string;
+  example: string;
+}
+
 export interface ContrastCase {
   misconception: string;
   diagnosis: string;
@@ -74,6 +80,7 @@ export interface RichLessonData {
   openTask: OpenTask;
   inquiries: InquiryPrompt[];
   toolkit: LearningTool[];
+  glossary: GlossaryItem[];
   contrastCase: ContrastCase;
   quiz: RichQuestion[];
   extension: ExtensionCard;
@@ -314,6 +321,44 @@ const toolkits: Record<CourseKind, LearningTool[]> = {
   ],
 };
 
+const glossaries: Record<CourseKind, Array<Omit<GlossaryItem, "example">>> = {
+  pinyin: [
+    { term: "声母", meaning: "音节开头的辅音，发音通常轻而短。" },
+    { term: "韵母", meaning: "音节中声母后面的部分，声音通常响亮。" },
+    { term: "声调", meaning: "音节高低升降的变化，能帮助区别意义。" },
+  ],
+  literacy: [
+    { term: "偏旁", meaning: "一组汉字共有的部件，常能提示字义类别。" },
+    { term: "部件", meaning: "组成汉字的基本部分，可以帮助记形和辨字。" },
+    { term: "语境", meaning: "字词所在的词语、句子和具体使用环境。" },
+  ],
+  reading: [
+    { term: "线索", meaning: "帮助我们发现人物、事件或变化的重要信息。" },
+    { term: "证据", meaning: "能够直接支持阅读判断的关键词句或细节。" },
+    { term: "观点", meaning: "读者根据文本证据形成并能够解释的看法。" },
+  ],
+  poetry: [
+    { term: "节奏", meaning: "诗句朗读中的停顿、重音和声音长短。" },
+    { term: "意象", meaning: "诗中带着情感和想象的景物或事物形象。" },
+    { term: "炼字", meaning: "反复选择最准确生动的字来表现画面和情感。" },
+  ],
+  speaking: [
+    { term: "对象", meaning: "交流中正在倾听的人，会影响称呼和语气。" },
+    { term: "要点", meaning: "为了实现交流目的必须讲清的关键信息。" },
+    { term: "回应", meaning: "倾听后给出的回答、追问或动作反馈。" },
+  ],
+  writing: [
+    { term: "中心", meaning: "一篇文章最想表达的主要意思或感受。" },
+    { term: "材料", meaning: "用来表现中心的经历、事实、人物和事物。" },
+    { term: "细节", meaning: "能让画面具体的动作、语言、心理或感官信息。" },
+  ],
+  garden: [
+    { term: "分类", meaning: "按照共同特点或用途整理零散知识。" },
+    { term: "规律", meaning: "多个例子中反复出现并有条件的共同联系。" },
+    { term: "迁移", meaning: "把已经学会的方法调整后用于新的任务。" },
+  ],
+};
+
 const widerConnections: Record<CourseKind, { field: string; insight: string }> = {
   pinyin: { field: "声音科学", insight: "声音来自气流和发音器官的配合；改变振动、阻碍位置或音高路线，就会产生不同读音。" },
   literacy: { field: "汉字文化", insight: "汉字形体保存了古人的观察方式，部件组合也反映事物之间的联系。" },
@@ -457,6 +502,7 @@ export function buildRichLesson(context: RichLessonContext): RichLessonData {
     },
     inquiries: buildInquiries(context),
     toolkit: toolkits[type],
+    glossary: glossaries[type].map((item) => ({ ...item, example: `联系本课例子：“${seed.example}”` })),
     contrastCase: buildContrastCase(context),
     quiz,
     extension: {
