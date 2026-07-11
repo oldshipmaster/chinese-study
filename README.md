@@ -58,6 +58,8 @@ npm run verify:pages
 ./scripts/generate-pinyin-audio.sh
 ```
 
+默认只补齐缺失文件；如需覆盖全部已有录音，使用 `FORCE=1 ./scripts/generate-pinyin-audio.sh`。
+
 ## 主要内容位置
 
 - 课程地图与课时装配：`app/data/curriculum.ts`

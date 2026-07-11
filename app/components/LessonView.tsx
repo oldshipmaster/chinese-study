@@ -30,6 +30,7 @@ const pinyinMouthCue = (token: string) => {
     ü: "先摆好 i 的舌位，再把双唇拢圆。",
   };
   if (exact[token]) return exact[token];
+  if (token === "er") return "先发 e 的声音，再把舌尖轻轻向上卷；er 可以单独成音节，不和声母相拼。";
   if (["y", "w"].includes(token)) return "声音轻短，帮助 i、u、ü 站到音节开头；整体认读时不要拆开拼。";
   if (["b", "p", "m", "f"].includes(token)) return token === "f" ? "上齿轻触下唇，让气流从缝隙摩擦出来。" : "先闭合双唇再放开；注意比较气流强弱和鼻腔共鸣。";
   if (["d", "t", "n", "l"].includes(token)) return "舌尖抵住上齿龈再放开；留意气流从口腔还是鼻腔通过。";
