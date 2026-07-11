@@ -43,6 +43,8 @@ export interface ExtensionCard {
 }
 
 export interface RichLessonData {
+  gradeBand: "lower" | "middle" | "upper";
+  learningGuide: string;
   warmUp: InteractionTask;
   knowledgePoints: KnowledgePoint[];
   interactions: InteractionTask[];
@@ -152,6 +154,8 @@ const makeQuestion = (
 ): RichQuestion => {
   const options = [answer, ...distractors];
   return {
+    gradeBand: "middle",
+    learningGuide: "先观察，再找证据，最后用自己的话解释。",
     prompt,
     options,
     answer,
@@ -196,5 +200,37 @@ export function buildRichLesson(context: RichLessonContext): RichLessonData {
       fact: engine.extension,
       challenge: `找一个生活中的新例子，用“${seed.checkAnswer}”或本课方法解释它。`,
     },
+  };
+}
+
+export function adaptRichLessonForGrade<T extends RichLessonData>(lesson: T, grade: number): T {
+  const gradeBand = grade <= 2 ? "lower" : grade <= 4 ? "middle" : "upper";
+  const settings = gradeBand === "lower"
+    ? {
+        guide: "看一看、点一点，再说一两句。",
+        prompt: "请说一两句：你发现了什么？哪条线索帮助了你？",
+        support: ["我发现……", "因为……", "我还想到……"],
+        challenge: "在家里找一个相似例子，指给家人看并说一句理由。",
+      }
+    : gradeBand === "middle"
+      ? {
+          guide: "观察现象，圈出证据，再把理由说完整。",
+          prompt: "请用完整的话说明本课发现，引用一个依据，再尝试迁移到新情境。",
+          support: ["我的发现是……", "我从……看出来……", "换一个情境，我会……"],
+          challenge: "找一个新的生活或阅读例子，用本课方法写两三句解释。",
+        }
+      : {
+          guide: "提出观点，比较证据，检验逻辑，再迁移到复杂情境。",
+          prompt: "请提出你的观点，引用至少一条具体证据，解释证据与观点的关系，并指出可能的另一种理解。",
+          support: ["我的观点是……依据包括……", "这条证据能够支持观点，因为……", "另一种理解可能是……但我认为……"],
+          challenge: "寻找一个看似相反的新案例，比较两组证据，并说明本课方法在什么条件下仍然成立。",
+        };
+
+  return {
+    ...lesson,
+    gradeBand,
+    learningGuide: settings.guide,
+    openTask: { ...lesson.openTask, prompt: settings.prompt, support: settings.support },
+    extension: { ...lesson.extension, challenge: `${lesson.extension.challenge} ${settings.challenge}` },
   };
 }

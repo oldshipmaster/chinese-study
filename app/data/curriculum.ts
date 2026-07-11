@@ -1,6 +1,7 @@
 import { getLessonSeed } from "./lessonSeeds";
 import {
   buildRichLesson,
+  adaptRichLessonForGrade,
   type ExtensionCard,
   type InteractionTask,
   type KnowledgePoint,
@@ -1176,7 +1177,10 @@ export const books: Book[] = [
 
 for (const book of books) {
   for (const unit of book.units) {
-    for (const course of unit.courses) course.minutes = adaptiveLessonMinutes(book.grade, course.type);
+    for (const course of unit.courses) {
+      course.minutes = adaptiveLessonMinutes(book.grade, course.type);
+      course.lesson = adaptRichLessonForGrade(course.lesson, book.grade);
+    }
   }
 }
 

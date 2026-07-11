@@ -54,3 +54,53 @@ test("lesson duration grows with grade and expressive course types", async () =>
   assert.match(curriculum, /type === "writing" \|\| type === "speaking"/);
   assert.match(curriculum, /course\.minutes = adaptiveLessonMinutes/);
 });
+
+test("runtime engine builds complete and distinct lessons for all seven course types", async () => {
+  const { buildRichLesson } = await import("../app/data/richLesson.ts");
+  const types = ["pinyin", "literacy", "reading", "poetry", "speaking", "writing", "garden"];
+  const modes = new Set();
+
+  for (const type of types) {
+    const lesson = buildRichLesson({
+      id: `sample-${type}`,
+      title: `示例${type}`,
+      type,
+      objective: "观察、理解并迁移本课方法",
+      action: "先观察，再找证据，最后表达",
+      seed: { knowledge: `${type}独立核心知识`, example: `${type}独立证据例子`, checkPrompt: `${type}创新问题？`, checkAnswer: `${type}合理答案` },
+    });
+
+    assert.ok(lesson.knowledgePoints.length >= 3 && lesson.knowledgePoints.length <= 5);
+    assert.ok(lesson.interactions.length >= 2);
+    assert.equal(lesson.quiz.length, 5);
+    assert.ok(lesson.openTask.support.length >= 3);
+    assert.ok(lesson.extension.fact.length > 15);
+    for (const interaction of lesson.interactions) modes.add(interaction.mode);
+    for (const question of lesson.quiz) {
+      assert.equal(Object.keys(question.feedback).length, question.options.length);
+      assert.ok(question.options.every((option) => question.feedback[option]?.length > 0));
+    }
+  }
+
+  assert.ok(modes.size >= 6, `expected at least six interaction modes, got ${[...modes].join(", ")}`);
+});
+
+test("grade adaptation changes support and challenge depth", async () => {
+  const { adaptRichLessonForGrade, buildRichLesson } = await import("../app/data/richLesson.ts");
+  const base = buildRichLesson({
+    id: "sample-reading",
+    title: "示例阅读",
+    type: "reading",
+    objective: "理解内容并迁移",
+    action: "找证据再表达",
+    seed: { knowledge: "核心知识", example: "证据例子", checkPrompt: "为什么？", checkAnswer: "因为有证据" },
+  });
+  const lower = adaptRichLessonForGrade(base, 1);
+  const upper = adaptRichLessonForGrade(base, 6);
+
+  assert.equal(lower.gradeBand, "lower");
+  assert.equal(upper.gradeBand, "upper");
+  assert.notEqual(lower.openTask.prompt, upper.openTask.prompt);
+  assert.ok(lower.openTask.support[0].length < upper.openTask.support[0].length);
+  assert.notEqual(lower.extension.challenge, upper.extension.challenge);
+});

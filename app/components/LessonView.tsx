@@ -150,7 +150,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
       <header className="lesson-toolbar">
         <button className="back-button" onClick={onBack}>← 课程地图</button>
         <div className="lesson-title">
-          <span>{course.lesson.kindLabel} · {course.minutes} 分钟 <em className="curated-badge">丰富互动版</em></span>
+          <span>{course.lesson.kindLabel} · {course.minutes} 分钟 <em className="curated-badge">丰富互动版 · {course.lesson.gradeBand === "lower" ? "启蒙" : course.lesson.gradeBand === "middle" ? "进阶" : "思辨"}</em></span>
           <strong>{course.title}</strong>
         </div>
         <div className="lesson-toolbar-actions">
@@ -176,6 +176,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
             <div className={`lesson-symbol ${playing ? "is-playing" : ""}`} aria-hidden="true">{course.lesson.symbol}</div>
             <h1>{course.title}</h1>
             <p>{course.lesson.hook}</p>
+            <p className="learning-guide">学习路线：{course.lesson.learningGuide}</p>
             {pinyinTokens.length > 0 && <div className="pinyin-soundboard" aria-label="拼音点击发音">{pinyinTokens.map((token) => <button key={token} onClick={() => speakPinyin(token)} aria-label={`听 ${token} 的发音`}>{token}<small>点击听音</small></button>)}</div>}
             {pinyinTokens.length > 0 && <p className="speech-status">{speechMessage}</p>}
             <ol className="animation-frames">{course.lesson.animationFrames.map((frame) => <li key={frame}>{frame}</li>)}</ol>
