@@ -132,6 +132,8 @@ test("rich lessons reveal knowledge, remember misconceptions, and ask for reflec
   const lesson = await readFile(new URL("../app/components/LessonView.tsx", import.meta.url), "utf8");
 
   assert.match(lesson, /revealedKnowledge/);
+  assert.match(lesson, /inquiryPredictions/);
+  assert.match(lesson, /我预测仍然成立/);
   assert.match(lesson, /点击翻开方法提示/);
   assert.match(lesson, /wrongAttempts/);
   assert.match(lesson, /masteredKnowledge/);

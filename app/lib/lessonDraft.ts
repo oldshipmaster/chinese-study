@@ -10,6 +10,7 @@ export interface LessonDraft {
   wrongAttempts: Record<number, string[]>;
   answers: string[];
   masteredKnowledge: number[];
+  inquiryPredictions: Record<number, string>;
 }
 
 export type LessonDrafts = Record<string, LessonDraft>;
@@ -24,12 +25,15 @@ export const emptyLessonDraft = (): LessonDraft => ({
   wrongAttempts: {},
   answers: [],
   masteredKnowledge: [],
+  inquiryPredictions: {},
 });
 
 const isStringArray = (value: unknown): value is string[] => Array.isArray(value) && value.every((item) => typeof item === "string");
 const isNumberArray = (value: unknown): value is number[] => Array.isArray(value) && value.every((item) => Number.isInteger(item) && item >= 0 && item <= 4);
 const isAnswerRecord = (value: unknown): value is Record<string, string[]> => Boolean(value) && typeof value === "object" && !Array.isArray(value)
   && Object.values(value).every(isStringArray);
+const isPredictionRecord = (value: unknown): value is Record<string, string> => Boolean(value) && typeof value === "object" && !Array.isArray(value)
+  && Object.values(value).every((item) => typeof item === "string");
 
 const isLessonDraft = (value: unknown): value is LessonDraft => {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
@@ -42,7 +46,8 @@ const isLessonDraft = (value: unknown): value is LessonDraft => {
     && typeof draft.openSubmitted === "boolean"
     && isAnswerRecord(draft.wrongAttempts)
     && isStringArray(draft.answers)
-    && (draft.masteredKnowledge === undefined || isNumberArray(draft.masteredKnowledge));
+    && (draft.masteredKnowledge === undefined || isNumberArray(draft.masteredKnowledge))
+    && (draft.inquiryPredictions === undefined || isPredictionRecord(draft.inquiryPredictions));
 };
 
 export function parseLessonDrafts(raw: string | null): LessonDrafts {
@@ -52,7 +57,7 @@ export function parseLessonDrafts(raw: string | null): LessonDrafts {
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
     const entries = Object.entries(parsed).filter((entry) => isLessonDraft(entry[1])).map(([id, value]) => {
       const draft = value as LessonDraft;
-      return [id, { ...draft, openRoute: draft.openRoute ?? null, masteredKnowledge: draft.masteredKnowledge ?? [] }] as [string, LessonDraft];
+      return [id, { ...draft, openRoute: draft.openRoute ?? null, masteredKnowledge: draft.masteredKnowledge ?? [], inquiryPredictions: draft.inquiryPredictions ?? {} }] as [string, LessonDraft];
     });
     if (entries.length !== Object.keys(parsed).length) return {};
     return Object.fromEntries(entries);

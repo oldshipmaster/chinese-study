@@ -24,4 +24,5 @@ test("invalid lesson draft storage falls back safely", () => {
 test("older drafts migrate with an empty knowledge self-check", () => {
   const legacy = { stage: 2, warmChoice: "观察", interactionAnswers: {}, openResponse: "", openSubmitted: false, wrongAttempts: {}, answers: [] };
   assert.deepEqual(parseLessonDrafts(JSON.stringify({ old: legacy })).old.masteredKnowledge, []);
+  assert.deepEqual(parseLessonDrafts(JSON.stringify({ old: legacy })).old.inquiryPredictions, {});
 });

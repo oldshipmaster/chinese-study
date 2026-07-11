@@ -55,6 +55,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   const [revealedKnowledge, setRevealedKnowledge] = useState<number[]>([]);
   const [masteredKnowledge, setMasteredKnowledge] = useState<number[]>([]);
   const [revealedInquiries, setRevealedInquiries] = useState<number[]>([]);
+  const [inquiryPredictions, setInquiryPredictions] = useState<Record<number, string>>({});
   const [wrongAttempts, setWrongAttempts] = useState<Record<number, string[]>>({});
   const [confidence, setConfidence] = useState("");
   const [answers, setAnswers] = useState<string[]>([]);
@@ -87,6 +88,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
         setWrongAttempts(draft.wrongAttempts);
         setAnswers(draft.answers);
         setMasteredKnowledge(draft.masteredKnowledge);
+        setInquiryPredictions(draft.inquiryPredictions);
         setMessage("已恢复上次学习位置，可以从这里继续。");
       }
       setDraftReady(true);
@@ -97,10 +99,10 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   useEffect(() => {
     if (!draftReady) return;
     const drafts = parseLessonDrafts(window.localStorage.getItem(LESSON_DRAFT_STORAGE_KEY));
-    const isEmpty = stage === 0 && !warmChoice && Object.keys(interactionAnswers).length === 0 && !openResponse && openRoute === null && !openSubmitted && Object.keys(wrongAttempts).length === 0 && answers.length === 0 && masteredKnowledge.length === 0;
-    const next = isEmpty ? removeLessonDraft(drafts, course.id) : upsertLessonDraft(drafts, course.id, { stage, warmChoice, interactionAnswers, openResponse, openRoute, openSubmitted, wrongAttempts, answers, masteredKnowledge });
+    const isEmpty = stage === 0 && !warmChoice && Object.keys(interactionAnswers).length === 0 && !openResponse && openRoute === null && !openSubmitted && Object.keys(wrongAttempts).length === 0 && answers.length === 0 && masteredKnowledge.length === 0 && Object.keys(inquiryPredictions).length === 0;
+    const next = isEmpty ? removeLessonDraft(drafts, course.id) : upsertLessonDraft(drafts, course.id, { stage, warmChoice, interactionAnswers, openResponse, openRoute, openSubmitted, wrongAttempts, answers, masteredKnowledge, inquiryPredictions });
     try { window.localStorage.setItem(LESSON_DRAFT_STORAGE_KEY, JSON.stringify(next)); } catch { /* The lesson still works when storage is unavailable. */ }
-  }, [answers, course.id, draftReady, interactionAnswers, masteredKnowledge, openResponse, openRoute, openSubmitted, stage, warmChoice, wrongAttempts]);
+  }, [answers, course.id, draftReady, inquiryPredictions, interactionAnswers, masteredKnowledge, openResponse, openRoute, openSubmitted, stage, warmChoice, wrongAttempts]);
 
   const completeIfReady = (nextAnswers: string[]) => {
     const passedQuiz = course.lesson.quiz.every((question, index) => nextAnswers[index] === question.answer);
@@ -167,6 +169,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
     setRevealedKnowledge([]);
     setMasteredKnowledge([]);
     setRevealedInquiries([]);
+    setInquiryPredictions({});
     setWrongAttempts({});
     setConfidence("");
     setAnswers([]);
@@ -310,7 +313,8 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
               <div className="inquiry-grid">{course.lesson.inquiries.map((inquiry, index) => (
                 <article key={inquiry.question} className={revealedInquiries.includes(index) ? "revealed" : ""}>
                   <strong>？</strong><p>{inquiry.question}</p>
-                  <button onClick={() => setRevealedInquiries((values) => values.includes(index) ? values.filter((value) => value !== index) : [...values, index])}>{revealedInquiries.includes(index) ? "收起研究路线" : "看看怎样研究"}</button>
+                  <div className="prediction-options">{["我预测仍然成立", "我预测会发生变化", "我还不确定"].map((prediction) => <button className={inquiryPredictions[index] === prediction ? "selected" : ""} key={prediction} onClick={() => { setInquiryPredictions((values) => ({ ...values, [index]: prediction })); setMessage(`已记录预测：${prediction}。接下来用证据检验，而不是急着判断对错。`); }}>{prediction}</button>)}</div>
+                  <button disabled={!inquiryPredictions[index]} onClick={() => setRevealedInquiries((values) => values.includes(index) ? values.filter((value) => value !== index) : [...values, index])}>{!inquiryPredictions[index] ? "先做预测，再看路线" : revealedInquiries.includes(index) ? "收起研究路线" : "看看怎样研究"}</button>
                   {revealedInquiries.includes(index) && <small>{inquiry.guide}</small>}
                 </article>
               ))}</div>
