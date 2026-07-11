@@ -64,6 +64,7 @@ export interface ContrastCase {
 }
 
 export interface RichLessonData {
+  courseKind: CourseKind;
   gradeBand: "lower" | "middle" | "upper";
   learningGuide: string;
   warmUp: InteractionTask;
@@ -236,6 +237,37 @@ const deepQuestions: Record<CourseKind, DeepQuestionBlueprint> = {
   },
 };
 
+const lowerDeepQuestions: Record<CourseKind, DeepQuestionBlueprint> = {
+  pinyin: {
+    reason: ["两个音听起来很像，可以怎样分清？", "一个一个慢慢读，看口形，再听气流强弱", ["只看字母大小", "两个音一起快读"], "慢读、观察和听辨能帮助耳朵发现差别。"],
+    transfer: ["看到一个新音节，可以先做什么？", "先找声母和韵母，再慢慢连起来读", ["不看声调直接猜", "把字母当图画背下来"], "拆开看清，再连起来读，是拼读新音节的办法。"],
+  },
+  literacy: {
+    reason: ["两个字长得很像，怎样不认错？", "找出不同的部件，再放进词语里试一试", ["只看哪个字笔画多", "把它们都读成同一个音"], "看不同部件、联系词语，能一起检查字形和字义。"],
+    transfer: ["遇到不认识的字，可以先找谁帮忙？", "找熟悉的偏旁和部件，再联系句子猜意思", ["随便说一个读音", "跳过整句话不看"], "熟悉部件和句子都是认识新字的线索。"],
+  },
+  reading: {
+    reason: ["两个人对故事想法不同，怎样比一比？", "回到课文各找一句话，看看谁的理由有根据", ["看谁先说", "看谁声音大"], "课文里的具体句子能帮助我们判断想法。"],
+    transfer: ["读新故事时，怎样发现人物变了？", "找人物前后做法，再问一问为什么会变", ["只数故事有几段", "直接用旧故事的答案"], "把前后表现放在一起看，就容易发现变化。"],
+  },
+  poetry: {
+    reason: ["诗里没写“开心”，怎样知道诗人的心情？", "看看诗里有什么景物、动作和声音，再说感受", ["每首诗都说开心", "只看诗有几行"], "诗里的景物和动作会悄悄告诉我们心情。"],
+    transfer: ["读一首新的写景诗，可以怎样想画面？", "圈出景物，边读边在脑中画一幅图", ["只背诗题", "看见景物都说很热闹"], "抓住景物想画面，是读懂新诗的好办法。"],
+  },
+  speaking: {
+    reason: ["别人说“没听懂”，你可以怎样帮他？", "换个顺序或举个例子，再问哪里不明白", ["把原话大声喊一遍", "怪他没有认真听"], "换一种说法并听回应，交流才会继续。"],
+    transfer: ["同一件事讲给同学和长辈，哪里要变？", "换合适的称呼和语气，事情本身要讲准确", ["对谁都说完全一样的话", "为了有趣把事情改掉"], "听的人不同，说话方式也要跟着调整。"],
+  },
+  writing: {
+    reason: ["一段话写了很多事却看不清重点，怎么办？", "选出最重要的一件事，删掉没有关系的内容", ["再加很多形容词", "把同一句话写三遍"], "围绕一个重点选择内容，画面才清楚。"],
+    transfer: ["想把一件小事写具体，可以先找什么？", "找一个最难忘的时刻，回想看到、听到和做了什么", ["从早到晚什么都写", "先抄别人的句子"], "一个真实时刻里藏着可以写清楚的细节。"],
+  },
+  garden: {
+    reason: ["知识卡很多却不会用，可能少了哪一步？", "没有比较它们的相同点，也没有试着做新题", ["卡片颜色太少", "标题写得不够大"], "整理后还要比较和使用，知识才会连起来。"],
+    transfer: ["遇到一道综合题，先怎样挑方法？", "先看题目要做什么，再从方法卡里选合适的一张", ["每次都用同一种方法", "不读要求直接做"], "先看任务再选方法，才不会生搬硬套。"],
+  },
+};
+
 const toolkits: Record<CourseKind, LearningTool[]> = {
   pinyin: [
     { name: "口形镜", use: "观察嘴巴开合、圆扁和舌头位置，找到发音动作。" },
@@ -369,8 +401,6 @@ const makeQuestion = (
 ): RichQuestion => {
   const options = [answer, ...distractors];
   return {
-    gradeBand: "middle",
-    learningGuide: "先观察，再找证据，最后用自己的话解释。",
     prompt,
     options,
     answer,
@@ -400,6 +430,9 @@ export function buildRichLesson(context: RichLessonContext): RichLessonData {
   ].map((question) => ({ ...question, options: rotateOptions(question.options, `${context.id}-${question.difficulty}`) }));
 
   return {
+    courseKind: type,
+    gradeBand: "middle",
+    learningGuide: "先观察，再找证据，最后用自己的话解释。",
     warmUp,
     knowledgePoints: [
       { label: "核心", title: "本课关键发现", detail: seed.knowledge, tip: "读完后试着不用原句复述一次。" },
@@ -477,13 +510,21 @@ export function adaptRichLessonForGrade<T extends RichLessonData>(lesson: T, gra
       ? ["我写清了自己的发现或观点", "我提供了一个具体、真实的依据", "我解释了依据和观点之间的联系"]
       : ["我的观点明确且有适用条件", "我引用了具体证据并解释其作用", "我回应了可能的另一种理解或反例"];
 
+  const adaptedQuiz = gradeBand === "lower"
+    ? [
+        ...lesson.quiz.slice(0, 3),
+        makeQuestion(...lowerDeepQuestions[lesson.courseKind].reason, "reason"),
+        makeQuestion(...lowerDeepQuestions[lesson.courseKind].transfer, "transfer"),
+      ].map((question, index) => ({ ...question, prompt: index < 3 ? question.prompt : `${quizLead}${question.prompt}`, options: rotateOptions(question.options, `lower-${lesson.courseKind}-${question.difficulty}`) }))
+    : lesson.quiz.map((question, index) => index < 3 ? question : { ...question, prompt: `${quizLead}${question.prompt}` });
+
   return {
     ...lesson,
     gradeBand,
     learningGuide: settings.guide,
     openTask: { ...lesson.openTask, prompt: settings.prompt, support: settings.support, rubric, routes: lesson.openTask.routes.map((route) => ({ ...route, prompt: `${route.prompt}${routeTail}` })) },
     inquiries: lesson.inquiries.map((inquiry) => ({ ...inquiry, guide: `${inquiry.guide}${inquiryTail}` })),
-    quiz: lesson.quiz.map((question, index) => index < 3 ? question : { ...question, prompt: `${quizLead}${question.prompt}` }),
+    quiz: adaptedQuiz,
     extension: { ...lesson.extension, challenge: `${lesson.extension.challenge} ${settings.challenge}` },
   };
 }

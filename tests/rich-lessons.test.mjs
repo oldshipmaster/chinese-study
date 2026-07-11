@@ -124,6 +124,7 @@ test("grade adaptation changes support and challenge depth", async () => {
   assert.ok(lower.openTask.support[0].length < upper.openTask.support[0].length);
   assert.notEqual(lower.extension.challenge, upper.extension.challenge);
   assert.notEqual(lower.quiz[3].prompt, upper.quiz[3].prompt);
+  assert.notEqual(lower.quiz[3].answer, upper.quiz[3].answer);
   assert.notEqual(lower.inquiries[0].guide, upper.inquiries[0].guide);
   assert.match(lower.quiz[3].prompt, /看一看|读一读|试一试/);
   assert.match(upper.quiz[3].prompt, /证据|反例|条件/);
