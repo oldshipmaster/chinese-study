@@ -6,6 +6,7 @@ import type { InteractionTask } from "../data/richLesson";
 
 const stages = ["情境导入", "旧知热身", "知识探秘", "例子拆解", "互动实验", "创新挑战", "五题闯关", "错因拓展"];
 const difficultyLabels = { remember: "记一记", understand: "懂一懂", apply: "用一用", reason: "想一想", transfer: "闯新关" };
+const interactionModeLabels = { match: "配对发现", sort: "顺序推理", evidence: "证据侦探", scenario: "情境应答", classify: "分类归纳", revise: "修改升级" };
 
 interface LessonViewProps {
   course: Course;
@@ -65,7 +66,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
     } else next = [value];
     setInteractionAnswers((state) => ({ ...state, [task.id]: next }));
     const correct = Array.isArray(task.answer) ? sameOrder(next, task.answer) : next[0] === task.answer;
-    setMessage(correct ? task.explanation : Array.isArray(task.answer) && next.length < task.answer.length ? `已选第 ${next.length} 步，继续。` : "这条思路还没有走通，可以换一种顺序或重新找证据。");
+    setMessage(correct ? task.explanation : Array.isArray(task.answer) && next.length < task.answer.length ? `已选第 ${next.length} 步。${task.feedback[value]}` : task.feedback[value]);
   };
 
   const chooseQuiz = (questionIndex: number, value: string) => {
@@ -237,13 +238,13 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
             <div className="interaction-grid">{course.lesson.interactions.map((task) => {
               const selected = interactionAnswers[task.id] ?? [];
               return <article key={task.id} className={interactionCorrect(task) ? "passed" : ""}>
-                <header><span>{task.mode}</span><h2>{task.title}</h2></header><p>{task.prompt}</p>
+                <header><span>{interactionModeLabels[task.mode]}</span><h2>{task.title}</h2></header><p>{task.prompt}</p>
                 <div className="interaction-options">{task.options.map((option) => (
                   <button className={selected.includes(option) ? "selected" : ""} key={option} onClick={() => chooseInteraction(task, option)}>
                     {Array.isArray(task.answer) && selected.includes(option) ? `${selected.indexOf(option) + 1}. ` : ""}{option}
                   </button>
                 ))}</div>
-                {selected.length > 0 && <small>{interactionCorrect(task) ? `✓ ${task.explanation}` : Array.isArray(task.answer) ? "按你认为正确的顺序继续点击；点错可重新开始。" : "再回到知识卡找一条证据。"}</small>}
+                {selected.length > 0 && <small>{interactionCorrect(task) ? `✓ ${task.explanation}` : task.feedback[selected[selected.length - 1]]}</small>}
               </article>;
             })}</div>
             <p>{message}</p>

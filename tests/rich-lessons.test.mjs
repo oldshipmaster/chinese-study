@@ -47,6 +47,24 @@ test("rich lesson questions include option-specific misconception feedback", asy
   assert.match(rich, /extension:/);
 });
 
+test("every interaction provides option-specific coaching", async () => {
+  const { buildRichLesson } = await import("../app/data/richLesson.ts");
+  for (const type of ["pinyin", "literacy", "reading", "poetry", "speaking", "writing", "garden"]) {
+    const lesson = buildRichLesson({
+      id: `feedback-${type}`,
+      title: `${type}反馈课`,
+      type,
+      objective: "独立发现并说明理由",
+      action: "观察、比较、表达",
+      seed: { knowledge: "关键知识", example: "具体证据", checkPrompt: "怎样判断？", checkAnswer: "用证据判断" },
+    });
+    for (const task of [lesson.warmUp, ...lesson.interactions]) {
+      assert.deepEqual(Object.keys(task.feedback).sort(), task.options.slice().sort(), `${type}:${task.id}`);
+      assert.ok(task.options.every((option) => task.feedback[option].length >= 8), `${type}:${task.id}`);
+    }
+  }
+});
+
 test("lesson duration grows with grade and expressive course types", async () => {
   const curriculum = await readFile("app/data/curriculum.ts", "utf8");
 

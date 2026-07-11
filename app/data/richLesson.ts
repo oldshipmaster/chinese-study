@@ -19,6 +19,7 @@ export interface InteractionTask {
   options: string[];
   answer: string | string[];
   explanation: string;
+  feedback: Record<string, string>;
 }
 
 export interface OpenTask {
@@ -76,7 +77,20 @@ const choice = (
   answer: string,
   distractors: [string, string],
   explanation: string,
-): InteractionTask => ({ id, mode, title, prompt, options: [answer, ...distractors], answer, explanation });
+): InteractionTask => ({
+  id,
+  mode,
+  title,
+  prompt,
+  options: [answer, ...distractors],
+  answer,
+  explanation,
+  feedback: {
+    [answer]: `判断准确。${explanation}`,
+    [distractors[0]]: `“${distractors[0]}”只停在表面，没有使用这道题要求的关键线索。`,
+    [distractors[1]]: `“${distractors[1]}”跳过了比较和验证，请回到知识卡重新找依据。`,
+  },
+});
 
 const sequence = (
   id: string,
@@ -84,7 +98,16 @@ const sequence = (
   prompt: string,
   answer: [string, string, string],
   explanation: string,
-): InteractionTask => ({ id, mode: "sort", title, prompt, options: [answer[1], answer[2], answer[0]], answer, explanation });
+): InteractionTask => ({
+  id,
+  mode: "sort",
+  title,
+  prompt,
+  options: [answer[1], answer[2], answer[0]],
+  answer,
+  explanation,
+  feedback: Object.fromEntries(answer.map((step, index) => [step, `这是第 ${index + 1} 步：${step}。想一想它前后分别要接什么。`])),
+});
 
 const rotateOptions = (options: string[], key: string): string[] => {
   const offset = [...key].reduce((sum, character, index) => sum + character.charCodeAt(0) * (index + 1), 0) % options.length;
