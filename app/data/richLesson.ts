@@ -344,11 +344,24 @@ export function adaptRichLessonForGrade<T extends RichLessonData>(lesson: T, gra
           challenge: "寻找一个看似相反的新案例，比较两组证据，并说明本课方法在什么条件下仍然成立。",
         };
 
+  const quizLead = gradeBand === "lower"
+    ? "看一看、读一读，再试一试："
+    : gradeBand === "middle"
+      ? "找出关键证据后判断："
+      : "比较证据、条件和可能的反例：";
+  const inquiryTail = gradeBand === "lower"
+    ? " 可以画一画、读一读或找一个实物帮忙。"
+    : gradeBand === "middle"
+      ? " 把你的预测和证据分别记下来，再检查是否一致。"
+      : " 再主动寻找一个反例，说明结论成立需要哪些条件。";
+
   return {
     ...lesson,
     gradeBand,
     learningGuide: settings.guide,
     openTask: { ...lesson.openTask, prompt: settings.prompt, support: settings.support },
+    inquiries: lesson.inquiries.map((inquiry) => ({ ...inquiry, guide: `${inquiry.guide}${inquiryTail}` })),
+    quiz: lesson.quiz.map((question, index) => index < 3 ? question : { ...question, prompt: `${quizLead}${question.prompt}` }),
     extension: { ...lesson.extension, challenge: `${lesson.extension.challenge} ${settings.challenge}` },
   };
 }
