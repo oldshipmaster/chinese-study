@@ -132,6 +132,7 @@ test("grade adaptation changes support and challenge depth", async () => {
   assert.match(lower.openTask.routes[0].prompt, /画一画|说一两句/);
   assert.match(upper.openTask.routes[0].prompt, /两条证据|反例|适用条件/);
   assert.notDeepEqual(lower.openTask.rubric, upper.openTask.rubric);
+  assert.notDeepEqual(lower.openTask.routes.map((route) => route.label), upper.openTask.routes.map((route) => route.label));
 });
 
 test("all 564 runtime courses satisfy the rich lesson quality floor", async () => {

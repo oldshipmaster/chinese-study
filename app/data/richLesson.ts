@@ -555,6 +555,11 @@ export function adaptRichLessonForGrade<T extends RichLessonData>(lesson: T, gra
     : gradeBand === "middle"
       ? " 写清你的发现和一条具体依据。"
       : " 至少比较两条证据，并说明可能的反例和适用条件。";
+  const routeLabels = gradeBand === "lower"
+    ? ["生活里找一找", "换一换会怎样", "我来当小老师"]
+    : gradeBand === "middle"
+      ? ["生活侦探", "反例挑战", "当小老师"]
+      : ["现实案例检验", "反例与条件", "向同伴讲授"];
   const rubric = gradeBand === "lower"
     ? ["我说清了自己的发现", "我举了一个看得见的例子", "我用“因为”说了一句理由"]
     : gradeBand === "middle"
@@ -573,7 +578,7 @@ export function adaptRichLessonForGrade<T extends RichLessonData>(lesson: T, gra
     ...lesson,
     gradeBand,
     learningGuide: settings.guide,
-    openTask: { ...lesson.openTask, prompt: settings.prompt, support: settings.support, rubric, routes: lesson.openTask.routes.map((route) => ({ ...route, prompt: `${route.prompt}${routeTail}` })) },
+    openTask: { ...lesson.openTask, prompt: settings.prompt, support: settings.support, rubric, routes: lesson.openTask.routes.map((route, index) => ({ ...route, label: routeLabels[index], prompt: `${route.prompt}${routeTail}` })) },
     inquiries: lesson.inquiries.map((inquiry) => ({ ...inquiry, guide: `${inquiry.guide}${inquiryTail}` })),
     quiz: adaptedQuiz,
     extension: { ...lesson.extension, challenge: `${lesson.extension.challenge} ${settings.challenge}` },
