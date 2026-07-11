@@ -38,20 +38,20 @@ test("curriculum defines every supported learning mode", async () => {
   }
 });
 
-test("every grade-one through grade-three course has unique curated lesson content", async () => {
+test("every grade-one through grade-four course has unique curated lesson content", async () => {
   const [curriculum, seeds] = await Promise.all([
     readFile("app/data/curriculum.ts", "utf8"),
     readFile("app/data/lessonSeeds.ts", "utf8"),
   ]);
   const curatedGrades = curriculum.slice(
     curriculum.indexOf('bookId: "g1-upper"'),
-    curriculum.indexOf('bookId: "g4-upper"'),
+    curriculum.indexOf('bookId: "g5-upper"'),
   );
   const courseIds = [...curatedGrades.matchAll(/(?:course|c)\("([^"]+)"/g)].map((match) => match[1]);
   const seedIds = new Set([...seeds.matchAll(/^  "([^"]+)": s\(/gm)].map((match) => match[1]));
   const knowledge = [...seeds.matchAll(/:\s*s\("([^"]+)"/g)].map((match) => match[1]);
 
-  assert.ok(courseIds.length >= 270, `expected at least 270 curated courses, got ${courseIds.length}`);
+  assert.ok(courseIds.length >= 370, `expected at least 370 curated courses, got ${courseIds.length}`);
   assert.deepEqual(courseIds.filter((id) => !seedIds.has(id)), []);
   assert.equal(new Set(knowledge).size, knowledge.length, "curated knowledge must not repeat");
   assert.doesNotMatch(seeds, /这节课的关键词|和本单元主题有什么关系|只看一眼就跳过/);
