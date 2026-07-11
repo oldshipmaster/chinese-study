@@ -181,3 +181,14 @@ test("high-order questions are designed for each course type", async () => {
   });
   assert.equal(new Set(pairs).size, 7);
 });
+
+test("all courses include three inquiry prompts beyond the quiz", async () => {
+  const { build } = await import("esbuild");
+  const result = await build({ entryPoints: ["app/data/curriculum.ts"], bundle: true, platform: "node", format: "esm", write: false, logLevel: "silent" });
+  const { books } = await import(`data:text/javascript;base64,${Buffer.from(result.outputFiles[0].text).toString("base64")}`);
+  for (const course of books.flatMap((book) => book.units).flatMap((unit) => unit.courses)) {
+    assert.equal(course.lesson.inquiries.length, 3, course.id);
+    assert.equal(new Set(course.lesson.inquiries.map((item) => item.question)).size, 3, course.id);
+    assert.ok(course.lesson.inquiries.every((item) => item.guide.length >= 12), course.id);
+  }
+});

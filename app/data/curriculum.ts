@@ -4,6 +4,7 @@ import {
   adaptRichLessonForGrade,
   type ExtensionCard,
   type InteractionTask,
+  type InquiryPrompt,
   type KnowledgePoint,
   type OpenTask,
   type QuestionDifficulty,
@@ -50,6 +51,7 @@ export interface LessonContent {
   knowledgePoints: KnowledgePoint[];
   interactions: InteractionTask[];
   openTask: OpenTask;
+  inquiries: InquiryPrompt[];
   quiz: LessonQuestion[];
   extension: ExtensionCard;
   summary: string;

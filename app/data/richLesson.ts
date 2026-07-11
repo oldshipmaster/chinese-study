@@ -43,6 +43,11 @@ export interface ExtensionCard {
   challenge: string;
 }
 
+export interface InquiryPrompt {
+  question: string;
+  guide: string;
+}
+
 export interface RichLessonData {
   gradeBand: "lower" | "middle" | "upper";
   learningGuide: string;
@@ -50,6 +55,7 @@ export interface RichLessonData {
   knowledgePoints: KnowledgePoint[];
   interactions: InteractionTask[];
   openTask: OpenTask;
+  inquiries: InquiryPrompt[];
   quiz: RichQuestion[];
   extension: ExtensionCard;
 }
@@ -213,6 +219,45 @@ const deepQuestions: Record<CourseKind, DeepQuestionBlueprint> = {
   },
 };
 
+const buildInquiries = (context: RichLessonContext): InquiryPrompt[] => {
+  const { title, type, seed } = context;
+  const common: InquiryPrompt = {
+    question: `如果把《${title}》最关键的条件换掉，原来的结论还成立吗？`,
+    guide: `先指出原条件，再根据“${seed.knowledge}”预测变化，并说出验证办法。`,
+  };
+  const byType: Record<CourseKind, [InquiryPrompt, InquiryPrompt]> = {
+    pinyin: [
+      { question: "只看口形不听声音，可能会把哪些读音混在一起？", guide: "挑两个相近的音，比较舌位、送气或声调，亲自慢读验证。" },
+      { question: "同一个字母换上不同声调，声音路线发生了什么变化？", guide: "用手势画出声调路线，边读边听起点、转折和终点。" },
+    ],
+    literacy: [
+      { question: "给本课汉字换一个部件，字义可能怎样变化？", guide: "先保留一个熟悉部件，再换偏旁、组词，并用句子检验新字义。" },
+      { question: "为什么有些字看起来很像，意思却相差很远？", guide: "找出决定意义的不同部件，再比较它们在真实词语中的作用。" },
+    ],
+    reading: [
+      { question: "如果故事中的关键选择相反，人物和结局会怎样变化？", guide: "找到原选择的前因后果，再沿着相反选择推演新的证据链。" },
+      { question: "哪一处细节删掉后，你对文章的理解会改变最多？", guide: `从“${seed.example}”附近寻找关键细节，说明它支撑了什么判断。` },
+    ],
+    poetry: [
+      { question: "把诗中的一个核心意象换掉，情感色彩会怎样变化？", guide: "先描述原意象带来的画面和情绪，再换一个意象进行对照朗读。" },
+      { question: "同一幅画面用快节奏和慢节奏朗读，感受为什么不同？", guide: "分别朗读一次，比较停顿、重音和声音长短怎样影响想象。" },
+    ],
+    speaking: [
+      { question: "如果听者不同，同一个意思需要怎样重新组织？", guide: "分别设想同学、长辈或陌生人，调整称呼、语气和背景信息。" },
+      { question: "怎样判断对方是真的理解，而不只是点头？", guide: "设计一个确认问题，请对方复述关键点，再根据回应补充说明。" },
+    ],
+    writing: [
+      { question: "同一件事从另一个人物视角来写，会出现哪些新细节？", guide: "换一个观察位置，列出他能看到、听到、想到的三类信息。" },
+      { question: "删去哪句话反而能让中心更突出？", guide: "逐句检查它是否服务中心，删掉一处后比较段落是否更紧凑。" },
+    ],
+    garden: [
+      { question: "本单元哪两种方法可以组合成一把新工具？", guide: "分别说清两种方法解决什么问题，再设计一个必须组合使用的新任务。" },
+      { question: "哪条规律有例外？遇到例外时怎样修正方法？", guide: "先举一个符合规律的例子，再找反例，补充方法适用的条件。" },
+    ],
+  };
+  return [...byType[type], common];
+};
+
 const makeQuestion = (
   prompt: string,
   answer: string,
@@ -266,6 +311,7 @@ export function buildRichLesson(context: RichLessonContext): RichLessonData {
       support: ["我的发现是……", "我从……看出来……", "如果换一个情境，我会……"],
       example: `我的发现是：${seed.knowledge} 依据是：${seed.example}`,
     },
+    inquiries: buildInquiries(context),
     quiz,
     extension: {
       title: `${title} · 再往前一步`,

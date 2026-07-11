@@ -27,6 +27,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   const [openSubmitted, setOpenSubmitted] = useState(false);
   const [showOpenExample, setShowOpenExample] = useState(false);
   const [revealedKnowledge, setRevealedKnowledge] = useState<number[]>([]);
+  const [revealedInquiries, setRevealedInquiries] = useState<number[]>([]);
   const [wrongAttempts, setWrongAttempts] = useState<Record<number, string[]>>({});
   const [confidence, setConfidence] = useState("");
   const [answers, setAnswers] = useState<string[]>([]);
@@ -103,6 +104,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
     setOpenSubmitted(false);
     setShowOpenExample(false);
     setRevealedKnowledge([]);
+    setRevealedInquiries([]);
     setWrongAttempts({});
     setConfidence("");
     setAnswers([]);
@@ -217,6 +219,16 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
                 {revealedKnowledge.includes(index) && <small>{point.tip}</small>}
               </article>
             ))}</div>
+            <section className="inquiry-lab">
+              <div><span className="eyebrow">探究问号</span><h2>没有标准套路，先大胆预测再找证据</h2></div>
+              <div className="inquiry-grid">{course.lesson.inquiries.map((inquiry, index) => (
+                <article key={inquiry.question} className={revealedInquiries.includes(index) ? "revealed" : ""}>
+                  <strong>？</strong><p>{inquiry.question}</p>
+                  <button onClick={() => setRevealedInquiries((values) => values.includes(index) ? values.filter((value) => value !== index) : [...values, index])}>{revealedInquiries.includes(index) ? "收起研究路线" : "看看怎样研究"}</button>
+                  {revealedInquiries.includes(index) && <small>{inquiry.guide}</small>}
+                </article>
+              ))}</div>
+            </section>
           </div>
         )}
 
