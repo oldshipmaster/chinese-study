@@ -54,6 +54,12 @@ export interface LearningTool {
   use: string;
 }
 
+export interface ContrastCase {
+  misconception: string;
+  diagnosis: string;
+  repair: string;
+}
+
 export interface RichLessonData {
   gradeBand: "lower" | "middle" | "upper";
   learningGuide: string;
@@ -63,6 +69,7 @@ export interface RichLessonData {
   openTask: OpenTask;
   inquiries: InquiryPrompt[];
   toolkit: LearningTool[];
+  contrastCase: ContrastCase;
   quiz: RichQuestion[];
   extension: ExtensionCard;
 }
@@ -285,6 +292,19 @@ const buildWarmUp = (context: RichLessonContext): InteractionTask => {
   return choice("warm-up", "scenario", "旧知热身", prompt, answer, distractors, explanation);
 };
 
+const buildContrastCase = (context: RichLessonContext): ContrastCase => {
+  const cases: Record<CourseKind, ContrastCase> = {
+    pinyin: { misconception: "误区：字母外形相近，读音也应该差不多。", diagnosis: "外形不能代替发音动作；送气、舌位、口形或声调不同，声音就会改变。", repair: `修正：结合“${context.seed.example}”做慢读对比，再用耳朵检查差别。` },
+    literacy: { misconception: "误区：两个字长得像，意思和用法就一样。", diagnosis: "一个关键部件或偏旁发生变化，往往会带来不同的字义和使用语境。", repair: `修正：先比较不同部件，再围绕“${context.seed.knowledge}”分别组词造句。` },
+    reading: { misconception: "误区：我的感觉很强烈，所以观点一定正确。", diagnosis: "阅读感受很重要，但观点还需要关键词句、人物表现或前因后果来支持。", repair: `修正：回到“${context.seed.example}”寻找证据，并解释证据怎样支持结论。` },
+    poetry: { misconception: "误区：把诗句翻译成白话，就已经完全读懂了。", diagnosis: "诗歌还要体会节奏、意象、画面和含蓄情感，字面意思只是理解的起点。", repair: `修正：把“${context.seed.example}”读出停顿，圈出意象，再说画面带来的感受。` },
+    speaking: { misconception: "误区：只要我把准备的话全部说完，交流就成功了。", diagnosis: "交流需要听者真正理解；对象、场合和对方回应都会影响表达效果。", repair: `修正：围绕“${context.seed.knowledge}”讲清要点，再用一个问题确认对方是否听懂。` },
+    writing: { misconception: "误区：形容词越多、篇幅越长，文章就越生动。", diagnosis: "空泛词语和无关材料会冲淡中心，真实的动作、语言和感受才形成具体画面。", repair: `修正：保留“${context.seed.example}”这类关键细节，删掉不能服务中心的句子。` },
+    garden: { misconception: "误区：把学过的内容重新抄一遍，就算完成整理。", diagnosis: "机械抄写没有建立联系；真正整理要分类、比较规律，并能在新任务中调用。", repair: `修正：根据“${context.seed.knowledge}”画出联系，再设计一道需要迁移的新题。` },
+  };
+  return cases[context.type];
+};
+
 const buildInquiries = (context: RichLessonContext): InquiryPrompt[] => {
   const { title, type, seed } = context;
   const common: InquiryPrompt = {
@@ -380,6 +400,7 @@ export function buildRichLesson(context: RichLessonContext): RichLessonData {
     },
     inquiries: buildInquiries(context),
     toolkit: toolkits[type],
+    contrastCase: buildContrastCase(context),
     quiz,
     extension: {
       title: `${title} · 再往前一步`,

@@ -3,6 +3,7 @@ import {
   buildRichLesson,
   adaptRichLessonForGrade,
   type ExtensionCard,
+  type ContrastCase,
   type InteractionTask,
   type InquiryPrompt,
   type KnowledgePoint,
@@ -55,6 +56,7 @@ export interface LessonContent {
   openTask: OpenTask;
   inquiries: InquiryPrompt[];
   toolkit: LearningTool[];
+  contrastCase: ContrastCase;
   quiz: LessonQuestion[];
   extension: ExtensionCard;
   summary: string;

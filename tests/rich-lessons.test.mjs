@@ -227,3 +227,12 @@ test("warm-ups activate prior knowledge differently for seven course types", asy
   assert.equal(new Set(warmUps.map((task) => `${task.prompt}|${task.answer}`)).size, 7);
   assert.ok(warmUps.every((task) => task.prompt.includes("《热身课》")));
 });
+
+test("every course type teaches through a misconception contrast case", async () => {
+  const { buildRichLesson } = await import("../app/data/richLesson.ts");
+  const cases = ["pinyin", "literacy", "reading", "poetry", "speaking", "writing", "garden"].map((type) => buildRichLesson({
+    id: `contrast-${type}`, title: "对照课", type, objective: "辨析误区", action: "修正", seed: { knowledge: "知识", example: "证据例子", checkPrompt: "问题？", checkAnswer: "答案" },
+  }).contrastCase);
+  assert.equal(new Set(cases.map((item) => item.misconception)).size, 7);
+  assert.ok(cases.every((item) => item.misconception.length >= 8 && item.diagnosis.length >= 12 && item.repair.length >= 12));
+});

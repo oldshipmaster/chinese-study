@@ -281,6 +281,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
             ))}</div>
             <p>读完后，试着指出“哪一句是证据，哪一句是结论”。</p>
             <section className="learning-toolkit"><div><span className="eyebrow">能力工具箱</span><h2>{course.lesson.kindLabel}学习的四件工具</h2></div><div>{course.lesson.toolkit.map((tool) => <article key={tool.name}><strong>{tool.name}</strong><p>{tool.use}</p></article>)}</div></section>
+            <section className="contrast-clinic"><span className="eyebrow">正反例诊所</span><h2>{course.lesson.contrastCase.misconception}</h2><p><strong>问题在哪：</strong>{course.lesson.contrastCase.diagnosis}</p><p><strong>怎样修正：</strong>{course.lesson.contrastCase.repair}</p></section>
           </div>
         )}
 
