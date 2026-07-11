@@ -29,11 +29,15 @@ export function CourseApp() {
   const returnToCurriculum = () => { setLessonDrafts(parseLessonDrafts(window.localStorage.getItem(LESSON_DRAFT_STORAGE_KEY))); setView("curriculum"); };
   const handleReset = (id: string) => {
     const selected = getCourse(id);
-    if (!progress.completedCourseIds.includes(id)) return false;
-    const confirmed = window.confirm(`确定重置《${selected?.title ?? "这节课"}》吗？\n\n完成记录会被删除，并扣回 3 片竹叶。此操作不可撤销。`);
+    const wasCompleted = progress.completedCourseIds.includes(id);
+    const storedDrafts = parseLessonDrafts(window.localStorage.getItem(LESSON_DRAFT_STORAGE_KEY));
+    if (!wasCompleted && !storedDrafts[id]) return false;
+    const confirmed = window.confirm(wasCompleted
+      ? `确定重置《${selected?.title ?? "这节课"}》吗？\n\n完成记录和本课草稿会被删除，并扣回 3 片竹叶。此操作不可撤销。`
+      : `确定清空《${selected?.title ?? "这节课"}》的学习草稿吗？\n\n这节课会从情境导入重新开始，其他课程不受影响。`);
     if (!confirmed) return false;
-    persist(resetCourse(progress, id));
-    const nextDrafts = removeLessonDraft(parseLessonDrafts(window.localStorage.getItem(LESSON_DRAFT_STORAGE_KEY)), id);
+    if (wasCompleted) persist(resetCourse(progress, id));
+    const nextDrafts = removeLessonDraft(storedDrafts, id);
     setLessonDrafts(nextDrafts);
     try { window.localStorage.setItem(LESSON_DRAFT_STORAGE_KEY, JSON.stringify(nextDrafts)); } catch { /* Reset completion still succeeds without draft storage. */ }
     return true;

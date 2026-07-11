@@ -35,7 +35,7 @@ export function CurriculumView({ book, completed, draftStages, onBack, onOpenCou
                   <div className="course-index">{String(courseIndex + 1).padStart(2, "0")}</div>
                   <h3>{item.title}</h3><p>{item.objective}</p>
                   <button onClick={() => onOpenCourse(item.id)}>{done ? "复习课程" : inProgress ? `继续第 ${draftStage + 1} 站` : "开始学习"}<span aria-hidden="true">→</span></button>
-                  {done && <button className="reset-button" onClick={() => onResetCourse(item.id)}>重置进度</button>}
+                  {(done || inProgress) && <button className="reset-button" onClick={() => onResetCourse(item.id)}>重置进度</button>}
                   {done && <span className="done-mark">已完成</span>}
                   {inProgress && <span className="draft-mark">进行中 · {draftStage + 1}/8</span>}
                 </article>

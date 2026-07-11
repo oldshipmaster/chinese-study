@@ -53,6 +53,7 @@ test("exposes reset controls and device pinyin speech", async () => {
 
   assert.match(app, /resetCourse/);
   assert.match(app, /confirm/);
+  assert.match(app, /其他课程不受影响/);
   assert.match(curriculum, /重置进度/);
   assert.match(lesson, /speechSynthesis/);
   assert.match(lesson, /SpeechSynthesisUtterance/);
