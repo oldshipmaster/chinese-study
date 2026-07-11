@@ -19,3 +19,12 @@ test("course completion is immutable and idempotent", async () => {
   assert.match(source, /alreadyCompleted \? 0 : 3/);
   assert.match(source, /recentCourseId: courseId/);
 });
+
+test("single-course reset removes completion and safely returns its reward", async () => {
+  const source = await readFile("app/lib/progress.ts", "utf8");
+
+  assert.match(source, /export function resetCourse/);
+  assert.match(source, /if \(!progress\.completedCourseIds\.includes\(courseId\)\) return progress/);
+  assert.match(source, /filter\(\(id\) => id !== courseId\)/);
+  assert.match(source, /Math\.max\(0, progress\.leaves - 3\)/);
+});

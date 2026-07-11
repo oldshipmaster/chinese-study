@@ -62,3 +62,16 @@ export function completeCourse(
     recentCourseId: courseId,
   };
 }
+
+export function resetCourse(
+  progress: LearningProgressV1,
+  courseId: string,
+): LearningProgressV1 {
+  if (!progress.completedCourseIds.includes(courseId)) return progress;
+
+  return {
+    ...progress,
+    completedCourseIds: progress.completedCourseIds.filter((id) => id !== courseId),
+    leaves: Math.max(0, progress.leaves - 3),
+  };
+}
