@@ -43,6 +43,7 @@ export interface ExtensionCard {
   title: string;
   fact: string;
   challenge: string;
+  connection: { field: string; insight: string };
 }
 
 export interface InquiryPrompt {
@@ -279,6 +280,16 @@ const toolkits: Record<CourseKind, LearningTool[]> = {
   ],
 };
 
+const widerConnections: Record<CourseKind, { field: string; insight: string }> = {
+  pinyin: { field: "声音科学", insight: "声音来自气流和发音器官的配合；改变振动、阻碍位置或音高路线，就会产生不同读音。" },
+  literacy: { field: "汉字文化", insight: "汉字形体保存了古人的观察方式，部件组合也反映事物之间的联系。" },
+  reading: { field: "逻辑推理", insight: "从文本证据走向观点，和科学推理一样需要检查因果、条件与反例。" },
+  poetry: { field: "音乐与绘画", insight: "诗的节奏像音乐，意象像画面；声音和视觉共同帮助我们体会情感。" },
+  speaking: { field: "沟通心理", insight: "听者的已有经验、情绪和注意力会影响理解，因此表达需要观察反馈并调整。" },
+  writing: { field: "观察记录", insight: "真实写作像小型研究：持续观察、选择材料、记录细节，再形成有依据的表达。" },
+  garden: { field: "信息整理", insight: "分类、比较和建立索引能降低记忆负担，让零散知识变成随时可调用的网络。" },
+};
+
 const buildWarmUp = (context: RichLessonContext): InteractionTask => {
   const warmUps: Record<CourseKind, [string, string, [string, string], string]> = {
     pinyin: [`准备学习《${context.title}》时，哪种热身能让发音更准确？`, "先听一遍，再照镜子观察口形并轻声试读", ["只看字母颜色", "不出声地快速翻过"], "耳朵、眼睛和发音动作一起参与，才容易辨清细小差别。"],
@@ -413,8 +424,9 @@ export function buildRichLesson(context: RichLessonContext): RichLessonData {
     quiz,
     extension: {
       title: `${title} · 再往前一步`,
-      fact: engine.extension,
+      fact: `${engine.extension} 联系本课发现：${seed.knowledge}`,
       challenge: `找一个生活中的新例子，用“${seed.checkAnswer}”或本课方法解释它。`,
+      connection: { field: widerConnections[type].field, insight: `${widerConnections[type].insight} 本课可以从“${seed.knowledge}”继续观察这种联系。` },
     },
   };
 }

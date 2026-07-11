@@ -242,6 +242,15 @@ test("every course type teaches through a misconception contrast case", async ()
   assert.ok(cases.every((item) => item.misconception.length >= 8 && item.diagnosis.length >= 12 && item.repair.length >= 12));
 });
 
+test("extensions connect seven course types to distinct wider fields", async () => {
+  const { buildRichLesson } = await import("../app/data/richLesson.ts");
+  const connections = ["pinyin", "literacy", "reading", "poetry", "speaking", "writing", "garden"].map((type) => buildRichLesson({
+    id: `connection-${type}`, title: "连接课", type, objective: "拓展", action: "连接", seed: { knowledge: "本课知识", example: "本课例子", checkPrompt: "问题？", checkAnswer: "答案" },
+  }).extension.connection);
+  assert.equal(new Set(connections.map((item) => item.field)).size, 7);
+  assert.ok(connections.every((item) => item.insight.includes("本课知识")));
+});
+
 test("open challenges offer three distinct learner-choice routes", async () => {
   const { buildRichLesson } = await import("../app/data/richLesson.ts");
   const lesson = buildRichLesson({ id: "choice-routes", title: "路线课", type: "reading", objective: "自主探究", action: "选择", seed: { knowledge: "用证据说明观点", example: "人物前后发生变化", checkPrompt: "为什么？", checkAnswer: "因为有线索" } });
