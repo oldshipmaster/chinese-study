@@ -74,6 +74,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   };
   const interactionsPassed = course.lesson.interactions.every(interactionCorrect);
   const lessonPassed = interactionsPassed && openSubmitted && quizPassed;
+  const minimumResponseLength = course.lesson.gradeBand === "lower" ? 6 : course.lesson.gradeBand === "middle" ? 16 : 28;
   const stageComplete = (index: number) => [
     stage > 0,
     warmChoice === course.lesson.warmUp.answer,
@@ -160,8 +161,8 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   };
 
   const submitOpenTask = () => {
-    if (openResponse.trim().length < 6) {
-      setMessage("再多说一点：至少写出一个发现和一个依据。");
+    if (openResponse.trim().length < minimumResponseLength) {
+      setMessage(`再多说一点：本年级至少写 ${minimumResponseLength} 个字，并包含一个发现和一个依据。`);
       return;
     }
     if (openChecks.length < course.lesson.openTask.rubric.length) {
@@ -382,6 +383,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
             {openRoute !== null && <aside className="chosen-route"><strong>我的挑战：</strong>{course.lesson.openTask.routes[openRoute].prompt}</aside>}
             <div className="sentence-starters">{course.lesson.openTask.support.map((support) => <button key={support} onClick={() => { setOpenSubmitted(false); setOpenResponse((value) => `${value}${value ? " " : ""}${support}`); }}>{support}</button>)}</div>
             <textarea value={openResponse} onChange={(event) => { setOpenSubmitted(false); setOpenResponse(event.target.value); }} placeholder="在这里写下你的发现和依据……" aria-label="开放表达答案" />
+            <p className={`response-count ${openResponse.trim().length >= minimumResponseLength ? "ready" : ""}`}>已写 {openResponse.trim().length} 字 · 本年级建议至少 {minimumResponseLength} 字</p>
             <section className="open-rubric"><strong>提交前，我自己检查</strong><div>{course.lesson.openTask.rubric.map((item, index) => <button className={openChecks.includes(index) ? "checked" : ""} key={item} onClick={() => { setOpenSubmitted(false); setOpenChecks((values) => values.includes(index) ? values.filter((value) => value !== index) : [...values, index]); }}><span>{openChecks.includes(index) ? "✓" : index + 1}</span>{item}</button>)}</div></section>
             <div className="open-actions"><button onClick={() => setShowOpenExample((value) => !value)}>{showOpenExample ? "收起表达支架" : "需要一点提示"}</button><button className="primary-button" onClick={submitOpenTask}>{openSubmitted ? "已提交，可继续修改" : "提交我的表达"}</button></div>
             {showOpenExample && <aside><strong>表达支架，不是唯一答案</strong><p>{course.lesson.openTask.example}</p></aside>}
