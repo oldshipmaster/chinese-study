@@ -74,6 +74,16 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   };
   const interactionsPassed = course.lesson.interactions.every(interactionCorrect);
   const lessonPassed = interactionsPassed && openSubmitted && quizPassed;
+  const stageComplete = (index: number) => [
+    stage > 0,
+    warmChoice === course.lesson.warmUp.answer,
+    masteredKnowledge.length === course.lesson.knowledgePoints.length,
+    stage > 3,
+    interactionsPassed,
+    openSubmitted,
+    quizPassed,
+    lessonPassed,
+  ][index];
 
   useEffect(() => {
     const drafts = parseLessonDrafts(window.localStorage.getItem(LESSON_DRAFT_STORAGE_KEY));
@@ -268,11 +278,12 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
       </header>
 
       <nav className="stage-nav rich-stage-nav" aria-label="课程步骤">
-        {stages.map((name, index) => (
-          <button key={name} className={index === stage ? "active" : index < stage ? "done" : ""} onClick={() => setStage(index)}>
-            <span>{index < stage ? "✓" : index + 1}</span>{name}
-          </button>
-        ))}
+        {stages.map((name, index) => {
+          const done = stageComplete(index);
+          return <button key={name} className={index === stage ? "active" : done ? "done" : ""} onClick={() => setStage(index)} aria-current={index === stage ? "step" : undefined}>
+            <span>{done ? "✓" : index + 1}</span>{name}
+          </button>;
+        })}
       </nav>
 
       <section className="classroom-stage rich-classroom" aria-live="polite">
