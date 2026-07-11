@@ -33,4 +33,5 @@ test("older drafts migrate with an empty knowledge self-check", () => {
   assert.deepEqual(parseLessonDrafts(JSON.stringify({ old: legacy })).old.inquiryPredictions, {});
   assert.deepEqual(parseLessonDrafts(JSON.stringify({ old: legacy })).old.openChecks, []);
   assert.equal(parseLessonDrafts(JSON.stringify({ old: legacy })).old.confidence, "");
+  assert.deepEqual(parseLessonDrafts(JSON.stringify({ old: legacy })).old.quizHints, []);
 });

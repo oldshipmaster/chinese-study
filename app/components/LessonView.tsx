@@ -61,6 +61,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   const [wrongAttempts, setWrongAttempts] = useState<Record<number, string[]>>({});
   const [confidence, setConfidence] = useState("");
   const [answers, setAnswers] = useState<string[]>([]);
+  const [quizHints, setQuizHints] = useState<number[]>([]);
   const [message, setMessage] = useState("带着问题走进情境，看看今天会发现什么。");
   const [speechMessage, setSpeechMessage] = useState("点击字母或音节，听清后再跟读。");
   const [pinyinRate, setPinyinRate] = useState<"normal" | "slow">("normal");
@@ -104,6 +105,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
         setInquiryPredictions(draft.inquiryPredictions);
         setOpenChecks(draft.openChecks);
         setConfidence(draft.confidence);
+        setQuizHints(draft.quizHints);
         setMessage("已恢复上次学习位置，可以从这里继续。");
       }
       setDraftReady(true);
@@ -114,10 +116,10 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   useEffect(() => {
     if (!draftReady) return;
     const drafts = parseLessonDrafts(window.localStorage.getItem(LESSON_DRAFT_STORAGE_KEY));
-    const isEmpty = stage === 0 && !warmChoice && Object.keys(interactionAnswers).length === 0 && !openResponse && openRoute === null && !openSubmitted && openChecks.length === 0 && !confidence && Object.keys(wrongAttempts).length === 0 && answers.length === 0 && masteredKnowledge.length === 0 && Object.keys(inquiryPredictions).length === 0;
-    const next = isEmpty ? removeLessonDraft(drafts, course.id) : upsertLessonDraft(drafts, course.id, { stage, warmChoice, interactionAnswers, openResponse, openRoute, openSubmitted, openChecks, confidence, wrongAttempts, answers, masteredKnowledge, inquiryPredictions });
+    const isEmpty = stage === 0 && !warmChoice && Object.keys(interactionAnswers).length === 0 && !openResponse && openRoute === null && !openSubmitted && openChecks.length === 0 && !confidence && quizHints.length === 0 && Object.keys(wrongAttempts).length === 0 && answers.length === 0 && masteredKnowledge.length === 0 && Object.keys(inquiryPredictions).length === 0;
+    const next = isEmpty ? removeLessonDraft(drafts, course.id) : upsertLessonDraft(drafts, course.id, { stage, warmChoice, interactionAnswers, openResponse, openRoute, openSubmitted, openChecks, confidence, quizHints, wrongAttempts, answers, masteredKnowledge, inquiryPredictions });
     try { window.localStorage.setItem(LESSON_DRAFT_STORAGE_KEY, JSON.stringify(next)); } catch { /* The lesson still works when storage is unavailable. */ }
-  }, [answers, confidence, course.id, draftReady, inquiryPredictions, interactionAnswers, masteredKnowledge, openChecks, openResponse, openRoute, openSubmitted, stage, warmChoice, wrongAttempts]);
+  }, [answers, confidence, course.id, draftReady, inquiryPredictions, interactionAnswers, masteredKnowledge, openChecks, openResponse, openRoute, openSubmitted, quizHints, stage, warmChoice, wrongAttempts]);
 
   const completeIfReady = (nextAnswers: string[]) => {
     const passedQuiz = course.lesson.quiz.every((question, index) => nextAnswers[index] === question.answer);
@@ -194,6 +196,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
     setWrongAttempts({});
     setConfidence("");
     setAnswers([]);
+    setQuizHints([]);
     setActivePinyinToken("");
     setMessage(resetMessage);
   };
@@ -239,6 +242,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
       : "五个层级暂未留下错项，可以限时重答或向家人讲解其中一题。",
     lessonPassed ? "挑战拓展任务：寻找新例子或反例，检验本课方法的适用条件。" : "完成未通过的项目后，再进入带走挑战。",
     masteredKnowledge.length < course.lesson.knowledgePoints.length ? `还有 ${course.lesson.knowledgePoints.length - masteredKnowledge.length} 张知识卡未标记掌握，复述后再诚实检查一次。` : "五张知识卡均已自检，可以随机抽一张脱离页面复述。",
+    quizHints.length > 0 ? `本轮使用了 ${quizHints.length} 次线索。复习后请尝试不打开线索再次作答。` : "本轮没有使用闯关线索，说明独立提取方法的能力正在增强。",
   ];
   const confidenceReviewPlan: Record<string, string> = {
     "我还要复习一次": "现在先回知识卡和错题页重学；明天不看提示，再做一次五题闯关。",
@@ -409,6 +413,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
                 <div>{question.options.map((option) => (
                   <button className={answers[qIndex] === option ? option === question.answer ? "correct" : "wrong" : ""} key={option} onClick={() => chooseQuiz(qIndex, option)}>{option}</button>
                 ))}</div>
+                <button className="quiz-hint" aria-expanded={quizHints.includes(qIndex)} onClick={() => setQuizHints((values) => values.includes(qIndex) ? values.filter((value) => value !== qIndex) : [...values, qIndex])}>{quizHints.includes(qIndex) ? `线索：回到${question.reviewTarget}，先说出判断步骤。` : "给我一个线索，不看答案"}</button>
                 {answers[qIndex] && <small className={answers[qIndex] === question.answer ? "correct-feedback" : "wrong-feedback"}>{question.feedback[answers[qIndex]]}{answers[qIndex] !== question.answer && <> <b>建议返回：{question.reviewTarget}</b></>}</small>}
               </fieldset>
             ))}</div>
