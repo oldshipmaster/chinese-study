@@ -299,7 +299,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
             <h1>{course.title}</h1>
             <p>{course.lesson.hook}</p>
             <p className="learning-guide">学习路线：{course.lesson.learningGuide}</p>
-            {pinyinTokens.length > 0 && <div className="pinyin-rate-control" aria-label="发音速度"><span>听音速度</span><button className={pinyinRate === "normal" ? "selected" : ""} onClick={() => setPinyinRate("normal")}>标准速度</button><button className={pinyinRate === "slow" ? "selected" : ""} onClick={() => setPinyinRate("slow")}>慢速辨音</button></div>}
+            {pinyinTokens.length > 0 && <div className="pinyin-rate-control" aria-label="发音速度"><span>听音速度</span><button aria-pressed={pinyinRate === "normal"} className={pinyinRate === "normal" ? "selected" : ""} onClick={() => setPinyinRate("normal")}>标准速度</button><button aria-pressed={pinyinRate === "slow"} className={pinyinRate === "slow" ? "selected" : ""} onClick={() => setPinyinRate("slow")}>慢速辨音</button></div>}
             {pinyinTokens.length > 0 && <div className="pinyin-soundboard" aria-label="拼音点击发音">{pinyinTokens.map((token) => <button key={token} onClick={() => speakPinyin(token)} aria-label={`听 ${token} 的发音`}>{token}<small>点击听音</small></button>)}</div>}
             {activePinyinToken && <aside className="mouth-cue"><div aria-hidden="true"><span>{activePinyinToken}</span><i /></div><section><strong>发音动作镜</strong><p>{pinyinMouthCue(activePinyinToken)}</p></section></aside>}
             {pinyinTokens.length > 0 && <p className="speech-status">{speechMessage}</p>}
@@ -324,8 +324,8 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
             <h1>五张知识卡，层层打开本课</h1>
             <div className="knowledge-grid">{course.lesson.knowledgePoints.map((point, index) => (
               <article key={point.title} className={revealedKnowledge.includes(index) ? "revealed" : ""}><span>{point.label}</span><h2>{point.title}</h2><p>{point.detail}</p>
-                <button className="knowledge-reveal" onClick={() => setRevealedKnowledge((values) => values.includes(index) ? values.filter((value) => value !== index) : [...values, index])}>{revealedKnowledge.includes(index) ? "收起方法提示" : "点击翻开方法提示"}</button>
-                <button className={`knowledge-master ${masteredKnowledge.includes(index) ? "selected" : ""}`} onClick={() => setMasteredKnowledge((values) => values.includes(index) ? values.filter((value) => value !== index) : [...values, index])}>{masteredKnowledge.includes(index) ? "✓ 已掌握，点击取消" : "标记为已掌握"}</button>
+                <button aria-expanded={revealedKnowledge.includes(index)} className="knowledge-reveal" onClick={() => setRevealedKnowledge((values) => values.includes(index) ? values.filter((value) => value !== index) : [...values, index])}>{revealedKnowledge.includes(index) ? "收起方法提示" : "点击翻开方法提示"}</button>
+                <button aria-pressed={masteredKnowledge.includes(index)} className={`knowledge-master ${masteredKnowledge.includes(index) ? "selected" : ""}`} onClick={() => setMasteredKnowledge((values) => values.includes(index) ? values.filter((value) => value !== index) : [...values, index])}>{masteredKnowledge.includes(index) ? "✓ 已掌握，点击取消" : "标记为已掌握"}</button>
                 {revealedKnowledge.includes(index) && <small>{point.tip}</small>}
               </article>
             ))}</div>
@@ -334,8 +334,8 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
               <div className="inquiry-grid">{course.lesson.inquiries.map((inquiry, index) => (
                 <article key={inquiry.question} className={revealedInquiries.includes(index) ? "revealed" : ""}>
                   <strong>？</strong><p>{inquiry.question}</p>
-                  <div className="prediction-options">{["我预测仍然成立", "我预测会发生变化", "我还不确定"].map((prediction) => <button className={inquiryPredictions[index] === prediction ? "selected" : ""} key={prediction} onClick={() => { setInquiryPredictions((values) => ({ ...values, [index]: prediction })); setMessage(`已记录预测：${prediction}。接下来用证据检验，而不是急着判断对错。`); }}>{prediction}</button>)}</div>
-                  <button disabled={!inquiryPredictions[index]} onClick={() => setRevealedInquiries((values) => values.includes(index) ? values.filter((value) => value !== index) : [...values, index])}>{!inquiryPredictions[index] ? "先做预测，再看路线" : revealedInquiries.includes(index) ? "收起研究路线" : "看看怎样研究"}</button>
+                  <div className="prediction-options">{["我预测仍然成立", "我预测会发生变化", "我还不确定"].map((prediction) => <button aria-pressed={inquiryPredictions[index] === prediction} className={inquiryPredictions[index] === prediction ? "selected" : ""} key={prediction} onClick={() => { setInquiryPredictions((values) => ({ ...values, [index]: prediction })); setMessage(`已记录预测：${prediction}。接下来用证据检验，而不是急着判断对错。`); }}>{prediction}</button>)}</div>
+                  <button aria-expanded={revealedInquiries.includes(index)} disabled={!inquiryPredictions[index]} onClick={() => setRevealedInquiries((values) => values.includes(index) ? values.filter((value) => value !== index) : [...values, index])}>{!inquiryPredictions[index] ? "先做预测，再看路线" : revealedInquiries.includes(index) ? "收起研究路线" : "看看怎样研究"}</button>
                   {revealedInquiries.includes(index) && <small>{inquiry.guide}</small>}
                 </article>
               ))}</div>
@@ -381,12 +381,12 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
           <div className="stage-content open-stage">
             <span className="eyebrow">创新挑战</span>
             <h1>{course.lesson.openTask.prompt}</h1>
-            <div className="challenge-routes" aria-label="选择创新挑战路线">{course.lesson.openTask.routes.map((route, index) => <button className={openRoute === index ? "selected" : ""} key={route.label} onClick={() => { setOpenRoute(index); setOpenSubmitted(false); setMessage(`已选择“${route.label}”，没有唯一答案，大胆提出自己的证据。`); }}><strong>{route.label}</strong><span>{route.prompt}</span></button>)}</div>
+            <div className="challenge-routes" aria-label="选择创新挑战路线">{course.lesson.openTask.routes.map((route, index) => <button aria-pressed={openRoute === index} className={openRoute === index ? "selected" : ""} key={route.label} onClick={() => { setOpenRoute(index); setOpenSubmitted(false); setMessage(`已选择“${route.label}”，没有唯一答案，大胆提出自己的证据。`); }}><strong>{route.label}</strong><span>{route.prompt}</span></button>)}</div>
             {openRoute !== null && <aside className="chosen-route"><strong>我的挑战：</strong>{course.lesson.openTask.routes[openRoute].prompt}</aside>}
             <div className="sentence-starters">{course.lesson.openTask.support.map((support) => <button key={support} onClick={() => { setOpenSubmitted(false); setOpenResponse((value) => `${value}${value ? " " : ""}${support}`); }}>{support}</button>)}</div>
             <textarea value={openResponse} onChange={(event) => { setOpenSubmitted(false); setOpenResponse(event.target.value); }} placeholder="在这里写下你的发现和依据……" aria-label="开放表达答案" />
             <p className={`response-count ${openResponse.trim().length >= minimumResponseLength ? "ready" : ""}`}>已写 {openResponse.trim().length} 字 · 本年级建议至少 {minimumResponseLength} 字</p>
-            <section className="open-rubric"><strong>提交前，我自己检查</strong><div>{course.lesson.openTask.rubric.map((item, index) => <button className={openChecks.includes(index) ? "checked" : ""} key={item} onClick={() => { setOpenSubmitted(false); setOpenChecks((values) => values.includes(index) ? values.filter((value) => value !== index) : [...values, index]); }}><span>{openChecks.includes(index) ? "✓" : index + 1}</span>{item}</button>)}</div></section>
+            <section className="open-rubric"><strong>提交前，我自己检查</strong><div>{course.lesson.openTask.rubric.map((item, index) => <button aria-pressed={openChecks.includes(index)} className={openChecks.includes(index) ? "checked" : ""} key={item} onClick={() => { setOpenSubmitted(false); setOpenChecks((values) => values.includes(index) ? values.filter((value) => value !== index) : [...values, index]); }}><span>{openChecks.includes(index) ? "✓" : index + 1}</span>{item}</button>)}</div></section>
             <div className="open-actions"><button onClick={() => setShowOpenExample((value) => !value)}>{showOpenExample ? "收起表达支架" : "需要一点提示"}</button><button className="primary-button" onClick={submitOpenTask}>{openSubmitted ? "已提交，可继续修改" : "提交我的表达"}</button></div>
             {showOpenExample && <aside><strong>表达支架，不是唯一答案</strong><p>{course.lesson.openTask.example}</p></aside>}
             <p>{message}</p>
@@ -425,7 +425,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
               const question = course.lesson.quiz[Number(index)];
               return <article key={index}><strong>{question.prompt}</strong>{values.map((value) => <p key={value}>曾选“{value}”：{question.feedback[value]}</p>)}<small>正确思路：{question.explanation}</small></article>;
             })}<div className="mistake-actions"><button onClick={() => setStage(2)}>回知识卡复习</button><button onClick={retryWrongQuestions}>只重做错过的题</button></div></section>
-            <section className="confidence-check"><h2>现在的我</h2><div>{["我还要复习一次", "我基本掌握了", "我能讲给别人听"].map((value) => <button className={confidence === value ? "selected" : ""} key={value} onClick={() => setConfidence(value)}>{value}</button>)}</div>{confidence && <p>已记录：{confidence}。诚实判断，比追求满分更重要。</p>}</section>
+            <section className="confidence-check"><h2>现在的我</h2><div>{["我还要复习一次", "我基本掌握了", "我能讲给别人听"].map((value) => <button aria-pressed={confidence === value} className={confidence === value ? "selected" : ""} key={value} onClick={() => setConfidence(value)}>{value}</button>)}</div>{confidence && <p>已记录：{confidence}。诚实判断，比追求满分更重要。</p>}</section>
             <section className="study-prescription"><span className="eyebrow">自学导航</span><h2>我的下一步学习处方</h2><ol>{studyPrescription.map((item) => <li key={item}>{item}</li>)}</ol></section>
             {!lessonPassed && <aside className="completion-hint">要完成课程，还需要：{!interactionsPassed ? "完成两项互动；" : ""}{!openSubmitted ? "提交开放表达；" : ""}{!quizPassed ? "答对五道分层题。" : ""}</aside>}
             {lessonPassed && <p className="success-message">全部完成！点击“完成课程”返回课程地图。</p>}
