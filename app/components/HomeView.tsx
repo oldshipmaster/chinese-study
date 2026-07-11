@@ -4,7 +4,7 @@ import type { LearningProgressV1 } from "../lib/progress";
 interface HomeViewProps {
   progress: LearningProgressV1;
   onOpenBook: (bookId: string) => void;
-  onStart: () => void;
+  onStart: (courseId: string) => void;
 }
 
 const abilities = [
@@ -21,6 +21,7 @@ const totalCourses = books.reduce((sum, book) => sum + book.units.reduce((unitSu
 const featuredCourse = getCourse("a-o-e")!;
 
 export function HomeView({ progress, onOpenBook, onStart }: HomeViewProps) {
+  const recentCourse = getCourse(progress.recentCourseId) ?? featuredCourse;
   return (
     <>
       <section className="hero-grid" aria-labelledby="welcome-title">
@@ -36,7 +37,7 @@ export function HomeView({ progress, onOpenBook, onStart }: HomeViewProps) {
             <div className="pinyin-cloud" aria-hidden="true"><span>a</span><span>o</span><span>e</span></div>
             <div className="pond" />
           </div>
-          <button className="primary-button" onClick={onStart}>开始今天的学习 <span aria-hidden="true">→</span></button>
+          <button className="primary-button" onClick={() => onStart("a-o-e")}>开始今天的学习 <span aria-hidden="true">→</span></button>
         </article>
 
         <aside className="today-panel paper-card" aria-label="今日学习路径">
@@ -53,6 +54,7 @@ export function HomeView({ progress, onOpenBook, onStart }: HomeViewProps) {
             <div><small>连续学习</small><strong>{progress.streak} 天</strong></div>
             <div><small>完成课程</small><strong>{progress.completedCourseIds.length} / {totalCourses}</strong></div>
           </div>
+          {recentCourse.id !== "a-o-e" && <button className="resume-recent" onClick={() => onStart(recentCourse.id)}><span>继续最近课程</span><strong>《{recentCourse.title}》 →</strong></button>}
         </aside>
       </section>
 
