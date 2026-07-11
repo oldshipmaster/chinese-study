@@ -354,6 +354,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
               <article><strong>{selectedCorrectCount} / 5</strong><span>分层问题</span></article>
             </div>
             <div className="extension-card"><strong>知识再长一片叶</strong><p>{course.lesson.extension.fact}</p><h2>带走挑战</h2><p>{course.lesson.extension.challenge}</p></div>
+            <section className="retell-card"><span className="eyebrow">30 秒复述卡</span><h2>{course.lesson.summary}</h2><ol><li><strong>课题：</strong>我学习了《{course.title}》。</li><li><strong>发现：</strong>{course.lesson.knowledgePoints[0].detail}</li><li><strong>证据：</strong>{course.lesson.knowledgePoints[1].detail}</li><li><strong>迁移：</strong>下一次遇到新问题，我会使用{course.lesson.toolkit.map((tool) => tool.name).join("、")}中的合适工具。</li></ol></section>
             <section className="mistake-review"><h2>我的错因回顾</h2>{wrongQuestionIndexes.length === 0 ? <p>本轮没有错答。下一次可以尝试更快说出证据。</p> : Object.entries(wrongAttempts).filter(([index]) => course.lesson.quiz[Number(index)]).map(([index, values]) => {
               const question = course.lesson.quiz[Number(index)];
               return <article key={index}><strong>{question.prompt}</strong>{values.map((value) => <p key={value}>曾选“{value}”：{question.feedback[value]}</p>)}<small>正确思路：{question.explanation}</small></article>;
