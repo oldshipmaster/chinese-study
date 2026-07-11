@@ -34,6 +34,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   const [answers, setAnswers] = useState<string[]>([]);
   const [message, setMessage] = useState("带着问题走进情境，看看今天会发现什么。");
   const [speechMessage, setSpeechMessage] = useState("点击字母或音节，听清后再跟读。");
+  const [pinyinRate, setPinyinRate] = useState<"normal" | "slow">("normal");
   const [notified, setNotified] = useState(completed);
   const [draftReady, setDraftReady] = useState(false);
   const quizPassed = course.lesson.quiz.every((question, index) => answers[index] === question.answer);
@@ -179,7 +180,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "zh-CN";
-    utterance.rate = 0.72;
+    utterance.rate = pinyinRate === "slow" ? 0.5 : 0.72;
     utterance.onstart = () => setSpeechMessage(`正在播放：${text}`);
     utterance.onend = () => setSpeechMessage(`播放完成：${text}。轮到你跟读。`);
     utterance.onerror = () => setSpeechMessage("音频播放失败，请检查设备是否静音。");
@@ -189,6 +190,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   const speakPinyin = (token: string) => {
     const audioToken = token.replaceAll("ü", "v");
     const audio = new Audio(`${import.meta.env.BASE_URL}audio/pinyin-${audioToken}.wav`);
+    audio.playbackRate = pinyinRate === "slow" ? 0.68 : 1;
     audio.onplay = () => setSpeechMessage(`正在播放：${token}`);
     audio.onended = () => setSpeechMessage(`播放完成：${token}。轮到你跟读。`);
     audio.onerror = () => speakWithDevice(token);
@@ -227,6 +229,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
             <h1>{course.title}</h1>
             <p>{course.lesson.hook}</p>
             <p className="learning-guide">学习路线：{course.lesson.learningGuide}</p>
+            {pinyinTokens.length > 0 && <div className="pinyin-rate-control" aria-label="发音速度"><span>听音速度</span><button className={pinyinRate === "normal" ? "selected" : ""} onClick={() => setPinyinRate("normal")}>标准速度</button><button className={pinyinRate === "slow" ? "selected" : ""} onClick={() => setPinyinRate("slow")}>慢速辨音</button></div>}
             {pinyinTokens.length > 0 && <div className="pinyin-soundboard" aria-label="拼音点击发音">{pinyinTokens.map((token) => <button key={token} onClick={() => speakPinyin(token)} aria-label={`听 ${token} 的发音`}>{token}<small>点击听音</small></button>)}</div>}
             {pinyinTokens.length > 0 && <p className="speech-status">{speechMessage}</p>}
             <ol className={`animation-frames ${playing ? "is-playing" : ""}`}>{course.lesson.animationFrames.map((frame, index) => <li className="story-beat" key={frame}><span>{index + 1}</span><p>{frame}</p></li>)}</ol>
