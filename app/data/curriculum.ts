@@ -273,6 +273,12 @@ const defaultMinutes: Record<CourseType, number> = {
   garden: 12,
 };
 
+function adaptiveLessonMinutes(grade: number, type: CourseType): number {
+  const base = grade <= 2 ? 18 : grade <= 4 ? 23 : 28;
+  const expressiveBoost = type === "writing" || type === "speaking" ? 2 : 0;
+  return base + expressiveBoost;
+}
+
 function defaultObjective(title: string, type: CourseType): string {
   const profile = profiles[type];
   return `${profile.skill}，围绕“${title}”完成观察、理解和表达`;
@@ -1167,6 +1173,12 @@ export const books: Book[] = [
     ],
   },
 ];
+
+for (const book of books) {
+  for (const unit of book.units) {
+    for (const course of unit.courses) course.minutes = adaptiveLessonMinutes(book.grade, course.type);
+  }
+}
 
 export function getBook(id: string): Book | undefined {
   return books.find((book) => book.bookId === id);

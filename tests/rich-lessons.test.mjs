@@ -44,3 +44,13 @@ test("rich lesson questions include option-specific misconception feedback", asy
   assert.match(rich, /feedback: \{/);
   assert.match(rich, /extension:/);
 });
+
+test("lesson duration grows with grade and expressive course types", async () => {
+  const curriculum = await readFile("app/data/curriculum.ts", "utf8");
+
+  assert.match(curriculum, /function adaptiveLessonMinutes/);
+  assert.match(curriculum, /grade <= 2/);
+  assert.match(curriculum, /grade <= 4/);
+  assert.match(curriculum, /type === "writing" \|\| type === "speaking"/);
+  assert.match(curriculum, /course\.minutes = adaptiveLessonMinutes/);
+});

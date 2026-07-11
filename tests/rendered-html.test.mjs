@@ -47,7 +47,7 @@ test("exposes reset controls and device pinyin speech", async () => {
   const [app, curriculum, lesson] = await Promise.all([
     readFile(new URL("../app/components/CourseApp.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/components/CurriculumView.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/components/AoeLesson.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/LessonView.tsx", import.meta.url), "utf8"),
   ]);
 
   assert.match(app, /resetCourse/);
@@ -56,27 +56,25 @@ test("exposes reset controls and device pinyin speech", async () => {
   assert.match(lesson, /speechSynthesis/);
   assert.match(lesson, /SpeechSynthesisUtterance/);
   assert.match(lesson, /utterance\.lang = "zh-CN"/);
-  assert.match(lesson, /听发音/);
+  assert.match(lesson, /点击听音/);
   assert.match(lesson, /音频播放失败，请检查设备是否静音/);
-  assert.doesNotMatch(lesson, /speakLetter\(nextLetter\)/);
-  assert.match(lesson, /onClick=\{\(\) => speakLetter\(letter, true\)\}/);
-  assert.doesNotMatch(lesson, /if \(playing && stage <= 2 && speechEnabled/);
   assert.match(lesson, /new Audio/);
   assert.match(lesson, /audio\/pinyin-/);
   assert.match(lesson, /audio\.play\(\)/);
   assert.match(lesson, /onended/);
+  assert.doesNotMatch(lesson, /useEffect/);
 });
 
-test("enables course completion after all three quiz answers are correct", async () => {
-  const lesson = await readFile(new URL("../app/components/AoeLesson.tsx", import.meta.url), "utf8");
+test("enables rich course completion after all requirements are satisfied", async () => {
+  const lesson = await readFile(new URL("../app/components/LessonView.tsx", import.meta.url), "utf8");
 
-  assert.match(lesson, /const quizPassed = questions\.every/);
-  assert.match(lesson, /disabled=\{stage === 4 && !quizPassed\}/);
-  assert.match(lesson, /stage === 4 \? "完成课程" : "下一步 →"/);
-  assert.match(lesson, /if \(stage === 4\) onBack\(\)/);
+  assert.match(lesson, /const quizPassed = course\.lesson\.quiz\.every/);
+  assert.match(lesson, /const lessonPassed = interactionsPassed && openSubmitted && quizPassed/);
+  assert.match(lesson, /disabled=\{stage === 7 && !lessonPassed\}/);
+  assert.match(lesson, /stage === 7 \? "完成课程" : "下一步 →"/);
 });
 
-test("generic lessons are complete self-study classrooms", async () => {
+test("generic lessons are complete rich self-study classrooms", async () => {
   const [app, lesson, curriculum] = await Promise.all([
     readFile(new URL("../app/components/CourseApp.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/components/LessonView.tsx", import.meta.url), "utf8"),
@@ -84,22 +82,22 @@ test("generic lessons are complete self-study classrooms", async () => {
   ]);
 
   assert.doesNotMatch(lesson, /课程正在生长/);
-  assert.match(lesson, /知识锦囊/);
-  assert.match(lesson, /例子演练/);
-  assert.match(lesson, /三题闯关/);
+  assert.match(lesson, /知识探秘/);
+  assert.match(lesson, /例子拆解/);
+  assert.match(lesson, /五题闯关/);
   assert.match(lesson, /const quizPassed = course\.lesson\.quiz\.every/);
-  assert.match(lesson, /disabled=\{stage === 4 && !quizPassed\}/);
+  assert.match(lesson, /disabled=\{stage === 7 && !lessonPassed\}/);
   assert.match(lesson, /onComplete\(\)/);
-  assert.match(app, /courseId !== "a-o-e" && <LessonView/);
+  assert.match(app, /view === "lesson" && <LessonView/);
+  assert.doesNotMatch(app, /<AoeLesson/);
   assert.match(app, /onComplete=\{\(\) => persist\(completeCourse\(progress, currentCourse\.id\)\)\}/);
   assert.doesNotMatch(curriculum, /看看学习目标/);
 });
 
-test("curated classrooms identify their editorial quality", async () => {
+test("curated classrooms identify their richer editorial quality", async () => {
   const lesson = await readFile(new URL("../app/components/LessonView.tsx", import.meta.url), "utf8");
 
-  assert.match(lesson, /course\.lesson\.curated/);
-  assert.match(lesson, /逐课精编/);
+  assert.match(lesson, /丰富互动版/);
 });
 
 test("rich classrooms expose eight learning stations and varied interaction state", async () => {
@@ -112,4 +110,14 @@ test("rich classrooms expose eight learning stations and varied interaction stat
   assert.match(lesson, /openResponse/);
   assert.match(lesson, /course\.lesson\.knowledgePoints/);
   assert.match(lesson, /course\.lesson\.extension/);
+});
+
+test("the rich pinyin classroom keeps pronunciation click-only", async () => {
+  const lesson = await readFile(new URL("../app/components/LessonView.tsx", import.meta.url), "utf8");
+
+  assert.match(lesson, /speechSynthesis/);
+  assert.match(lesson, /new Audio/);
+  assert.match(lesson, /audio\/pinyin-/);
+  assert.match(lesson, /onClick=\{\(\) => speakPinyin/);
+  assert.doesNotMatch(lesson, /useEffect\([^)]*speakPinyin/s);
 });
