@@ -17,8 +17,10 @@ test("every curated seed is expanded into a rich lesson contract", async () => {
   assert.match(curriculum, /extension: ExtensionCard/);
   assert.match(curriculum, /buildRichLesson/);
   assert.match(rich, /knowledgePoints: \[/);
-  assert.match(rich, /interactions: engine\.interactions/);
-  assert.match(rich, /quiz: \[/);
+  assert.match(rich, /const interactions = engine\.interactions/);
+  assert.match(rich, /interactions,/);
+  assert.match(rich, /const quiz = \[/);
+  assert.match(rich, /quiz,/);
   assert.match(rich, /"remember"/);
   assert.match(rich, /"transfer"/);
 });
@@ -126,4 +128,22 @@ test("all 564 runtime courses satisfy the rich lesson quality floor", async () =
     assert.ok(course.lesson.quiz.every((question) => question.options.every((option) => question.feedback[option]?.length > 0)), course.id);
     assert.equal(course.lesson.gradeBand, course.grade <= 2 ? "lower" : course.grade <= 4 ? "middle" : "upper", course.id);
   }
+});
+
+test("choice positions are deterministic without always putting answers first", async () => {
+  const { buildRichLesson } = await import("../app/data/richLesson.ts");
+  const context = {
+    id: "stable-reading-course",
+    title: "稳定选项测试",
+    type: "reading",
+    objective: "寻找证据并解释",
+    action: "先观察再推理",
+    seed: { knowledge: "核心知识", example: "证据例子", checkPrompt: "创新问题？", checkAnswer: "合理答案" },
+  };
+  const first = buildRichLesson(context);
+  const second = buildRichLesson(context);
+
+  assert.deepEqual(first.quiz.map((question) => question.options), second.quiz.map((question) => question.options));
+  assert.ok(first.quiz.some((question) => question.options[0] !== question.answer));
+  assert.ok(first.interactions.some((interaction) => !Array.isArray(interaction.answer) && interaction.options[0] !== interaction.answer));
 });

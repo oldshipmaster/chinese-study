@@ -86,6 +86,15 @@ const sequence = (
   explanation: string,
 ): InteractionTask => ({ id, mode: "sort", title, prompt, options: [answer[1], answer[2], answer[0]], answer, explanation });
 
+const rotateOptions = (options: string[], key: string): string[] => {
+  const offset = [...key].reduce((sum, character, index) => sum + character.charCodeAt(0) * (index + 1), 0) % options.length;
+  return [...options.slice(offset), ...options.slice(0, offset)];
+};
+
+const arrangeInteraction = (task: InteractionTask, key: string): InteractionTask => Array.isArray(task.answer)
+  ? task
+  : { ...task, options: rotateOptions(task.options, key) };
+
 const engines: Record<CourseKind, Engine> = {
   pinyin: {
     method: "先听音和看口形，再比较送气、舌位或声调，最后连成完整音节。",
@@ -173,9 +182,18 @@ export function buildRichLesson(context: RichLessonContext): RichLessonData {
   const { title, seed, objective, type, action } = context;
   const engine = engines[type];
   const transferAnswer = `先找线索，再用本课方法解释新问题`;
+  const warmUp = arrangeInteraction(choice("warm-up", "scenario", "旧知热身", `走进《${title}》前，哪种学习状态最有帮助？`, "带着问题观察并说出理由", ["只等页面给答案", "看到长句就直接跳过"], "主动提问能唤醒旧知识，也能为新发现留下位置。"), `${context.id}-warm-up`);
+  const interactions = engine.interactions(context).map((task) => arrangeInteraction(task, `${context.id}-${task.id}`));
+  const quiz = [
+    makeQuestion(seed.checkPrompt, seed.checkAnswer, ["只凭课题猜答案", "没有回到材料找线索"], seed.example, "remember"),
+    makeQuestion(`《${title}》最重要的核心知识是什么？`, seed.knowledge, ["只记住页面颜色", "只说我已经看完"], "核心知识能概括本课真正要理解的内容。", "understand"),
+    makeQuestion("哪项最适合作为核心知识的证据？", seed.example, ["与内容无关的个人偏好", "没有事实的空泛评价"], "好证据与结论之间能说清联系。", "apply"),
+    makeQuestion("遇到一个答案时，怎样判断它真的合理？", engine.method, ["看哪个选项最长", "选择最先看到的答案"], "本课方法把观察、证据与解释连在一起。", "reason"),
+    makeQuestion("把本课能力带到新任务，第一步应该怎样做？", transferAnswer, ["原样背诵旧答案", "不看新条件直接套用"], "迁移不是照搬，要比较新旧任务并重新寻找证据。", "transfer"),
+  ].map((question) => ({ ...question, options: rotateOptions(question.options, `${context.id}-${question.difficulty}`) }));
 
   return {
-    warmUp: choice("warm-up", "scenario", "旧知热身", `走进《${title}》前，哪种学习状态最有帮助？`, "带着问题观察并说出理由", ["只等页面给答案", "看到长句就直接跳过"], "主动提问能唤醒旧知识，也能为新发现留下位置。"),
+    warmUp,
     knowledgePoints: [
       { label: "核心", title: "本课关键发现", detail: seed.knowledge, tip: "读完后试着不用原句复述一次。" },
       { label: "证据", title: "从例子看证据", detail: seed.example, tip: "圈出最能证明核心发现的词或动作。" },
@@ -183,19 +201,13 @@ export function buildRichLesson(context: RichLessonContext): RichLessonData {
       { label: "迁移", title: "换个问题也会用", detail: `${seed.checkPrompt} 可以回答：${seed.checkAnswer}。`, tip: "答案后面再补一句“因为……”。" },
       { label: "目标", title: "能力坐标", detail: objective, tip: "学完后回到这里，检查自己能不能独立完成。" },
     ],
-    interactions: engine.interactions(context),
+    interactions,
     openTask: {
       prompt: `请用自己的话讲清《${title}》最重要的发现，并指出一个依据。`,
       support: ["我的发现是……", "我从……看出来……", "如果换一个情境，我会……"],
       example: `我的发现是：${seed.knowledge} 依据是：${seed.example}`,
     },
-    quiz: [
-      makeQuestion(seed.checkPrompt, seed.checkAnswer, ["只凭课题猜答案", "没有回到材料找线索"], seed.example, "remember"),
-      makeQuestion(`《${title}》最重要的核心知识是什么？`, seed.knowledge, ["只记住页面颜色", "只说我已经看完"], "核心知识能概括本课真正要理解的内容。", "understand"),
-      makeQuestion("哪项最适合作为核心知识的证据？", seed.example, ["与内容无关的个人偏好", "没有事实的空泛评价"], "好证据与结论之间能说清联系。", "apply"),
-      makeQuestion("遇到一个答案时，怎样判断它真的合理？", engine.method, ["看哪个选项最长", "选择最先看到的答案"], "本课方法把观察、证据与解释连在一起。", "reason"),
-      makeQuestion("把本课能力带到新任务，第一步应该怎样做？", transferAnswer, ["原样背诵旧答案", "不看新条件直接套用"], "迁移不是照搬，要比较新旧任务并重新寻找证据。", "transfer"),
-    ],
+    quiz,
     extension: {
       title: `${title} · 再往前一步`,
       fact: engine.extension,
