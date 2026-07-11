@@ -151,6 +151,17 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
 
   const replay = () => clearLessonState("从头再学一遍，这次试着发现新的线索。");
 
+  const retryWrongQuestions = () => {
+    if (wrongQuestionIndexes.length === 0) {
+      setMessage("本轮没有错题，可以选择一道高阶题讲给家人听。");
+      setStage(6);
+      return;
+    }
+    setAnswers((current) => current.map((answer, index) => wrongQuestionIndexes.includes(index) ? "" : answer));
+    setStage(6);
+    setMessage(`已保留答对的题，只需重新挑战 ${wrongQuestionIndexes.length} 道错题。`);
+  };
+
   const goNext = () => {
     if (stage === 7) {
       if (lessonPassed && !notified) {
@@ -343,10 +354,10 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
               <article><strong>{selectedCorrectCount} / 5</strong><span>分层问题</span></article>
             </div>
             <div className="extension-card"><strong>知识再长一片叶</strong><p>{course.lesson.extension.fact}</p><h2>带走挑战</h2><p>{course.lesson.extension.challenge}</p></div>
-            <section className="mistake-review"><h2>我的错因回顾</h2>{Object.keys(wrongAttempts).length === 0 ? <p>本轮没有错答。下一次可以尝试更快说出证据。</p> : Object.entries(wrongAttempts).map(([index, values]) => {
+            <section className="mistake-review"><h2>我的错因回顾</h2>{wrongQuestionIndexes.length === 0 ? <p>本轮没有错答。下一次可以尝试更快说出证据。</p> : Object.entries(wrongAttempts).filter(([index]) => course.lesson.quiz[Number(index)]).map(([index, values]) => {
               const question = course.lesson.quiz[Number(index)];
               return <article key={index}><strong>{question.prompt}</strong>{values.map((value) => <p key={value}>曾选“{value}”：{question.feedback[value]}</p>)}<small>正确思路：{question.explanation}</small></article>;
-            })}</section>
+            })}<div className="mistake-actions"><button onClick={() => setStage(2)}>回知识卡复习</button><button onClick={retryWrongQuestions}>只重做错过的题</button></div></section>
             <section className="confidence-check"><h2>现在的我</h2><div>{["我还要复习一次", "我基本掌握了", "我能讲给别人听"].map((value) => <button className={confidence === value ? "selected" : ""} key={value} onClick={() => setConfidence(value)}>{value}</button>)}</div>{confidence && <p>已记录：{confidence}。诚实判断，比追求满分更重要。</p>}</section>
             <section className="study-prescription"><span className="eyebrow">自学导航</span><h2>我的下一步学习处方</h2><ol>{studyPrescription.map((item) => <li key={item}>{item}</li>)}</ol></section>
             {!lessonPassed && <aside className="completion-hint">要完成课程，还需要：{!interactionsPassed ? "完成两项互动；" : ""}{!openSubmitted ? "提交开放表达；" : ""}{!quizPassed ? "答对五道分层题。" : ""}</aside>}

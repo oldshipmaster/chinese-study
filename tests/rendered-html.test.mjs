@@ -156,4 +156,7 @@ test("final station gives a personalized next-study prescription", async () => {
   assert.match(lesson, /wrongAttempts/);
   assert.match(lesson, /回到互动实验/);
   assert.match(lesson, /挑战拓展任务/);
+  assert.match(lesson, /retryWrongQuestions/);
+  assert.match(lesson, /只重做错过的题/);
+  assert.match(lesson, /回知识卡复习/);
 });
