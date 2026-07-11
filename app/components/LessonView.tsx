@@ -267,7 +267,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   };
 
   return (
-    <main className={`lesson-page generic-lesson rich-lesson type-${course.type}`}>
+    <main className={`lesson-page generic-lesson rich-lesson type-${course.type} band-${course.lesson.gradeBand}`}>
       <header className="lesson-toolbar">
         <button className="back-button" onClick={onBack}>← 课程地图</button>
         <div className="lesson-title">

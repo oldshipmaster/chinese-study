@@ -40,6 +40,7 @@ test("ships the selected visual system and accessible motion fallback", async ()
   assert.match(css, /#f7f3e8/i);
   assert.match(css, /#29766b/i);
   assert.match(css, /prefers-reduced-motion/);
+  assert.match(css, /band-lower/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
 });
 
