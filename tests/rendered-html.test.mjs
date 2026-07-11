@@ -196,3 +196,11 @@ test("final station gives a personalized next-study prescription", async () => {
   assert.match(lesson, /confidenceReviewPlan/);
   assert.match(lesson, /间隔复习建议/);
 });
+
+test("thirty-second retell is an active retrieval exercise", async () => {
+  const lesson = await readFile(new URL("../app/components/LessonView.tsx", import.meta.url), "utf8");
+  assert.match(lesson, /retellSeconds/);
+  assert.match(lesson, /开始 30 秒脱稿复述/);
+  assert.match(lesson, /复述完成/);
+  assert.match(lesson, /发现、证据和迁移/);
+});

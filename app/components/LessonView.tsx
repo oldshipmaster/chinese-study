@@ -75,6 +75,8 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   const [confidence, setConfidence] = useState("");
   const [answers, setAnswers] = useState<string[]>([]);
   const [quizHints, setQuizHints] = useState<number[]>([]);
+  const [retellSeconds, setRetellSeconds] = useState(30);
+  const [retellRunning, setRetellRunning] = useState(false);
   const [message, setMessage] = useState("带着问题走进情境，看看今天会发现什么。");
   const [speechMessage, setSpeechMessage] = useState("点击字母或音节，听清后再跟读。");
   const [pinyinRate, setPinyinRate] = useState<"normal" | "slow">("normal");
@@ -135,6 +137,18 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
     const next = isEmpty ? removeLessonDraft(drafts, course.id) : upsertLessonDraft(drafts, course.id, { stage, warmChoice, interactionAnswers, openResponse, openRoute, openSubmitted, openChecks, confidence, quizHints, selectedTerms, wrongAttempts, answers, masteredKnowledge, inquiryPredictions });
     try { window.localStorage.setItem(LESSON_DRAFT_STORAGE_KEY, JSON.stringify(next)); } catch { /* The lesson still works when storage is unavailable. */ }
   }, [answers, confidence, course.id, draftReady, inquiryPredictions, interactionAnswers, masteredKnowledge, openChecks, openResponse, openRoute, openSubmitted, quizHints, selectedTerms, stage, warmChoice, wrongAttempts]);
+
+  useEffect(() => {
+    if (!retellRunning) return;
+    const timer = window.setTimeout(() => {
+      if (retellSeconds <= 1) {
+        setRetellSeconds(0);
+        setRetellRunning(false);
+        setMessage("复述完成！现在检查自己是否讲到了发现、证据和迁移。");
+      } else setRetellSeconds((seconds) => seconds - 1);
+    }, 1000);
+    return () => window.clearTimeout(timer);
+  }, [retellRunning, retellSeconds]);
 
   const completeIfReady = (nextAnswers: string[]) => {
     const passedQuiz = course.lesson.quiz.every((question, index) => nextAnswers[index] === question.answer);
@@ -225,6 +239,8 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
     setConfidence("");
     setAnswers([]);
     setQuizHints([]);
+    setRetellSeconds(30);
+    setRetellRunning(false);
     setActivePinyinToken("");
     setMessage(resetMessage);
   };
@@ -491,7 +507,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
               <article><strong>{selectedCorrectCount} / 5</strong><span>当前正确 · 首次答对 {firstTryCorrectCount}/5 · 提示 {quizHints.length} 次</span></article>
             </div>
             <div className="extension-card"><strong>知识再长一片叶</strong><p>{course.lesson.extension.fact}</p><aside className="cross-connection"><span>跨学科连接 · {course.lesson.extension.connection.field}</span><p>{course.lesson.extension.connection.insight}</p></aside><h2>带走挑战</h2><p>{course.lesson.extension.challenge}</p></div>
-            <section className="retell-card"><span className="eyebrow">30 秒复述卡</span><h2>{course.lesson.summary}</h2><ol><li><strong>课题：</strong>我学习了《{course.title}》。</li><li><strong>发现：</strong>{course.lesson.knowledgePoints[0].detail}</li><li><strong>证据：</strong>{course.lesson.knowledgePoints[1].detail}</li><li><strong>迁移：</strong>下一次遇到新问题，我会使用{course.lesson.toolkit.map((tool) => tool.name).join("、")}中的合适工具。</li></ol></section>
+            <section className={`retell-card ${retellRunning ? "is-running" : ""}`}><span className="eyebrow">30 秒复述卡</span><h2>{retellRunning ? `脱稿复述中 · ${retellSeconds} 秒` : course.lesson.summary}</h2>{retellRunning ? <p className="retell-live">不看答案，依次讲清：课题、发现、证据和迁移。卡住时先说“我从……看出来……”。</p> : <ol><li><strong>课题：</strong>我学习了《{course.title}》。</li><li><strong>发现：</strong>{course.lesson.knowledgePoints[0].detail}</li><li><strong>证据：</strong>{course.lesson.knowledgePoints[1].detail}</li><li><strong>迁移：</strong>下一次遇到新问题，我会使用{course.lesson.toolkit.map((tool) => tool.name).join("、")}中的合适工具。</li></ol>}<div className="retell-actions"><button onClick={() => { setRetellSeconds(30); setRetellRunning(true); setMessage("开始 30 秒脱稿复述。页面已收起答案，只保留提纲。"); }}>{retellSeconds === 0 ? "再挑战一次" : "开始 30 秒脱稿复述"}</button>{retellRunning && <button onClick={() => { setRetellRunning(false); setMessage("复述已暂停，可以先看复述卡整理思路，再重新挑战。"); }}>暂停并看提示</button>}</div></section>
             {openSubmitted && <section className="expression-artifact"><span className="eyebrow">我的学习作品</span><h2>{openRoute !== null ? course.lesson.openTask.routes[openRoute].label : "开放表达"}</h2><p>{openResponse}</p><small>我使用了：{selectedTerms.length > 0 ? selectedTerms.join("、") : "自己的话和本课证据"}</small></section>}
             <button className="print-artifact" onClick={() => window.print()}>打印或保存本课学习作品</button>
             <section className="mistake-review"><h2>我的错因回顾</h2>{wrongQuestionIndexes.length === 0 ? <p>本轮没有错答。下一次可以尝试更快说出证据。</p> : Object.entries(wrongAttempts).filter(([index]) => course.lesson.quiz[Number(index)]).map(([index, values]) => {
