@@ -16,6 +16,8 @@ const abilities = [
   ["写", "习作创作"],
 ];
 
+const totalCourses = books.reduce((sum, book) => sum + book.units.reduce((unitSum, unit) => unitSum + unit.courses.length, 0), 0);
+
 export function HomeView({ progress, onOpenBook, onStart }: HomeViewProps) {
   return (
     <>
@@ -51,7 +53,7 @@ export function HomeView({ progress, onOpenBook, onStart }: HomeViewProps) {
       </section>
 
       <section className="section-block" aria-labelledby="grade-title">
-        <div className="section-heading"><div><span className="eyebrow">十二册课程地图</span><h2 id="grade-title">从一年级走到六年级</h2></div><p>每一册都是一座语文小岛</p></div>
+        <div className="section-heading"><div><span className="eyebrow">十二册全量课程地图</span><h2 id="grade-title">从一年级走到六年级</h2></div><p>{totalCourses} 节原创自学课都可以直接开始</p></div>
         <div className="grade-grid">
           {[1, 2, 3, 4, 5, 6].map((grade) => (
             <article className={`grade-card grade-${grade}`} key={grade}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { books, getBook, getCourse } from "../data/curriculum";
 import { completeCourse, defaultProgress, parseProgress, PROGRESS_STORAGE_KEY, resetCourse } from "../lib/progress";
 import { AoeLesson } from "./AoeLesson";
@@ -14,9 +14,10 @@ export function CourseApp() {
   const [view, setView] = useState<View>("home");
   const [bookId, setBookId] = useState("g1-upper");
   const [courseId, setCourseId] = useState("a-o-e");
-  const [progress, setProgress] = useState(defaultProgress);
-
-  useEffect(() => setProgress(parseProgress(window.localStorage.getItem(PROGRESS_STORAGE_KEY))), []);
+  const [progress, setProgress] = useState(() => {
+    if (typeof window === "undefined") return defaultProgress();
+    return parseProgress(window.localStorage.getItem(PROGRESS_STORAGE_KEY));
+  });
 
   const persist = (next: ReturnType<typeof defaultProgress>) => {
     setProgress(next);
@@ -41,7 +42,7 @@ export function CourseApp() {
       {view === "home" && <main className="home-page"><HomeView progress={progress} onOpenBook={openBook} onStart={() => openCourse("a-o-e")} /></main>}
       {view === "curriculum" && <CurriculumView book={currentBook} completed={progress.completedCourseIds} onBack={() => setView("home")} onOpenCourse={openCourse} onResetCourse={handleReset} />}
       {view === "lesson" && courseId === "a-o-e" && <AoeLesson completed={progress.completedCourseIds.includes("a-o-e")} onBack={() => setView("curriculum")} onComplete={() => persist(completeCourse(progress, "a-o-e"))} onReset={() => handleReset("a-o-e")} />}
-      {view === "lesson" && courseId !== "a-o-e" && <LessonView course={currentCourse} onBack={() => setView("curriculum")} />}
+      {view === "lesson" && courseId !== "a-o-e" && <LessonView course={currentCourse} completed={progress.completedCourseIds.includes(currentCourse.id)} onBack={() => setView("curriculum")} onComplete={() => persist(completeCourse(progress, currentCourse.id))} onReset={() => handleReset(currentCourse.id)} />}
       {view !== "lesson" && <footer className="site-footer"><div><strong>字里少年宫</strong><span>原创小学语文动画课程</span></div><p>依据课程标准与统编教材结构设计，不复制教材正文与插图。</p></footer>}
     </div>
   );

@@ -11,6 +11,25 @@ test("curriculum exposes twelve books and the flagship lesson", async () => {
   assert.match(source, /course\("a-o-e"/);
 });
 
+test("curriculum opens a full primary-school course map", async () => {
+  const source = await readFile("app/data/curriculum.ts", "utf8");
+
+  assert.ok((source.match(/\bc\("/g) ?? []).length >= 220);
+  assert.doesNotMatch(source, /building/);
+  assert.match(source, /快乐读书吧：读书真快乐/);
+  assert.match(source, /综合性学习：难忘小学生活/);
+  assert.match(source, /古诗词诵读/);
+});
+
+test("every generated course carries a self-study lesson package", async () => {
+  const source = await readFile("app/data/curriculum.ts", "utf8");
+
+  assert.match(source, /export interface LessonContent/);
+  assert.match(source, /lesson: buildLesson/);
+  assert.match(source, /quiz: \[/);
+  assert.match(source, /animationFrames/);
+});
+
 test("curriculum defines every supported learning mode", async () => {
   const source = await readFile("app/data/curriculum.ts", "utf8");
 

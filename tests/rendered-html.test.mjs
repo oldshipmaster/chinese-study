@@ -75,3 +75,22 @@ test("enables course completion after all three quiz answers are correct", async
   assert.match(lesson, /stage === 4 \? "完成课程" : "下一步 →"/);
   assert.match(lesson, /if \(stage === 4\) onBack\(\)/);
 });
+
+test("generic lessons are complete self-study classrooms", async () => {
+  const [app, lesson, curriculum] = await Promise.all([
+    readFile(new URL("../app/components/CourseApp.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/LessonView.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/CurriculumView.tsx", import.meta.url), "utf8"),
+  ]);
+
+  assert.doesNotMatch(lesson, /课程正在生长/);
+  assert.match(lesson, /知识锦囊/);
+  assert.match(lesson, /例子演练/);
+  assert.match(lesson, /三题闯关/);
+  assert.match(lesson, /const quizPassed = course\.lesson\.quiz\.every/);
+  assert.match(lesson, /disabled=\{stage === 4 && !quizPassed\}/);
+  assert.match(lesson, /onComplete\(\)/);
+  assert.match(app, /courseId !== "a-o-e" && <LessonView/);
+  assert.match(app, /onComplete=\{\(\) => persist\(completeCourse\(progress, currentCourse\.id\)\)\}/);
+  assert.doesNotMatch(curriculum, /看看学习目标/);
+});
