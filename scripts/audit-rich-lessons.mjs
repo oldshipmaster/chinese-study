@@ -15,7 +15,7 @@ const report = [];
 
 for (const book of curriculum.books) {
   const courses = book.units.flatMap((unit) => unit.courses);
-  const typeCounts = Object.fromEntries([...new Set(courses.map((course) => course.type))].map((type) => [type, courses.filter((course) => course.type === type).length]));
+  const typeCounts = [...new Set(courses.map((course) => course.type))].map((type) => `${type}:${courses.filter((course) => course.type === type).length}`).join(" · ");
   for (const course of courses) {
     const expressive = course.type === "writing" || course.type === "speaking";
     const expectedMinutes = book.grade <= 2 ? (expressive ? 20 : 18) : book.grade <= 4 ? (expressive ? 25 : 23) : expressive ? 30 : 28;
