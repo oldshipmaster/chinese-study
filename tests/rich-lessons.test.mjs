@@ -61,6 +61,7 @@ test("every interaction provides option-specific coaching", async () => {
     for (const task of [lesson.warmUp, ...lesson.interactions]) {
       assert.deepEqual(Object.keys(task.feedback).sort(), task.options.slice().sort(), `${type}:${task.id}`);
       assert.ok(task.options.every((option) => task.feedback[option].length >= 8), `${type}:${task.id}`);
+      assert.ok(task.reflection.length >= 12, `${type}:${task.id}:reflection`);
     }
   }
 });

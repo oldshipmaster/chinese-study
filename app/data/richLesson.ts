@@ -20,6 +20,7 @@ export interface InteractionTask {
   answer: string | string[];
   explanation: string;
   feedback: Record<string, string>;
+  reflection: string;
 }
 
 export interface OpenTask {
@@ -127,6 +128,7 @@ const choice = (
     [distractors[0]]: `“${distractors[0]}”只停在表面，没有使用这道题要求的关键线索。`,
     [distractors[1]]: `“${distractors[1]}”跳过了比较和验证，请回到知识卡重新找依据。`,
   },
+  reflection: `做对“${title}”后，请补一句：“我选择这条线索，因为……”`,
 });
 
 const sequence = (
@@ -144,6 +146,7 @@ const sequence = (
   answer,
   explanation,
   feedback: Object.fromEntries(answer.map((step, index) => [step, `这是第 ${index + 1} 步：${step}。想一想它前后分别要接什么。`])),
+  reflection: `完成“${title}”后，请遮住选项，用自己的话复述三步顺序。`,
 });
 
 const rotateOptions = (options: string[], key: string): string[] => {
