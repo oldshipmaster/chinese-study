@@ -8,6 +8,7 @@ import { LESSON_DRAFT_STORAGE_KEY, parseLessonDrafts, removeLessonDraft, upsertL
 const stages = ["情境导入", "旧知热身", "知识探秘", "例子拆解", "互动实验", "创新挑战", "五题闯关", "错因拓展"];
 const difficultyLabels = { remember: "记一记", understand: "懂一懂", apply: "用一用", reason: "想一想", transfer: "闯新关" };
 const interactionModeLabels = { match: "配对发现", sort: "顺序推理", evidence: "证据侦探", scenario: "情境应答", classify: "分类归纳", revise: "修改升级" };
+const interactionModeGuides = { match: "比较特征，找到最严密的对应关系。", sort: "按先后点击三步，随时可以重新排序。", evidence: "先读结论，再选择能直接证明它的材料。", scenario: "想清对象、目的和现场条件后再应答。", classify: "先确定分类标准，再检查每项是否符合。", revise: "比较修改前后，看哪一项更准确、具体、连贯。" };
 
 interface LessonViewProps {
   course: Course;
@@ -337,7 +338,7 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
             <div className="interaction-grid">{course.lesson.interactions.map((task) => {
               const selected = interactionAnswers[task.id] ?? [];
               return <article key={task.id} className={interactionCorrect(task) ? "passed" : ""}>
-                <header><span>{interactionModeLabels[task.mode]}</span><h2>{task.title}</h2></header><p>{task.prompt}</p>
+                <header><span>{interactionModeLabels[task.mode]}</span><h2>{task.title}</h2></header><p className="mode-guide">玩法：{interactionModeGuides[task.mode]}</p><p>{task.prompt}</p>
                 <div className="interaction-options">{task.options.map((option) => (
                   <button className={selected.includes(option) ? "selected" : ""} key={option} onClick={() => chooseInteraction(task, option)}>
                     {Array.isArray(task.answer) && selected.includes(option) ? `${selected.indexOf(option) + 1}. ` : ""}{option}
