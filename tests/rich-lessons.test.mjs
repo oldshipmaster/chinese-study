@@ -165,3 +165,19 @@ test("choice positions are deterministic without always putting answers first", 
   assert.ok(first.quiz.some((question) => question.options[0] !== question.answer));
   assert.ok(first.interactions.some((interaction) => !Array.isArray(interaction.answer) && interaction.options[0] !== interaction.answer));
 });
+
+test("high-order questions are designed for each course type", async () => {
+  const { buildRichLesson } = await import("../app/data/richLesson.ts");
+  const pairs = ["pinyin", "literacy", "reading", "poetry", "speaking", "writing", "garden"].map((type) => {
+    const lesson = buildRichLesson({
+      id: `deep-${type}`,
+      title: "同名课程",
+      type,
+      objective: "形成语文能力",
+      action: "完成挑战",
+      seed: { knowledge: "同一核心", example: "同一例子", checkPrompt: "同一问题？", checkAnswer: "同一答案" },
+    });
+    return lesson.quiz.slice(3).map((question) => `${question.prompt}|${question.answer}`).join("||");
+  });
+  assert.equal(new Set(pairs).size, 7);
+});

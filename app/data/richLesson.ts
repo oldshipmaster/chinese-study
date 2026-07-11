@@ -69,6 +69,11 @@ type Engine = {
   interactions: (context: RichLessonContext) => InteractionTask[];
 };
 
+type DeepQuestionBlueprint = {
+  reason: [string, string, [string, string], string];
+  transfer: [string, string, [string, string], string];
+};
+
 const choice = (
   id: string,
   mode: Exclude<InteractionMode, "sort">,
@@ -177,6 +182,37 @@ const engines: Record<CourseKind, Engine> = {
   },
 };
 
+const deepQuestions: Record<CourseKind, DeepQuestionBlueprint> = {
+  pinyin: {
+    reason: ["两个读音很接近时，怎样找出差别？", "对照口形、舌位或送气，再分别慢读和听辨", ["只比较字母写得大不大", "把两个音连续快读过去"], "发音差别要靠口形动作和听觉共同验证。"],
+    transfer: ["遇到从没见过的新音节，怎样尝试拼读？", "拆出声母、韵母和声调，逐步拼合后再听读音", ["跳过声调直接猜", "把整个音节当图画死记"], "拆分、拼合、听辨是一套可以迁移的拼读工具。"],
+  },
+  literacy: {
+    reason: ["两个字外形相近时，怎样判断各自的意思？", "比较不同部件，再放进词语和句子验证", ["只看它们是不是同音", "选笔画较少的那个字"], "字形部件提供线索，语境负责检验字义。"],
+    transfer: ["遇到一个陌生汉字，第一轮可以怎样推测？", "观察偏旁和部件，联系熟字、组词与语境逐项验证", ["只凭第一眼随便读", "完全跳过句子查答案"], "识字迁移要把形、音、义三条线索连起来。"],
+  },
+  reading: {
+    reason: ["两位同学对人物有不同评价，怎样判断谁更有道理？", "分别列出文本证据，比较证据能否支持各自观点", ["看谁说话声音更大", "只选择和自己感觉一样的"], "阅读观点可以不同，但证据与推理必须经得起核对。"],
+    transfer: ["读一篇新文章时，怎样快速寻找关键变化？", "圈出前后表现和转折词，再解释变化的原因", ["只数每段有多少字", "直接套用旧文章的结论"], "抓前后变化与因果关系能帮助理解新的文本。"],
+  },
+  poetry: {
+    reason: ["诗中没有直接写“思念”，为什么仍能读出这种情感？", "从意象、动作、语气和写作背景组合推断", ["因为每首古诗都写思念", "只因为诗句字数整齐"], "诗歌情感常藏在具体意象和表达方式里。"],
+    transfer: ["读另一首写景诗，怎样体会景物背后的情感？", "圈出意象和动作，想象画面，再比较色彩、声音与节奏", ["只背诗人的姓名", "看见景物就一律说很快乐"], "由意象进入画面，再由画面体会情感，是可迁移的读诗方法。"],
+  },
+  speaking: {
+    reason: ["对方没有听懂时，最有效的调整是什么？", "换一种更清楚的顺序或例子，并询问对方哪里不明白", ["原话更快地重复三遍", "责怪对方没有认真听"], "真实交流要根据听者反馈及时调整表达。"],
+    transfer: ["把同一件事讲给同学和长辈听，应该怎样变化？", "根据对象调整称呼、语气和背景信息，核心事实保持准确", ["对所有人使用完全相同的话", "为了有趣随意改变事实"], "对象和场合变化时，表达方式也要随之变化。"],
+  },
+  writing: {
+    reason: ["一段话细节很多却仍显得混乱，可能缺少什么？", "缺少围绕中心的取舍和清楚的叙述顺序", ["缺少更多形容词堆叠", "缺少把同一句话重复几遍"], "细节必须服务中心，并放在合适的位置。"],
+    transfer: ["把一次普通经历写得具体，第一步怎样做？", "确定最想表达的感受，再选能表现它的关键瞬间", ["从早到晚每分钟都写", "先抄一段别人的文章"], "中心决定材料，关键瞬间承载真实细节。"],
+  },
+  garden: {
+    reason: ["整理了很多知识卡却不会做新题，问题可能在哪里？", "只做了分类，没有比较规律并尝试迁移", ["卡片颜色不够多", "标题写得不够大"], "整理的目的在于建立联系并支持使用。"],
+    transfer: ["面对综合语文任务，怎样选择合适的方法？", "先辨认任务目标和条件，再从方法库中选择、组合并检验", ["每次都固定使用同一种方法", "不读要求就直接开始"], "综合任务需要根据目标灵活组合已有方法。"],
+  },
+};
+
 const makeQuestion = (
   prompt: string,
   answer: string,
@@ -204,15 +240,15 @@ const makeQuestion = (
 export function buildRichLesson(context: RichLessonContext): RichLessonData {
   const { title, seed, objective, type, action } = context;
   const engine = engines[type];
-  const transferAnswer = `先找线索，再用本课方法解释新问题`;
+  const deep = deepQuestions[type];
   const warmUp = arrangeInteraction(choice("warm-up", "scenario", "旧知热身", `走进《${title}》前，哪种学习状态最有帮助？`, "带着问题观察并说出理由", ["只等页面给答案", "看到长句就直接跳过"], "主动提问能唤醒旧知识，也能为新发现留下位置。"), `${context.id}-warm-up`);
   const interactions = engine.interactions(context).map((task) => arrangeInteraction(task, `${context.id}-${task.id}`));
   const quiz = [
     makeQuestion(seed.checkPrompt, seed.checkAnswer, ["只凭课题猜答案", "没有回到材料找线索"], seed.example, "remember"),
     makeQuestion(`《${title}》最重要的核心知识是什么？`, seed.knowledge, ["只记住页面颜色", "只说我已经看完"], "核心知识能概括本课真正要理解的内容。", "understand"),
     makeQuestion("哪项最适合作为核心知识的证据？", seed.example, ["与内容无关的个人偏好", "没有事实的空泛评价"], "好证据与结论之间能说清联系。", "apply"),
-    makeQuestion("遇到一个答案时，怎样判断它真的合理？", engine.method, ["看哪个选项最长", "选择最先看到的答案"], "本课方法把观察、证据与解释连在一起。", "reason"),
-    makeQuestion("把本课能力带到新任务，第一步应该怎样做？", transferAnswer, ["原样背诵旧答案", "不看新条件直接套用"], "迁移不是照搬，要比较新旧任务并重新寻找证据。", "transfer"),
+    makeQuestion(deep.reason[0], deep.reason[1], deep.reason[2], deep.reason[3], "reason"),
+    makeQuestion(deep.transfer[0], deep.transfer[1], deep.transfer[2], deep.transfer[3], "transfer"),
   ].map((question) => ({ ...question, options: rotateOptions(question.options, `${context.id}-${question.difficulty}`) }));
 
   return {
