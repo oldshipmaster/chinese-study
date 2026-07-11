@@ -14,6 +14,7 @@ const curriculum = await import(`data:text/javascript;base64,${Buffer.from(resul
 const ids = new Set();
 const quizSignatures = new Set();
 const sceneSignatures = new Set();
+const answerPositions = [0, 0, 0];
 const report = [];
 
 for (const book of curriculum.books) {
@@ -25,6 +26,7 @@ for (const book of curriculum.books) {
     assert.ok(!ids.has(course.id), `重复课程 ID：${course.id}`);
     ids.add(course.id);
     quizSignatures.add(course.lesson.quiz.map((question) => `${question.prompt}|${question.answer}`).join("||"));
+    for (const question of course.lesson.quiz) answerPositions[question.options.indexOf(question.answer)] += 1;
     sceneSignatures.add(course.lesson.animationFrames.join("||"));
     assert.equal(course.lesson.curated, true, `${course.id} 缺少独立编辑内容`);
     assert.ok(!/待补充|敬请期待|课程正在生长|占位/.test(JSON.stringify(course.lesson)), `${course.id} 仍含占位内容`);
@@ -65,5 +67,7 @@ assert.equal(curriculum.books.reduce((sum, book) => sum + book.units.length, 0),
 assert.equal(ids.size, 564, "课程总数不是 564");
 assert.equal(quizSignatures.size, 564, "存在重复的整套五题闯关");
 assert.equal(sceneSignatures.size, 564, "存在重复的整套动画分镜");
+assert.ok(answerPositions.every((count) => count >= 700), `正确答案位置分布不均：${answerPositions.join(",")}`);
 console.table(report);
 console.log(`逐册审计通过：12 册、95 个单元、${ids.size} 课；564 套动画与五题组合均唯一；每课 5 张知识卡、3 个正式概念、3 个探究问题、4 件能力工具、3 条自主挑战路线、误区修正、跨学科连接和至少 2 项互动。`);
+console.log(`五题正确答案位置分布：第1位 ${answerPositions[0]} 题，第2位 ${answerPositions[1]} 题，第3位 ${answerPositions[2]} 题。`);
