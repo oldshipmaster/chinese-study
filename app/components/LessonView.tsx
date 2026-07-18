@@ -71,6 +71,8 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
   const [masteredKnowledge, setMasteredKnowledge] = useState<number[]>([]);
   const [revealedInquiries, setRevealedInquiries] = useState<number[]>([]);
   const [inquiryPredictions, setInquiryPredictions] = useState<Record<number, string>>({});
+  const [creativeHints, setCreativeHints] = useState<number[]>([]);
+  const [revealedCreativeQuestions, setRevealedCreativeQuestions] = useState<number[]>([]);
   const [wrongAttempts, setWrongAttempts] = useState<Record<number, string[]>>({});
   const [confidence, setConfidence] = useState("");
   const [answers, setAnswers] = useState<string[]>([]);
@@ -241,6 +243,8 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
     setMasteredKnowledge([]);
     setRevealedInquiries([]);
     setInquiryPredictions({});
+    setCreativeHints([]);
+    setRevealedCreativeQuestions([]);
     setWrongAttempts({});
     setConfidence("");
     setAnswers([]);
@@ -428,6 +432,20 @@ export function LessonView({ course, completed, onBack, onComplete, onReset }: L
                   {revealedInquiries.includes(index) && <small>{inquiry.guide}</small>}
                 </article>
               ))}</div>
+            </section>
+            <section className="creative-sparks">
+              <div className="creative-sparks-heading"><div><span className="eyebrow">思维火花</span><h2>五个没有唯一答案的新问题</h2></div><p>先大胆想，再看轻提示；最后点击参考思路，比较它和你的想法。</p></div>
+              <div className="creative-sparks-grid">{course.lesson.creativeQuestions.map((question, index) => {
+                const hintVisible = creativeHints.includes(index);
+                const referenceVisible = revealedCreativeQuestions.includes(index);
+                return <article className={referenceVisible ? "revealed" : ""} key={question.kind}>
+                  <header><span>{index + 1}</span><strong>{question.label}</strong></header>
+                  <h3>{question.prompt}</h3>
+                  <div className="creative-spark-actions"><button aria-expanded={hintVisible} onClick={() => setCreativeHints((values) => values.includes(index) ? values.filter((value) => value !== index) : [...values, index])}>{hintVisible ? "收起轻提示" : "给我一点提示"}</button><button aria-expanded={referenceVisible} onClick={() => setRevealedCreativeQuestions((values) => values.includes(index) ? values.filter((value) => value !== index) : [...values, index])}>{referenceVisible ? "收起参考思路" : "查看参考思路"}</button></div>
+                  {hintVisible && <p className="creative-hint"><strong>轻提示：</strong>{question.hint}</p>}
+                  {referenceVisible && <aside><strong>参考思路</strong><p>{question.reference}</p><small>这是一种思路，不是唯一答案。</small><b>继续追问：{question.followUp}</b></aside>}
+                </article>;
+              })}</div>
             </section>
           </div>
         )}

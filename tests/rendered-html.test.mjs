@@ -214,3 +214,13 @@ test("final station lets learners build and save their own question", async () =
   assert.match(lesson, /questionMakerReady/);
   assert.match(lesson, /从答题者升级为出题人/);
 });
+
+test("creative question sparks reveal hints and reference thinking only on click", async () => {
+  const lesson = await readFile(new URL("../app/components/LessonView.tsx", import.meta.url), "utf8");
+  assert.match(lesson, /revealedCreativeQuestions/);
+  assert.match(lesson, /思维火花/);
+  assert.match(lesson, /查看参考思路/);
+  assert.match(lesson, /这是一种思路，不是唯一答案/);
+  assert.match(lesson, /aria-expanded/);
+  assert.match(lesson, /followUp/);
+});
