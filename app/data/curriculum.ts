@@ -7,6 +7,7 @@ import {
   type InteractionTask,
   type GlossaryItem,
   type InquiryPrompt,
+  type CreativeQuestion,
   type KnowledgePoint,
   type LearningTool,
   type OpenTask,
@@ -59,6 +60,7 @@ export interface LessonContent {
   interactions: InteractionTask[];
   openTask: OpenTask;
   inquiries: InquiryPrompt[];
+  creativeQuestions: CreativeQuestion[];
   toolkit: LearningTool[];
   glossary: GlossaryItem[];
   contrastCase: ContrastCase;

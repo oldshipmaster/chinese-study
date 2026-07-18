@@ -54,6 +54,17 @@ export interface InquiryPrompt {
   guide: string;
 }
 
+export type CreativeQuestionKind = "what-if" | "compare" | "counterexample" | "transfer" | "create";
+
+export interface CreativeQuestion {
+  kind: CreativeQuestionKind;
+  label: string;
+  prompt: string;
+  hint: string;
+  reference: string;
+  followUp: string;
+}
+
 export interface LearningTool {
   name: string;
   use: string;
@@ -87,6 +98,7 @@ export interface RichLessonData {
   interactions: InteractionTask[];
   openTask: OpenTask;
   inquiries: InquiryPrompt[];
+  creativeQuestions: CreativeQuestion[];
   toolkit: LearningTool[];
   glossary: GlossaryItem[];
   contrastCase: ContrastCase;
@@ -393,6 +405,72 @@ const buildQuestionStudio = (context: RichLessonContext): QuestionStudio => {
   return { mission: `围绕《${context.title}》设计一道真正需要${context.type === "pinyin" ? "辨音" : context.type === "literacy" ? "比较形义" : context.type === "reading" ? "寻找证据" : context.type === "poetry" ? "想象与品读" : context.type === "speaking" ? "判断情境" : context.type === "writing" ? "选择与修改" : "整理与迁移"}的新题。`, ...studios[context.type] };
 };
 
+const creativeKinds: Array<{ kind: CreativeQuestionKind; label: string }> = [
+  { kind: "what-if", label: "假如改变" },
+  { kind: "compare", label: "比较辨析" },
+  { kind: "counterexample", label: "反例侦探" },
+  { kind: "transfer", label: "生活迁移" },
+  { kind: "create", label: "创造表达" },
+];
+
+type CreativeQuestionBody = Omit<CreativeQuestion, "kind" | "label">;
+
+const buildCreativeQuestions = (context: RichLessonContext): CreativeQuestion[] => {
+  const { title, seed } = context;
+  const byType: Record<CourseKind, CreativeQuestionBody[]> = {
+    pinyin: [
+      { prompt: `假如《${title}》中的一个音换了口形、气流或声调，听起来可能怎样变化？`, hint: "先慢读原音，再只改变一个发音条件。", reference: `可以从“${seed.example}”出发，一次只改变口形、送气或声调，再比较两次听到的声音。`, followUp: "如果同时改变两个条件，你还能判断是哪一处造成差别吗？" },
+      { prompt: `比较《${title}》里最容易混淆的两个音，耳朵和嘴巴分别能发现什么？`, hint: "把发音拆成听音、看口形、感受气流三步。", reference: `参考“${seed.knowledge}”，既要比较听感，也要观察发音部位和气流强弱，不能只看字母外形。`, followUp: "你能设计一个最小对比，让同学一听就发现差别吗？" },
+      { prompt: `能不能找到一个看起来符合《${title}》发音规律、实际却需要特别注意的音节？`, hint: "寻找拼写相似但发音动作或规则不同的情况。", reference: `可以把“${seed.example}”当作已知例子，再找一个拼写相近的音节，检查它是否受声调、整体认读或省写规则影响。`, followUp: "这个反例说明原来的规律需要补充什么条件？" },
+      { prompt: `在生活中的名字、招牌或儿歌里，怎样找到并验证《${title}》学到的声音？`, hint: "先找真实词语，再听、读、比较。", reference: `可以寻找含有目标音的词，用“${seed.knowledge}”检查口形与听感，并请家人判断两次读音是否一致。`, followUp: "换一个方言口音或说话速度，辨音方法还有效吗？" },
+      { prompt: `请为《${title}》设计一段三步辨音小游戏，让别人边听边发现发音规律。`, hint: "游戏要有目标音、干扰音和验证动作。", reference: `一种设计是先播放或读出目标音，再混入相近音，最后让玩家用口形、气流或声调路线解释选择。`, followUp: "怎样调整游戏，才能让第一次答错的人真正学会？" },
+    ],
+    literacy: [
+      { prompt: `假如把《${title}》中一个字的偏旁换掉，字形、读音或意思可能发生什么变化？`, hint: "一次只换一个部件，再放进词语里验证。", reference: `可以从“${seed.example}”中的关键字出发，换一个偏旁后查想读音，并用两个不同词语比较字义。`, followUp: "有没有换了偏旁但读音相近、意思完全不同的情况？" },
+      { prompt: `比较《${title}》中的关键字和一个形近字，哪条线索最能防止写错、用错？`, hint: "同时看部件位置、偏旁意义和句子语境。", reference: `依据“${seed.knowledge}”，最可靠的方法不是只数笔画，而是把不同部件和真实语境联系起来核对。`, followUp: "如果只听读音、不看字形，最容易出现什么误会？" },
+      { prompt: `找一个能挑战《${title}》识字规律的特殊汉字：它哪里像规律，哪里又不完全一样？`, hint: "寻找偏旁提示不明显或古今字义变化的字。", reference: `可以先用“${seed.example}”概括一般规律，再找一个偏旁不能直接猜出完整字义的字，说明规律只能提供线索。`, followUp: "原来的识字方法应该增加哪一步验证？" },
+      { prompt: `如果在超市、车站或社区看到《${title}》相关的字，你会怎样猜义并验证？`, hint: "利用招牌图像、相邻词语和生活场景。", reference: `先观察真实语境，再结合“${seed.knowledge}”分析部件，最后用完整词语或句子检查猜测是否说得通。`, followUp: "同一个字换到另一个场景，意思可能改变吗？" },
+      { prompt: `请用《${title}》的关键字创造一张“会讲故事的汉字卡”，你会画什么、写什么？`, hint: "让字形部件、词语和画面互相解释。", reference: `一种做法是放大关键部件，配上“${seed.example}”对应的生活画面，再写一个能看出字义的短句。`, followUp: "怎样让没学过这个字的人也能从卡片中猜出大意？" },
+    ],
+    reading: [
+      { prompt: `假如《${title}》中的关键选择或事件完全相反，人物、情节和主题可能怎样变化？`, hint: "先找到原事件的前因和后果，再沿相反方向推演。", reference: `可从“${seed.example}”这个证据出发，改变其中一个关键选择，再逐步推演人物行动和结局，而不是直接猜新结局。`, followUp: "哪些人物特点可能仍然不变？你有什么证据？" },
+      { prompt: `比较两种对《${title}》的不同理解，怎样判断哪一种证据更充分？`, hint: "分别列出观点、文本证据和解释，不比声音大小。", reference: `依据“${seed.knowledge}”，更有说服力的理解应引用具体词句或情节，并解释证据怎样支持观点。`, followUp: "有没有可能两种理解都成立，但适用的角度不同？" },
+      { prompt: `能否找到《${title}》中一个看似不符合核心发现的细节？它会推翻还是修正结论？`, hint: "主动寻找例外，再判断例外的分量。", reference: `先用“${seed.example}”说明原发现，再寻找方向相反的词句；一个反例可能推翻结论，也可能只说明结论需要条件。`, followUp: "如果把结论说得更准确，你会增加什么范围或条件？" },
+      { prompt: `把《${title}》的阅读方法带到新闻、说明书或另一个故事中，哪一步需要调整？`, hint: "比较文本目的、证据类型和读者任务。", reference: `可以保留“先找证据再下判断”的核心，但要根据新文本改用事实、数据、人物行动或说明步骤作为证据。`, followUp: "什么情况下原来的阅读方法不够用，还需要查外部资料？" },
+      { prompt: `请为《${title}》创造一个新结尾或新视角，同时保留原文最重要的线索。`, hint: "先确定不能丢失的核心，再改变叙述者或结局。", reference: `一种思路是保留“${seed.knowledge}”和关键证据，换成另一人物讲述，让读者看到同一事件的不同感受。`, followUp: "新版本改变了读者对哪个人物或主题的理解？" },
+    ],
+    poetry: [
+      { prompt: `假如把《${title}》中的一个意象、动词或季节换掉，画面和情感会怎样变化？`, hint: "只替换一个词，朗读原句和新句做比较。", reference: `可以从“${seed.example}”选择一个关键意象或动作，替换后比较色彩、节奏和情感，不只解释字面意思。`, followUp: "哪一个词最不能换？为什么它不可替代？" },
+      { prompt: `比较《${title}》的两种朗读节奏，哪一种更能表现诗中画面和情感？`, hint: "关注停顿、轻重、速度与意象变化。", reference: `依据“${seed.knowledge}”，合适的朗读要让节奏服务画面：景物舒展可稍缓，动作或情绪变化处可调整轻重。`, followUp: "如果故意用相反节奏朗读，会产生什么新的感受？" },
+      { prompt: `能否找到一个与《${title}》主要情感不完全一致的意象或词语？怎样解释它？`, hint: "不要急着删掉矛盾，先看它是否形成转折或衬托。", reference: `可先概括“${seed.example}”呈现的主画面，再分析看似相反的词是否丰富、转折或衬托了诗人情感。`, followUp: "这个细节让原来的情感概括需要怎样修改？" },
+      { prompt: `在照片、音乐或生活景象中，怎样找到与《${title}》相通的意境？`, hint: "先找共同的色彩、声音、动作或情绪。", reference: `可以选择一个与“${seed.knowledge}”相近的生活画面，再指出它与诗中意象、节奏或情感的具体联系。`, followUp: "同一画面配上不同音乐，会改变你对诗的理解吗？" },
+      { prompt: `请仿照《${title}》创造两三行新诗，保留一种写法但换成自己的生活画面。`, hint: "可以保留节奏、意象组合或由景到情的顺序。", reference: `一种思路是借用原诗观察方法，以“${seed.example}”为参照，换成自己见过的景物和动作，表达真实感受。`, followUp: "你的新诗中哪个词最能让读者看见画面？" },
+    ],
+    speaking: [
+      { prompt: `假如《${title}》的听者、场合或交流目的改变，原来的说法需要怎样调整？`, hint: "一次改变一个条件，比较称呼、语气和信息顺序。", reference: `可依据“${seed.example}”保留核心信息，再按新听者的年龄、关系和需要调整词语、语气及详略。`, followUp: "哪些内容无论对象怎样改变都必须说清楚？" },
+      { prompt: `比较《${title}》中的两种表达方案，哪一种更清楚、更礼貌、更有效？`, hint: "分别从信息、顺序、语气和回应四方面检查。", reference: `依据“${seed.knowledge}”，有效表达不仅自己说完，还要让对方听懂、愿意回应，并能确认交流结果。`, followUp: "有没有一种说法很礼貌，却因为信息不足仍然无效？" },
+      { prompt: `找一个会让《${title}》交流方法失效的特殊情境，并想办法修正。`, hint: "考虑对方误解、情绪激动、时间有限或信息不全。", reference: `可以设计一个对方没有听懂“${seed.example}”的情境，此时需要换说法、举例、提问或先倾听，而不是重复原句。`, followUp: "怎样判断修正后的表达真的起作用了？" },
+      { prompt: `把《${title}》的方法用到家庭商量、同伴合作或公共场合，哪一步最重要？`, hint: "选择一个真实场景，明确对象和目标。", reference: `先说明真实交流目的，再用“${seed.knowledge}”安排要点，并根据对方回应及时补充或调整。`, followUp: "如果双方目标不同，怎样寻找都能接受的方案？" },
+      { prompt: `请为《${title}》创造一段有分歧但能继续合作的对话。`, hint: "对话要包含倾听、理由、回应和共同决定。", reference: `一种设计是让两人观点不同，一方先复述对方意思，再结合“${seed.example}”提出理由，最后共同确认下一步。`, followUp: "哪一句话真正推动了交流，而不是只表达态度？" },
+    ],
+    writing: [
+      { prompt: `假如《${title}》换一个叙述顺序、观察视角或关键材料，文章效果会怎样变化？`, hint: "只改变一个写作选择，再比较中心是否更突出。", reference: `可以保留“${seed.knowledge}”这个中心，改变“${seed.example}”的出现位置或叙述者，观察重点和读者感受怎样改变。`, followUp: "哪一种改变会让中心变模糊？为什么？" },
+      { prompt: `比较《${title}》同一内容的概括写法和细节写法，分别适合放在哪里？`, hint: "检查段落作用，不是细节越多越好。", reference: `依据“${seed.knowledge}”，关键画面可用动作、语言或感受展开，过渡和次要信息则应概括，详略共同服务中心。`, followUp: "如果全文都写得很详细，读者会遇到什么问题？" },
+      { prompt: `找一个看起来生动却不服务《${title}》中心的细节，应该删掉、移动还是改写？`, hint: "先问这个细节证明或表现了什么。", reference: `可把细节与“${seed.example}”代表的中心材料比较；若它不能推动内容或表现中心，就应删减或改造成有效证据。`, followUp: "有没有看似普通却最应该保留的真实细节？" },
+      { prompt: `把《${title}》的写作方法用于日记、说明书或倡议书，哪些地方要改变？`, hint: "比较写作目的、读者和需要的证据。", reference: `可以保留选材和组织方法，但日记重真实感受，说明书重准确步骤，倡议书还要说明问题、理由和行动。`, followUp: "同一材料面对不同读者，详略应该怎样变化？" },
+      { prompt: `请为《${title}》创造一个从未使用过的开头、结尾或观察角度，并说明选择理由。`, hint: "新颖要服务中心，不能只追求奇怪。", reference: `一种思路是从“${seed.example}”中的声音、物品或旁观者视角进入，再回到“${seed.knowledge}”收束全文。`, followUp: "你的创造怎样让读者更快进入情境或更深理解中心？" },
+    ],
+    garden: [
+      { prompt: `假如改变《${title}》的分类标准或使用条件，原来的整理结果会怎样变化？`, hint: "先说清原标准，再只改变一个分类依据。", reference: `可以用“${seed.example}”作为原分类例子，再换成用途、结构或情境等新标准，比较同一内容会被放到哪里。`, followUp: "两种分类标准能否同时使用？怎样避免混乱？" },
+      { prompt: `比较两种整理《${title}》知识的方法，哪一种更方便记忆和迁移？`, hint: "检查能否看见联系、快速查找并解决新题。", reference: `依据“${seed.knowledge}”，有效整理不只是抄写，而要用分类、对比或联系图让方法在新任务中可以被调用。`, followUp: "哪种整理看起来整齐，却可能没有帮助理解？" },
+      { prompt: `找一个不能直接套用《${title}》规律的新题，它缺少或改变了什么条件？`, hint: "比较新题和原例子的相同点与不同点。", reference: `先用“${seed.example}”说明原规律，再找一个关键条件不同的新任务；不能迁移时，应修正规律边界而不是硬套答案。`, followUp: "补上哪个条件后，原方法又可以使用？" },
+      { prompt: `把《${title}》整理出的规律带到下一个单元或生活任务中，你会先检查什么？`, hint: "先确认目标、材料和条件是否相似。", reference: `可以先回忆“${seed.knowledge}”，再比较新旧任务的对象、目的和限制，只迁移真正相同的方法部分。`, followUp: "迁移失败时，怎样判断是方法错了还是条件变了？" },
+      { prompt: `请为《${title}》创造一张知识地图或一项闯关任务，让别人发现知识之间的联系。`, hint: "至少设置分类、联系和迁移三个环节。", reference: `一种设计是以“${seed.knowledge}”为中心连接例子、方法和新情境，再用“${seed.checkPrompt}”作为最后的迁移关。`, followUp: "怎样让完成任务的人说出方法，而不只是得到答案？" },
+    ],
+  };
+  return byType[context.type].map((body, index) => ({ ...creativeKinds[index], ...body }));
+};
+
 const buildWarmUp = (context: RichLessonContext): InteractionTask => {
   const warmUps: Record<CourseKind, [string, string, [string, string], string]> = {
     pinyin: [`准备学习《${context.title}》时，哪种热身能让发音更准确？`, "先听一遍，再照镜子观察口形并轻声试读", ["只看字母颜色", "不出声地快速翻过"], "耳朵、眼睛和发音动作一起参与，才容易辨清细小差别。"],
@@ -530,6 +608,7 @@ export function buildRichLesson(context: RichLessonContext): RichLessonData {
       rubric: ["我写清了自己的发现或观点", "我提供了一个具体、真实的依据", "我解释了依据和观点之间的联系"],
     },
     inquiries: buildInquiries(context),
+    creativeQuestions: buildCreativeQuestions(context),
     toolkit: toolkits[type],
     glossary: glossaries[type].map((item) => ({ ...item, example: `试着用“${item.term}”观察本课例子：“${seed.example}”` })),
     contrastCase: buildContrastCase(context),

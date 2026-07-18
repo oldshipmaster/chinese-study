@@ -283,3 +283,24 @@ test("seven course types provide distinct question-making studios", async () => 
   assert.equal(new Set(studios.map((studio) => studio.stems.join("|"))).size, 7);
   assert.ok(studios.every((studio) => studio.mission.includes("《出题课》") && studio.stems.length === 3 && studio.qualityCheck.length >= 16));
 });
+
+test("seven course engines build five distinct creative question sparks", async () => {
+  const { buildRichLesson } = await import("../app/data/richLesson.ts");
+  const kinds = ["what-if", "compare", "counterexample", "transfer", "create"];
+  const signatures = [];
+  for (const type of ["pinyin", "literacy", "reading", "poetry", "speaking", "writing", "garden"]) {
+    const lesson = buildRichLesson({
+      id: `creative-${type}`,
+      title: "创想课",
+      type,
+      objective: "会发散思考",
+      action: "提出新问题",
+      seed: { knowledge: "本课核心发现", example: "本课具体证据", checkPrompt: "怎样判断？", checkAnswer: "根据证据判断" },
+    });
+    assert.deepEqual(lesson.creativeQuestions.map((item) => item.kind), kinds);
+    assert.ok(lesson.creativeQuestions.every((item) => item.prompt.length >= 12 && item.hint.length >= 10 && item.reference.length >= 18 && item.followUp.length >= 10));
+    assert.ok(lesson.creativeQuestions.every((item) => JSON.stringify(item).includes("创想课") || JSON.stringify(item).includes("本课核心发现") || JSON.stringify(item).includes("本课具体证据")));
+    signatures.push(lesson.creativeQuestions.map((item) => item.prompt).join("|"));
+  }
+  assert.equal(new Set(signatures).size, 7);
+});
