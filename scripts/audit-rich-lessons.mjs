@@ -14,6 +14,7 @@ const curriculum = await import(`data:text/javascript;base64,${Buffer.from(resul
 const ids = new Set();
 const quizSignatures = new Set();
 const sceneSignatures = new Set();
+const creativeQuestionSignatures = new Set();
 const answerPositions = [0, 0, 0];
 const report = [];
 
@@ -28,6 +29,7 @@ for (const book of curriculum.books) {
     quizSignatures.add(course.lesson.quiz.map((question) => `${question.prompt}|${question.answer}`).join("||"));
     for (const question of course.lesson.quiz) answerPositions[question.options.indexOf(question.answer)] += 1;
     sceneSignatures.add(course.lesson.animationFrames.join("||"));
+    creativeQuestionSignatures.add(course.lesson.creativeQuestions.map((item) => `${item.prompt}|${item.reference}`).join("||"));
     assert.equal(course.lesson.curated, true, `${course.id} 缺少独立编辑内容`);
     assert.ok(!/待补充|敬请期待|课程正在生长|占位/.test(JSON.stringify(course.lesson)), `${course.id} 仍含占位内容`);
     assert.equal(course.lesson.lessonId, course.id, `${course.id} 课程内容标识错位`);
@@ -49,6 +51,9 @@ for (const book of curriculum.books) {
     assert.equal(new Set(course.lesson.examples).size, 3, `${course.id} 例子拆解重复`);
     assert.equal(course.lesson.knowledgePoints.length, 5, `${course.id} 知识卡数量不足`);
     assert.equal(course.lesson.inquiries.length, 3, `${course.id} 探究问题数量不足`);
+    assert.equal(course.lesson.creativeQuestions.length, 5, `${course.id} 创新问题数量不足`);
+    assert.equal(new Set(course.lesson.creativeQuestions.map((item) => item.kind)).size, 5, `${course.id} 创新问题类型不完整`);
+    assert.ok(course.lesson.creativeQuestions.every((item) => item.prompt.length >= 12 && item.hint.length >= 10 && item.reference.length >= 18 && item.followUp.length >= 10), `${course.id} 创新问题内容过短`);
     assert.equal(course.lesson.toolkit.length, 4, `${course.id} 能力工具数量不足`);
     assert.equal(course.lesson.glossary.length, 3, `${course.id} 语文概念数量不足`);
     assert.equal(course.lesson.openTask.routes.length, 3, `${course.id} 自主挑战路线不足`);
@@ -75,7 +80,8 @@ assert.equal(curriculum.books.reduce((sum, book) => sum + book.units.length, 0),
 assert.equal(ids.size, 564, "课程总数不是 564");
 assert.equal(quizSignatures.size, 564, "存在重复的整套五题闯关");
 assert.equal(sceneSignatures.size, 564, "存在重复的整套动画分镜");
+assert.equal(creativeQuestionSignatures.size, 564, "存在重复的整套创新问题");
 assert.ok(answerPositions.every((count) => count >= 700), `正确答案位置分布不均：${answerPositions.join(",")}`);
 console.table(report);
-console.log(`逐册审计通过：12 册、95 个单元、${ids.size} 课；564 套动画与五题组合均唯一；每课 5 张知识卡、3 个正式概念、3 个探究问题、4 件能力工具、3 步思考组织器、3 条自主挑战路线、误区修正、跨学科连接和至少 2 项互动。`);
+console.log(`逐册审计通过：12 册、95 个单元、${ids.size} 课；564 套动画、分层闯关和创新问题均唯一；每课 5 张知识卡、3 个正式概念、3 个探究问题、5 道可揭晓创新问题、4 件能力工具、3 步思考组织器、3 条自主挑战路线、误区修正、跨学科连接和至少 2 项互动。`);
 console.log(`五题正确答案位置分布：第1位 ${answerPositions[0]} 题，第2位 ${answerPositions[1]} 题，第3位 ${answerPositions[2]} 题。`);

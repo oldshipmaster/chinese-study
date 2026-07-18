@@ -22,7 +22,7 @@ const assetUrl = new URL(assetPath, baseUrl).href;
 const assetResponse = await fetchWithRetry(assetUrl);
 assert.equal(assetResponse.status, 200, `课堂脚本状态异常：${assetResponse.status}`);
 const bundle = await assetResponse.text();
-const requiredFeatures = ["八站自学小径", "发音动作镜", "四声路径", "语文概念词典", "我预测仍然成立", "跨学科连接", "30 秒复述卡", "只重做错过的题", "继续第 "];
+const requiredFeatures = ["八站自学小径", "发音动作镜", "四声路径", "语文概念词典", "我预测仍然成立", "思维火花", "查看参考思路", "这是一种思路，不是唯一答案", "跨学科连接", "30 秒复述卡", "只重做错过的题", "继续第 "];
 for (const feature of requiredFeatures) {
   assert.ok(bundle.includes(feature), `线上课堂缺少功能：${feature}`);
 }
