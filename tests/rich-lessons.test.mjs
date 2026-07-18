@@ -304,3 +304,15 @@ test("seven course engines build five distinct creative question sparks", async 
   }
   assert.equal(new Set(signatures).size, 7);
 });
+
+test("creative question references deepen from lower to upper grades", async () => {
+  const { buildRichLesson, adaptRichLessonForGrade } = await import("../app/data/richLesson.ts");
+  const base = buildRichLesson({ id: "grade-sparks", title: "层级课", type: "reading", objective: "思辨", action: "推理", seed: { knowledge: "人物选择影响结局", example: "人物在困难中坚持", checkPrompt: "为什么？", checkAnswer: "因为有行动证据" } });
+  const lower = adaptRichLessonForGrade(base, 1);
+  const middle = adaptRichLessonForGrade(base, 3);
+  const upper = adaptRichLessonForGrade(base, 6);
+  assert.notEqual(lower.creativeQuestions[0].reference, middle.creativeQuestions[0].reference);
+  assert.notEqual(middle.creativeQuestions[0].reference, upper.creativeQuestions[0].reference);
+  assert.match(lower.creativeQuestions[0].hint, /画|说|指/);
+  assert.match(upper.creativeQuestions[2].followUp, /反例|条件|证据/);
+});

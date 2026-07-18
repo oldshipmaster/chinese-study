@@ -686,6 +686,23 @@ export function adaptRichLessonForGrade<T extends RichLessonData>(lesson: T, gra
     : gradeBand === "middle"
       ? ["我写清了自己的发现或观点", "我提供了一个具体、真实的依据", "我解释了依据和观点之间的联系"]
       : ["我的观点明确且有适用条件", "我引用了具体证据并解释其作用", "我回应了可能的另一种理解或反例"];
+  const creativeDepth = gradeBand === "lower"
+    ? {
+        hintLead: "可以画一画、指一指或说一说。",
+        referenceTail: "先用一两句话说清你看见的变化和理由，也可以用图画帮助表达。",
+        followUpTail: "还能再找一个看得见、听得到或做得到的例子吗？",
+      }
+    : gradeBand === "middle"
+      ? {
+          hintLead: "先写下预测，再圈出一条具体证据。",
+          referenceTail: "请用完整的话说明发现、具体证据以及两者之间的联系。",
+          followUpTail: "换一个新情境，你需要保留或调整哪一步方法？",
+        }
+      : {
+          hintLead: "先界定条件，再比较至少两条证据和另一种解释。",
+          referenceTail: "还要检验证据是否可靠，说明结论的适用条件，并回应可能的另一种解释。",
+          followUpTail: "能否再找一个反例，说明结论成立的条件和证据边界？",
+        };
 
   const adaptedQuiz = gradeBand === "lower"
     ? [
@@ -701,6 +718,12 @@ export function adaptRichLessonForGrade<T extends RichLessonData>(lesson: T, gra
     learningGuide: settings.guide,
     openTask: { ...lesson.openTask, prompt: settings.prompt, support: settings.support, organizer: settings.organizer, rubric, routes: lesson.openTask.routes.map((route, index) => ({ ...route, label: routeLabels[index], prompt: `${route.prompt}${routeTail}` })) },
     inquiries: lesson.inquiries.map((inquiry) => ({ ...inquiry, guide: `${inquiry.guide}${inquiryTail}` })),
+    creativeQuestions: lesson.creativeQuestions.map((question) => ({
+      ...question,
+      hint: `${creativeDepth.hintLead}${question.hint}`,
+      reference: `${question.reference} ${creativeDepth.referenceTail}`,
+      followUp: `${question.followUp} ${creativeDepth.followUpTail}`,
+    })),
     quiz: adaptedQuiz,
     extension: { ...lesson.extension, challenge: `${lesson.extension.challenge} ${settings.challenge}` },
   };
